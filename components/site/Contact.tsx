@@ -3,6 +3,8 @@ import { ContactTriggerButton } from "./ContactTriggerButton";
 
 export function Contact({ site }: { site: SiteContent }) {
   const { contact } = site;
+  const whatsappUrl = `https://wa.me/${contact.phone.replace(/[^0-9]/g, "")}`;
+
   return (
     <>
       <span
@@ -19,29 +21,55 @@ export function Contact({ site }: { site: SiteContent }) {
         {contact.body}
       </p>
 
-      <ContactTriggerButton className="absolute left-[1088px] top-[5883px] flex h-[44px] w-[165px] items-center justify-center bg-white text-center text-[13px] font-bold text-[#006eb3]">
+      <ContactTriggerButton className="absolute left-[1088px] top-[5883px] flex h-[44px] w-[165px] items-center justify-center bg-white text-center text-[13px] font-bold text-[#006eb3] transition-all hover:bg-white/90 active:scale-95">
         {contact.cta}
       </ContactTriggerButton>
 
       <div className="absolute left-[680px] top-[5695px] w-[482px] -translate-x-full text-right text-[20px] leading-[36px] text-white" dir="ltr">
         <p className="font-bold">{contact.emailLabel}</p>
-        <p>{contact.email}</p>
+        <p>
+          <a
+            href={`mailto:${contact.email}`}
+            className="cursor-pointer transition-opacity hover:opacity-80 hover:underline"
+          >
+            {contact.email}
+          </a>
+        </p>
         <p className="font-bold">{contact.phoneLabel}</p>
-        <p>{contact.phone}</p>
+        <p>
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cursor-pointer transition-opacity hover:opacity-80 hover:underline"
+          >
+            {contact.phone}
+          </a>
+        </p>
         <p className="font-bold">{contact.addressLabel}</p>
         {contact.addressLines.map((line) => (
           <p key={line}>{line}</p>
         ))}
       </div>
 
-      <div className="absolute left-[689px] top-[5704px] size-[24px]">
+      <a
+        href={`mailto:${contact.email}`}
+        aria-label={contact.email}
+        className="absolute left-[689px] top-[5704px] size-[24px] cursor-pointer transition-opacity hover:opacity-80"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/identity-07.svg" alt="" className="block size-full" />
-      </div>
-      <div className="absolute left-[689px] top-[5775px] size-[24px]">
+      </a>
+      <a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={contact.phone}
+        className="absolute left-[689px] top-[5775px] size-[24px] cursor-pointer transition-opacity hover:opacity-80"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/identity-08.svg" alt="" className="block size-full" />
-      </div>
+      </a>
       <div className="absolute left-[688px] top-[5845px] size-[24px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/identity-09.svg" alt="" className="block size-full" />

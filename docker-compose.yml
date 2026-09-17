@@ -1,20 +1,83 @@
 services:
+  traefik:
+    image: traefik:v3.1
+    restart: unless-stopped
+    command:
+      # Global settings
+      - "--global.checknewversion=false"
+      - "--global.sendanonymoususage=false"
+      # Docker provider
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      # Entrypoints: HTTP (80) & HTTPS (443)
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      # Let's Encrypt / ACME configuration
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-info@idvet.co}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_certificates:/letsencrypt
+    networks:
+      - idvet_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3009
+      - DATABASE_URL=${INTERNAL_DATABASE_URL:-postgresql://${POSTGRES_USER:-idvet}:${POSTGRES_PASSWORD:-idvet}@db:5432/${POSTGRES_DB:-idvet}}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://idvet.co}
+    ports:
+      - "3009:3009"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - idvet_network
+    labels:
+      - "traefik.enable=true"
+      # Route HTTPS traffic for idvet.co and www.idvet.co
+      - "traefik.http.routers.idvet.rule=Host(`idvet.co`) || Host(`www.idvet.co`)"
+      - "traefik.http.routers.idvet.entrypoints=websecure"
+      - "traefik.http.routers.idvet.tls=true"
+      - "traefik.http.routers.idvet.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.idvet.service=idvet"
+      # Middlewares: Redirect www to apex domain + Gzip/Brotli compression
+      - "traefik.http.routers.idvet.middlewares=idvet-redirect-www,idvet-compress"
+      - "traefik.http.middlewares.idvet-redirect-www.redirectregex.regex=^https?://www\\.idvet\\.co/(.*)"
+      - "traefik.http.middlewares.idvet-redirect-www.redirectregex.replacement=https://idvet.co/$${1}"
+      - "traefik.http.middlewares.idvet-redirect-www.redirectregex.permanent=true"
+      - "traefik.http.middlewares.idvet-compress.compress=true"
+      # Service loadbalancer port
+      - "traefik.http.services.idvet.loadbalancer.server.port=3009"
+
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: idvet
-      POSTGRES_PASSWORD: idvet
-      POSTGRES_DB: idvet
-    ports:
-      - "5434:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-idvet}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-idvet}
+      POSTGRES_DB: ${POSTGRES_DB:-idvet}
     volumes:
       - idvet_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U idvet -d idvet"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-idvet} -d ${POSTGRES_DB:-idvet}"]
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - idvet_network
 
   adminer:
     image: adminer:latest
@@ -23,6 +86,13 @@ services:
       - "8091:8080"
     depends_on:
       - db
+    networks:
+      - idvet_network
 
 volumes:
   idvet_db_data:
+  traefik_certificates:
+
+networks:
+  idvet_network:
+    driver: bridge

@@ -50,7 +50,7 @@ export function Header({ site }: { site: SiteContent }) {
           key={id}
           href={`#${id}`}
           onClick={(e) => handleNavClick(e, id)}
-          className={`absolute top-[56px] -translate-x-1/2 whitespace-nowrap text-[20px] text-[#0676bd] hover:underline ${
+          className={`absolute top-[65px] -translate-x-1/2 whitespace-nowrap text-[20px] text-[#0676bd] hover:underline ${
             active === id ? "font-bold" : "font-normal"
           }`}
           style={{ left }}
@@ -61,7 +61,7 @@ export function Header({ site }: { site: SiteContent }) {
 
       <Link
         href={langSwitch.href}
-        className="absolute left-[190px] top-[47px] flex h-[44px] w-[165px] items-center justify-center rounded-[25px] border border-solid border-[#0676bd] font-roboto text-[13px] font-bold text-[#0676bd]"
+        className="absolute left-[190px] top-[57px] flex h-[44px] w-[165px] items-center justify-center rounded-[25px] border border-solid border-[#0676bd] font-roboto text-[13px] font-bold text-[#0676bd] transition-colors hover:bg-[#0676bd]/5"
       >
         {langSwitch.label}
       </Link>
@@ -70,7 +70,7 @@ export function Header({ site }: { site: SiteContent }) {
         type="button"
         onClick={() => scrollToTop()}
         aria-label="Scroll to top"
-        className="absolute left-[1090px] top-[23px] h-[93px] w-[163px] cursor-pointer bg-transparent p-0"
+        className="absolute left-[1090px] top-[34px] h-[93px] w-[163px] cursor-pointer bg-transparent p-0 transition-opacity hover:opacity-90"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

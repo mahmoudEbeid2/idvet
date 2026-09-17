@@ -31,6 +31,13 @@ export async function generateMetadata({
   return {
     title: `IDVET — ${site.hero.eyebrow}`,
     description: site.hero.paragraph,
+    icons: {
+      icon: [
+        { url: "/icon.svg", type: "image/svg+xml" },
+        { url: "/assets/idvet-logo.svg", type: "image/svg+xml" },
+      ],
+      apple: "/icon.svg",
+    },
   };
 }
 

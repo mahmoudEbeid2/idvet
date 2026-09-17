@@ -212,16 +212,24 @@ export function Hero({ site }: { site: SiteContent }) {
           {hero.paragraph}
         </p>
 
-        <a
-          href="#brands"
-          onClick={handlePrimaryCtaClick}
-          className="hero-cta hero-shine pointer-events-auto absolute left-[1087px] top-[763px] flex h-[44px] w-[165px] items-center justify-center bg-[#0676bd] text-center text-[13px] font-bold text-white"
-        >
-          {hero.ctaPrimary}
-        </a>
-        <ContactTriggerButton className="hero-cta pointer-events-auto absolute left-[905px] top-[763px] flex h-[44px] w-[167px] items-center justify-center border border-solid border-white text-center text-[13px] font-normal text-white">
-          {hero.ctaSecondary}
-        </ContactTriggerButton>
+        <div className="pointer-events-auto absolute right-[188px] top-[763px] flex items-center gap-[18px] whitespace-nowrap">
+          <a
+            href="#brands"
+            onClick={handlePrimaryCtaClick}
+            className="hero-cta hero-shine flex h-[48px] shrink-0 cursor-pointer items-center justify-center gap-[14px] bg-[#0676bd] px-6 text-[15px] font-bold text-white whitespace-nowrap transition-all duration-200 hover:bg-[#0568a8] hover:shadow-md active:bg-[#045990]"
+          >
+            <span className="whitespace-nowrap">{hero.ctaPrimary}</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/arrow-icon.svg"
+              alt=""
+              className="size-[24px] rotate-180 shrink-0 select-none"
+            />
+          </a>
+          <ContactTriggerButton className="hero-cta flex h-[48px] shrink-0 cursor-pointer items-center justify-center border border-white bg-transparent px-8 text-[15px] font-normal text-white whitespace-nowrap transition-all duration-200 hover:bg-white/20 hover:shadow-sm active:bg-white/30">
+            <span className="whitespace-nowrap">{hero.ctaSecondary}</span>
+          </ContactTriggerButton>
+        </div>
       </div>
 
       {/* Tagline strip */}

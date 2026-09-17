@@ -11,7 +11,11 @@ export function ContactTriggerButton({
 }) {
   const { open } = useContactModal();
   return (
-    <button type="button" onClick={open} className={className}>
+    <button
+      type="button"
+      onClick={open}
+      className={`cursor-pointer ${className ?? ""}`.trim()}
+    >
       {children}
     </button>
   );

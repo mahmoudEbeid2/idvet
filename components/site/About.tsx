@@ -9,17 +9,17 @@ export function About({ site }: { site: SiteContent }) {
         aria-hidden
         className="absolute left-0 top-[1120px] block h-px w-px"
       />
-      <p className="absolute left-[1253px] top-[1168px] w-[345px] -translate-x-full text-right text-[36px] font-medium leading-[18px] text-[#0075be]">
+      <p className="absolute left-[1253px] top-[1145px] w-[345px] -translate-x-full text-right text-[32px] font-bold leading-normal text-[#0075be]">
         {about.title}
       </p>
-      <div className="absolute left-[1253px] top-[1232px] w-[705px] -translate-x-full text-right">
-        <p className="mb-[10px] text-[32px] font-bold leading-[40px] text-[#0075be]">
+      <div className="absolute left-[1253px] top-[1205px] w-[760px] -translate-x-full text-right">
+        <p className="mb-4 text-[26px] font-bold leading-[38px] text-[#0075be]">
           {about.heading}
         </p>
         {about.paragraphs.map((p, i) => (
           <p
             key={i}
-            className="mb-[10px] text-[24px] font-normal leading-[40px] text-[#4d4d4d] last:mb-0"
+            className="mb-3 text-[17px] font-normal leading-[30px] text-[#4d4d4d] last:mb-0"
           >
             {p}
           </p>

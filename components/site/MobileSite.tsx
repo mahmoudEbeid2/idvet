@@ -7,6 +7,7 @@ import type { SiteContent } from "@/lib/content";
 import { ContactTriggerButton } from "./ContactTriggerButton";
 import { scrollToSection, scrollToTop } from "@/lib/scrollToSection";
 import { useActiveSection } from "@/lib/useActiveSection";
+import { GalleryLightbox } from "./GalleryLightbox";
 
 const GALLERY_IMAGES = Array.from({ length: 10 }, (_, i) => `gallery-${i + 1}.png`);
 
@@ -14,6 +15,7 @@ const MOBILE_NAV_IDS = ["about", "services", "brands", "contact"] as const;
 
 export function MobileSite({ site }: { site: SiteContent }) {
   const [navOpen, setNavOpen] = useState(false);
+  const [galleryLightboxIndex, setGalleryLightboxIndex] = useState<number | null>(null);
   const active = useActiveSection(MOBILE_NAV_IDS, "about");
 
   // Opening the page directly on a hash (e.g. /#brands) should land on that
@@ -41,8 +43,8 @@ export function MobileSite({ site }: { site: SiteContent }) {
   return (
     <div className="lg:hidden">
       {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-black/5 bg-white">
-        <div className="flex items-center justify-between px-4 py-3">
+      <header className="sticky top-0 z-20 border-b border-black/5 bg-white shadow-xs">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <button
             type="button"
             onClick={() => {
@@ -109,20 +111,26 @@ export function MobileSite({ site }: { site: SiteContent }) {
         <p className="mb-6 text-sm leading-relaxed text-white/90 sm:text-base">
           {site.hero.paragraph}
         </p>
-        <div className="flex flex-wrap justify-center gap-3 sm:justify-end">
-          <ContactTriggerButton className="rounded-full border border-white px-5 py-2.5 text-sm font-medium">
-            {site.hero.ctaSecondary}
-          </ContactTriggerButton>
+        <div className="flex flex-wrap justify-center gap-3.5 sm:justify-start">
           <a
             href="#brands"
             onClick={(e) => {
               e.preventDefault();
               scrollToSection("brands", { fallbackHref: `/${site.locale}` });
             }}
-            className="rounded-full bg-[#0676bd] px-5 py-2.5 text-sm font-bold"
+            className="flex h-[46px] shrink-0 cursor-pointer items-center justify-center gap-3 bg-[#0676bd] px-5 text-sm font-bold text-white whitespace-nowrap transition-all hover:bg-[#0568a8]"
           >
-            {site.hero.ctaPrimary}
+            <span className="whitespace-nowrap">{site.hero.ctaPrimary}</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/arrow-icon.svg"
+              alt=""
+              className="size-[22px] rotate-180 shrink-0 select-none"
+            />
           </a>
+          <ContactTriggerButton className="flex h-[46px] shrink-0 cursor-pointer items-center justify-center border border-white bg-transparent px-6 text-sm font-normal text-white whitespace-nowrap transition-colors hover:bg-white/20 active:bg-white/30">
+            <span className="whitespace-nowrap">{site.hero.ctaSecondary}</span>
+          </ContactTriggerButton>
         </div>
       </section>
 
@@ -283,19 +291,41 @@ export function MobileSite({ site }: { site: SiteContent }) {
           {site.gallery.title}
         </p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {GALLERY_IMAGES.map((src) => (
-            <div key={src} className="relative aspect-square overflow-hidden rounded-xl">
+          {GALLERY_IMAGES.map((src, i) => (
+            <button
+              key={src}
+              type="button"
+              onClick={() => setGalleryLightboxIndex(i)}
+              aria-label={`${site.gallery.title} ${i + 1}`}
+              className="group relative aspect-square cursor-pointer overflow-hidden rounded-xl border border-black/5 bg-slate-100 p-0 text-left focus:outline-none focus:ring-2 focus:ring-[#0075be]"
+            >
               <Image
                 src={`/assets/${src}`}
-                alt=""
+                alt={`${site.gallery.title} ${i + 1}`}
                 fill
                 loading="lazy"
                 sizes="(max-width: 640px) 50vw, 33vw"
-                className="object-cover"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
               />
-            </div>
+              <div className="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 backdrop-blur-[1px] transition-opacity duration-200 group-hover:opacity-100">
+                <span className="flex size-9 items-center justify-center rounded-full bg-white/90 text-[#0075be] shadow-md">
+                  <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                  </svg>
+                </span>
+              </div>
+            </button>
           ))}
         </div>
+
+        {galleryLightboxIndex !== null && (
+          <GalleryLightbox
+            images={GALLERY_IMAGES}
+            initialIndex={galleryLightboxIndex}
+            onClose={() => setGalleryLightboxIndex(null)}
+            title={site.gallery.title}
+          />
+        )}
       </section>
 
       {/* Contact */}
@@ -318,11 +348,23 @@ export function MobileSite({ site }: { site: SiteContent }) {
         >
           <div>
             <p className="font-bold">{site.contact.emailLabel}</p>
-            <p className="text-sm">{site.contact.email}</p>
+            <a
+              href={`mailto:${site.contact.email}`}
+              className="text-sm underline-offset-4 hover:underline"
+            >
+              {site.contact.email}
+            </a>
           </div>
           <div>
             <p className="font-bold">{site.contact.phoneLabel}</p>
-            <p className="text-sm">{site.contact.phone}</p>
+            <a
+              href={`https://wa.me/${site.contact.phone.replace(/[^0-9]/g, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm underline-offset-4 hover:underline"
+            >
+              {site.contact.phone}
+            </a>
           </div>
           <div>
             <p className="font-bold">{site.contact.addressLabel}</p>
