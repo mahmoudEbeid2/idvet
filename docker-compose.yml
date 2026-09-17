@@ -1,33 +1,4 @@
 services:
-  traefik:
-    image: traefik:v3.1
-    restart: unless-stopped
-    command:
-      # Global settings
-      - "--global.checknewversion=false"
-      - "--global.sendanonymoususage=false"
-      # Docker provider
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      # Entrypoints: HTTP (80) & HTTPS (443)
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.websecure.address=:443"
-      # Let's Encrypt / ACME configuration
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-info@idvet.co}"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - traefik_certificates:/letsencrypt
-    networks:
-      - idvet_network
-
   app:
     build:
       context: .
@@ -44,14 +15,16 @@ services:
       db:
         condition: service_healthy
     networks:
-      - idvet_network
+      - traefik_webgateway
+      - idvet_internal
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=traefik_webgateway"
       # Route HTTPS traffic for idvet.co and www.idvet.co
       - "traefik.http.routers.idvet.rule=Host(`idvet.co`) || Host(`www.idvet.co`)"
       - "traefik.http.routers.idvet.entrypoints=websecure"
       - "traefik.http.routers.idvet.tls=true"
-      - "traefik.http.routers.idvet.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.idvet.tls.certresolver=myresolver"
       - "traefik.http.routers.idvet.service=idvet"
       # Middlewares: Redirect www to apex domain + Gzip/Brotli compression
       - "traefik.http.routers.idvet.middlewares=idvet-redirect-www,idvet-compress"
@@ -77,7 +50,7 @@ services:
       timeout: 5s
       retries: 10
     networks:
-      - idvet_network
+      - idvet_internal
 
   adminer:
     image: adminer:latest
@@ -87,12 +60,13 @@ services:
     depends_on:
       - db
     networks:
-      - idvet_network
+      - idvet_internal
 
 volumes:
   idvet_db_data:
-  traefik_certificates:
 
 networks:
-  idvet_network:
+  traefik_webgateway:
+    external: true
+  idvet_internal:
     driver: bridge
