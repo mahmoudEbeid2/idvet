@@ -1,0 +1,344 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import type { SiteContent } from "@/lib/content";
+import { ContactTriggerButton } from "./ContactTriggerButton";
+import { scrollToSection, scrollToTop } from "@/lib/scrollToSection";
+import { useActiveSection } from "@/lib/useActiveSection";
+
+const GALLERY_IMAGES = Array.from({ length: 10 }, (_, i) => `gallery-${i + 1}.png`);
+
+const MOBILE_NAV_IDS = ["about", "services", "brands", "contact"] as const;
+
+export function MobileSite({ site }: { site: SiteContent }) {
+  const [navOpen, setNavOpen] = useState(false);
+  const active = useActiveSection(MOBILE_NAV_IDS, "about");
+
+  // Opening the page directly on a hash (e.g. /#brands) should land on that
+  // section on load — see lib/scrollToSection.ts for why this can't just be
+  // native <a href="#id"> fragment navigation.
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (hash) {
+      requestAnimationFrame(() => scrollToSection(hash));
+    }
+  }, []);
+
+  function handleNavClick(id: string) {
+    setNavOpen(false);
+    scrollToSection(id, { fallbackHref: `/${site.locale}` });
+  }
+
+  const mobileLabels: Record<(typeof MOBILE_NAV_IDS)[number], string> = {
+    about: site.nav.about,
+    services: site.nav.services,
+    brands: site.nav.brands,
+    contact: site.nav.contact,
+  };
+
+  return (
+    <div className="lg:hidden">
+      {/* Header */}
+      <header className="sticky top-0 z-20 border-b border-black/5 bg-white">
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            type="button"
+            onClick={() => {
+              setNavOpen(false);
+              scrollToTop();
+            }}
+            aria-label="Scroll to top"
+            className="cursor-pointer bg-transparent p-0"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/assets/idvet-logo.svg" alt="IDVET" className="h-12 w-auto" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setNavOpen((v) => !v)}
+            aria-label="menu"
+            className="flex h-10 w-10 flex-col items-center justify-center gap-1.5"
+          >
+            <span className="block h-0.5 w-6 bg-[#0676bd]" />
+            <span className="block h-0.5 w-6 bg-[#0676bd]" />
+            <span className="block h-0.5 w-6 bg-[#0676bd]" />
+          </button>
+        </div>
+        {navOpen && (
+          <nav className="flex flex-col items-center gap-3 border-t border-black/5 px-4 py-4 text-center text-[#0676bd]">
+            {MOBILE_NAV_IDS.map((id) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick(id);
+                }}
+                className={active === id ? "font-bold" : "font-normal"}
+              >
+                {mobileLabels[id]}
+              </a>
+            ))}
+            <Link
+              href={site.langSwitch.href}
+              className="mt-1 w-fit rounded-full border border-[#0676bd] px-4 py-2 font-roboto text-sm font-bold"
+            >
+              {site.langSwitch.label}
+            </Link>
+          </nav>
+        )}
+      </header>
+
+      {/* Hero */}
+      <section className="relative h-[320px] w-full sm:h-[420px]">
+        <Image
+          src="/assets/hero-img.png"
+          alt=""
+          fill
+          sizes="100vw"
+          className="scale-x-[-1] object-cover"
+        />
+      </section>
+      <section className="bg-[#0b1f36] px-4 py-10 text-center text-white sm:text-right">
+        <p className="mb-3 text-sm font-bold sm:text-base">{site.hero.eyebrow}</p>
+        <h1 className="mb-4 text-2xl font-bold leading-tight sm:text-3xl">
+          {site.hero.heading}
+        </h1>
+        <p className="mb-6 text-sm leading-relaxed text-white/90 sm:text-base">
+          {site.hero.paragraph}
+        </p>
+        <div className="flex flex-wrap justify-center gap-3 sm:justify-end">
+          <ContactTriggerButton className="rounded-full border border-white px-5 py-2.5 text-sm font-medium">
+            {site.hero.ctaSecondary}
+          </ContactTriggerButton>
+          <a
+            href="#brands"
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToSection("brands", { fallbackHref: `/${site.locale}` });
+            }}
+            className="rounded-full bg-[#0676bd] px-5 py-2.5 text-sm font-bold"
+          >
+            {site.hero.ctaPrimary}
+          </a>
+        </div>
+      </section>
+
+      {/* Tagline */}
+      <section className="bg-[#f0efef] px-4 py-6 text-center text-sm font-medium text-[#848484] sm:text-base">
+        {site.tagline}
+      </section>
+
+      {/* About */}
+      <section
+        id="about-m"
+        className="scroll-mt-[73px] flex flex-col items-center gap-6 px-4 py-12"
+      >
+        <div className="relative h-[220px] w-[170px]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/assets/about-illustration.svg"
+            alt=""
+            className="block size-full"
+          />
+        </div>
+        <p className="text-2xl font-medium text-[#0075be]">{site.about.title}</p>
+        <p className="text-center text-xl font-bold leading-snug text-[#0075be] sm:text-right">
+          {site.about.heading}
+        </p>
+        <div className="flex w-full flex-col gap-3 text-center text-[#4d4d4d] sm:text-right">
+          {site.about.paragraphs.map((p, i) => (
+            <p key={i} className="leading-relaxed">
+              {p}
+            </p>
+          ))}
+        </div>
+      </section>
+
+      {/* Services */}
+      <section
+        id="services-m"
+        className="scroll-mt-[73px] bg-[#0075be] px-4 py-12 text-white"
+      >
+        <p className="mb-2 text-center text-2xl font-medium">{site.services.title}</p>
+        <p className="mb-8 text-center text-lg font-medium text-white/90">
+          {site.services.subtitle}
+        </p>
+        <div className="flex flex-col gap-6">
+          {site.services.items.map((item, i) => (
+            <div key={i} className="text-center sm:text-right">
+              <p className="mb-1 font-bold leading-snug">
+                {item.heading.split("\n").map((line, j) => (
+                  <span key={j}>
+                    {j > 0 && <br />}
+                    {line}
+                  </span>
+                ))}
+              </p>
+              <p className="text-sm leading-relaxed text-white/90">{item.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Brands */}
+      <section id="brands-m" className="scroll-mt-[73px] px-4 py-12">
+        <p className="mb-2 text-center text-2xl font-bold text-[#0075be]">
+          {site.brands.title}
+        </p>
+        <p className="mb-2 text-center text-lg font-bold text-[#0075be]">
+          {site.brands.introHeading}
+        </p>
+        <p className="mb-8 text-center text-sm leading-relaxed text-[#4d4d4d]">
+          {site.brands.introBody}
+        </p>
+        <div className="flex flex-col gap-6">
+          {site.brands.cards.map((card) => (
+            <div
+              key={card.title}
+              className="flex flex-col items-center gap-3 rounded-2xl bg-[#f7f7f7] p-5"
+            >
+              <div className="relative h-[50px] w-[160px]">
+                {card.logo.map((src) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={src}
+                    src={src}
+                    alt=""
+                    className="absolute inset-0 mx-auto size-full object-contain"
+                  />
+                ))}
+              </div>
+              <p className="w-full text-center font-bold text-[#0075be] sm:text-right">
+                {card.title}
+              </p>
+              <p className="w-full text-center text-sm leading-relaxed text-[#4d4d4d] sm:text-right">
+                {card.body}
+              </p>
+              <div className="flex flex-wrap justify-center gap-2" dir="ltr">
+                {card.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="whitespace-nowrap rounded-full border border-[#006db2] bg-white px-3 py-1 text-xs text-[#0075be]"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <a
+                href={card.href}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 text-sm font-bold text-[#0075be] underline"
+              >
+                {card.linkText}
+              </a>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Client photo strip */}
+      <div className="relative h-[220px] w-full">
+        <Image
+          src="/assets/clients-strip.png"
+          alt=""
+          fill
+          loading="lazy"
+          sizes="100vw"
+          className="object-cover"
+        />
+      </div>
+
+      {/* Why us */}
+      <section id="why-us-m" className="bg-[#f0efef] px-4 py-12">
+        <p className="mb-2 text-center text-2xl font-medium text-[#196cb5]">
+          {site.whyUs.title}
+        </p>
+        <p className="mb-8 text-center text-lg font-medium text-[#196cb5]">
+          {site.whyUs.subtitle}
+        </p>
+        <div className="flex flex-col gap-8">
+          {site.whyUs.items.map((item) => (
+            <div
+              key={item.title}
+              className="flex flex-col items-center gap-3 text-center sm:text-right"
+            >
+              <div className="relative size-[56px]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={item.icon} alt="" className="block size-full" />
+              </div>
+              <p className="font-bold text-[#196cb5]">{item.title}</p>
+              <p className="text-sm leading-relaxed text-[#196cb5]">{item.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Gallery */}
+      <section id="gallery-m" className="px-4 py-12">
+        <p className="mb-6 text-center text-2xl font-medium text-[#0075be]">
+          {site.gallery.title}
+        </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {GALLERY_IMAGES.map((src) => (
+            <div key={src} className="relative aspect-square overflow-hidden rounded-xl">
+              <Image
+                src={`/assets/${src}`}
+                alt=""
+                fill
+                loading="lazy"
+                sizes="(max-width: 640px) 50vw, 33vw"
+                className="object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section
+        id="contact-m"
+        className="scroll-mt-[73px] bg-[#006eb3] px-4 py-12 text-white"
+      >
+        <p className="mb-3 text-center text-2xl font-medium">{site.contact.heading}</p>
+        <p className="mb-6 text-center text-sm leading-relaxed text-white/90">
+          {site.contact.body}
+        </p>
+        <div className="mb-8 flex justify-center">
+          <ContactTriggerButton className="rounded-full bg-white px-6 py-3 text-sm font-bold text-[#006eb3]">
+            {site.contact.cta}
+          </ContactTriggerButton>
+        </div>
+        <div
+          className="flex flex-col items-center gap-4 text-center sm:items-end sm:text-right"
+          dir="ltr"
+        >
+          <div>
+            <p className="font-bold">{site.contact.emailLabel}</p>
+            <p className="text-sm">{site.contact.email}</p>
+          </div>
+          <div>
+            <p className="font-bold">{site.contact.phoneLabel}</p>
+            <p className="text-sm">{site.contact.phone}</p>
+          </div>
+          <div>
+            <p className="font-bold">{site.contact.addressLabel}</p>
+            {site.contact.addressLines.map((line) => (
+              <p key={line} className="text-sm">
+                {line}
+              </p>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#006eb3] px-4 py-6 text-center text-sm font-light text-white">
+        {site.footer.copyright}
+      </footer>
+    </div>
+  );
+}

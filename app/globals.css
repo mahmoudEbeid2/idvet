@@ -1,26 +1,237 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-brand-500: #0676bd;
+  --color-brand-600: #0075be;
+  --color-brand-650: #006db2;
+  --color-brand-700: #006eb3;
+  --color-brand-750: #196cb5;
+  --color-ink: #1a1a1a;
+  --color-body: #4d4d4d;
+  --color-muted: #848484;
+  --color-surface: #f0efef;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-plex: var(--font-ibm-plex-sans-arabic);
+  --font-roboto: var(--font-roboto);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-ibm-plex-sans-arabic), sans-serif;
+}
+
+/* ===================================================================
+   Hero animations
+   All keyframes animate only `transform`/`opacity` (GPU-friendly).
+   Every animated class defaults to its END state (fully visible, no
+   transform) so that with no JS and no matching media query the hero
+   is simply static and readable. Motion is opt-in via
+   `prefers-reduced-motion: no-preference`, so reduced-motion users —
+   and anyone whose JS hasn't run yet — get the finished state instantly.
+   =================================================================== */
+
+@keyframes hero-fade-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-word-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-word {
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-eyebrow {
+    opacity: 0;
+    animation: hero-fade-slide-down 0.5s ease-out forwards;
+  }
+  .hero-word {
+    opacity: 0;
+    animation-name: hero-word-in;
+    animation-duration: 0.45s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+    /* animation-delay set per word via inline style */
+  }
+  .hero-paragraph {
+    opacity: 0;
+    animation: hero-fade-slide-up 0.5s ease-out forwards;
+    animation-delay: 0.95s;
+  }
+  .hero-cta {
+    opacity: 0;
+    animation: hero-fade-slide-up 0.4s ease-out forwards;
+    animation-delay: 1.2s;
+  }
+}
+
+/* Ken Burns background zoom */
+@keyframes hero-ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-ken-burns {
+    animation: hero-ken-burns 20s ease-in-out infinite alternate;
+  }
+}
+
+/* Pulsing glow over the globe */
+@keyframes hero-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.hero-glow {
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-glow {
+    animation: hero-glow-pulse 4s ease-in-out infinite;
+  }
+}
+
+/* Floating particles */
+@keyframes hero-particle-float {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate(var(--drift-x, 6px), var(--drift-y, -10px));
+    opacity: 0.9;
+  }
+}
+
+.hero-particle {
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-particle {
+    animation-name: hero-particle-float;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    /* duration/delay set per particle via inline style; --drift-x/-y
+       are true custom properties since the keyframe reads them with var() */
+  }
+}
+
+/* Ripple rings expanding from the floor glow */
+@keyframes hero-ripple {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.hero-ripple {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-ripple {
+    animation-name: hero-ripple;
+    animation-timing-function: ease-out;
+    animation-iteration-count: infinite;
+    /* duration/delay set per ring via inline style */
+  }
+}
+
+/* Shine sweep on the primary hero button */
+.hero-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-shine::before,
+.hero-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    115deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  transform: translateX(-150%) skewX(-20deg);
+  pointer-events: none;
+}
+
+.hero-shine::after {
+  transition: transform 0.7s ease;
+}
+
+.hero-shine:hover::after {
+  transform: translateX(350%) skewX(-20deg);
+}
+
+@keyframes hero-shine-auto {
+  0%,
+  85% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(350%) skewX(-20deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-shine::before {
+    animation: hero-shine-auto 6s ease-in-out infinite;
+  }
 }

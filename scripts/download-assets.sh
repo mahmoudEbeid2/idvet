@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -e
+PREFIX="https://www.figma.com/api/mcp/asset/2462cf1a-2967-46de-a283-87cba63be0c0"
+OUT="D:/turk/idvet/public/assets"
+mkdir -p "$OUT"
+
+declare -A FILES=(
+  [clients-strip.png]="9b8d7.png"
+  [hero-img.png]="eecc8.png"
+  [our-services-bg.png]="7a10e.png"
+  [brands-section.png]="41bee.png"
+  [hipro-logo.png]="98662.png"
+  [gallery-1.png]="b5b9e.png"
+  [gallery-2.png]="370d8.png"
+  [gallery-3.png]="a7764.png"
+  [gallery-4.png]="2ca0e.png"
+  [gallery-5.png]="e91a0.png"
+  [gallery-6.png]="63253.png"
+  [gallery-7.png]="0066c.png"
+  [gallery-8.png]="39bf0.png"
+  [gallery-9.png]="5159c.png"
+  [gallery-10.png]="2f453.png"
+  [arrow-icon.svg]="507d2.svg"
+  [idvet-logo.svg]="c6651.svg"
+  [about-illustration.svg]="96c23.svg"
+  [identity-05.svg]="1c126.svg"
+  [identity-04.svg]="638b4.svg"
+  [identity-06.svg]="e9d64.svg"
+  [line-vertical.svg]="45575.svg"
+  [identity-07.svg]="82ae9.svg"
+  [identity-08.svg]="51305.svg"
+  [identity-09.svg]="5caad.svg"
+  [line-horizontal.svg]="bc467.svg"
+  [gallery-mask.svg]="c92df.svg"
+  [jamuh-logo.svg]="89cd4.svg"
+  [vetcare-logo-part1.svg]="cbc41.svg"
+  [vetcare-logo-part2.svg]="a989e.svg"
+)
+
+for name in "${!FILES[@]}"; do
+  url="$PREFIX/${FILES[$name]}"
+  echo "Downloading $name..."
+  curl -sfL "$url" -o "$OUT/$name" || echo "FAILED: $name"
+done
+echo "Done."
