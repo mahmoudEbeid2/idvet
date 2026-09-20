@@ -1,4 +1,10 @@
-export type Locale = "ku" | "ar";
+export type Locale = "ku" | "ar" | "en";
+
+export interface LanguageOption {
+  locale: Locale;
+  label: string;
+  href: string;
+}
 
 export interface ServiceItem {
   /** Rendered as bold line(s); "\n" splits into separate stacked lines. */
@@ -32,10 +38,7 @@ export interface SiteContent {
     services: string;
     about: string;
   };
-  langSwitch: {
-    label: string;
-    href: string;
-  };
+  languages: LanguageOption[];
   hero: {
     eyebrow: string;
     heading: string;

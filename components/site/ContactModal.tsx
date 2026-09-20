@@ -49,8 +49,10 @@ export function ContactModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl bg-white p-8 text-right shadow-xl"
-        dir="rtl"
+        className={`w-full max-w-md rounded-2xl bg-white p-8 shadow-xl ${
+          locale === "en" ? "text-left" : "text-right"
+        }`}
+        dir={locale === "en" ? "ltr" : "rtl"}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-6 flex items-center justify-between">

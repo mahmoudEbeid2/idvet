@@ -1,6 +1,6 @@
 import type { SiteContent } from "./types";
 
-export const ku: SiteContent = {
+export const ku: Omit<SiteContent, "languages"> = {
   locale: "ku",
   htmlLang: "ckb",
   nav: {
@@ -8,10 +8,6 @@ export const ku: SiteContent = {
     brands: "البراندات",
     services: "خدماتنا",
     about: "عن الشركة",
-  },
-  langSwitch: {
-    label: "العربية",
-    href: "/ar",
   },
   hero: {
     eyebrow: "هاوبەشی ئێوە لە تەندروستی ئاژەڵان – عێراق",

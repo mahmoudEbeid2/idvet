@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import type { SiteContent } from "@/lib/content";
 import { ContactTriggerButton } from "./ContactTriggerButton";
 import { scrollToSection, scrollToTop } from "@/lib/scrollToSection";
 import { useActiveSection } from "@/lib/useActiveSection";
 import { GalleryLightbox } from "./GalleryLightbox";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const GALLERY_IMAGES = Array.from({ length: 10 }, (_, i) => `gallery-${i + 1}.png`);
 
@@ -83,12 +83,11 @@ export function MobileSite({ site }: { site: SiteContent }) {
                 {mobileLabels[id]}
               </a>
             ))}
-            <Link
-              href={site.langSwitch.href}
-              className="mt-1 w-fit rounded-full border border-[#0676bd] px-4 py-2 font-roboto text-sm font-bold"
-            >
-              {site.langSwitch.label}
-            </Link>
+            <LanguageSwitcher
+              current={site.locale}
+              options={site.languages}
+              className="mt-1 w-fit cursor-pointer appearance-none rounded-full border border-[#0676bd] bg-white px-4 py-2 text-center font-roboto text-sm font-bold text-[#0676bd] focus:outline-none"
+            />
           </nav>
         )}
       </header>

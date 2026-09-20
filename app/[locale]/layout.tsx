@@ -53,7 +53,7 @@ export default async function LocaleLayout({
   const site = content[locale];
 
   return (
-    <html lang={site.htmlLang} dir="rtl">
+    <html lang={site.htmlLang} dir={site.locale === "en" ? "ltr" : "rtl"}>
       <body
         className={`${ibmPlexSansArabic.variable} ${roboto.variable} antialiased`}
       >

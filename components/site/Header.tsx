@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
 import type { SiteContent } from "@/lib/content";
 import { scrollToSection, scrollToTop } from "@/lib/scrollToSection";
 import { useActiveSection } from "@/lib/useActiveSection";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const NAV_ITEMS = [
   { id: "contact", left: 496 },
@@ -16,7 +16,7 @@ const NAV_ITEMS = [
 const NAV_IDS = NAV_ITEMS.map((item) => item.id);
 
 export function Header({ site }: { site: SiteContent }) {
-  const { nav, langSwitch } = site;
+  const { nav } = site;
   const active = useActiveSection(NAV_IDS, "about");
 
   // Opening the page directly on a hash (e.g. /#brands) should land on that
@@ -59,12 +59,11 @@ export function Header({ site }: { site: SiteContent }) {
         </a>
       ))}
 
-      <Link
-        href={langSwitch.href}
-        className="absolute left-[190px] top-[57px] flex h-[44px] w-[165px] items-center justify-center rounded-[25px] border border-solid border-[#0676bd] font-roboto text-[13px] font-bold text-[#0676bd] transition-colors hover:bg-[#0676bd]/5"
-      >
-        {langSwitch.label}
-      </Link>
+      <LanguageSwitcher
+        current={site.locale}
+        options={site.languages}
+        className="absolute left-[190px] top-[57px] h-[44px] w-[165px] cursor-pointer appearance-none rounded-[25px] border border-solid border-[#0676bd] bg-white px-4 text-center font-roboto text-[13px] font-bold text-[#0676bd] transition-colors hover:bg-[#0676bd]/5 focus:outline-none"
+      />
 
       <button
         type="button"
