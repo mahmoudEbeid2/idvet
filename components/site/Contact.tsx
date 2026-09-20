@@ -11,6 +11,56 @@ export function Contact({ site }: { site: SiteContent }) {
   const bodyTop = isEnglish ? 5793 : 5763;
   const ctaTop = isEnglish ? 5893 : 5883;
 
+  // Each row is icon + label/value in one flex container so they can never
+  // drift apart — the icon sits wherever the row starts (left in LTR, right
+  // in RTL) purely from the inherited `dir`, no locale branching needed.
+  const infoRows = [
+    {
+      key: "email",
+      icon: "/assets/identity-07.svg",
+      label: contact.emailLabel,
+      value: (
+        <a
+          href={`mailto:${contact.email}`}
+          dir="ltr"
+          className="inline-block cursor-pointer text-start transition-opacity hover:opacity-80 hover:underline"
+        >
+          {contact.email}
+        </a>
+      ),
+    },
+    {
+      key: "phone",
+      icon: "/assets/identity-08.svg",
+      label: contact.phoneLabel,
+      value: (
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          dir="ltr"
+          className="inline-block cursor-pointer text-start transition-opacity hover:opacity-80 hover:underline"
+        >
+          {contact.phone}
+        </a>
+      ),
+    },
+    {
+      key: "address",
+      icon: "/assets/identity-09.svg",
+      label: contact.addressLabel,
+      value: (
+        <span dir="ltr" className="block text-start">
+          {contact.addressLines.map((line) => (
+            <span key={line} className="block">
+              {line}
+            </span>
+          ))}
+        </span>
+      ),
+    },
+  ];
+
   return (
     <>
       <span
@@ -37,57 +87,25 @@ export function Contact({ site }: { site: SiteContent }) {
         {contact.cta}
       </ContactTriggerButton>
 
+      {/* Contact info column: same physical-RTL-authored position as every
+          other block in this section, mirrored by the canvas-level flip on
+          Canvas.tsx for English (see `mirror`). The icon+label rows inside
+          are plain dir-aware flex, so once the ancestor's mirror is
+          cancelled here, the browser's own `dir` handling places the icon
+          correctly (start side) with no locale branching needed. */}
       <div
-        className={`absolute left-[680px] top-[5695px] w-[482px] -translate-x-full text-right text-[20px] leading-[36px] text-white ${mirror}`}
-        dir="ltr"
+        className={`absolute left-[680px] top-[5695px] flex w-[482px] -translate-x-full flex-col gap-[18px] text-[20px] leading-[28px] text-white ${mirror}`}
       >
-        <p className="font-bold">{contact.emailLabel}</p>
-        <p>
-          <a
-            href={`mailto:${contact.email}`}
-            className="cursor-pointer transition-opacity hover:opacity-80 hover:underline"
-          >
-            {contact.email}
-          </a>
-        </p>
-        <p className="font-bold">{contact.phoneLabel}</p>
-        <p>
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cursor-pointer transition-opacity hover:opacity-80 hover:underline"
-          >
-            {contact.phone}
-          </a>
-        </p>
-        <p className="font-bold">{contact.addressLabel}</p>
-        {contact.addressLines.map((line) => (
-          <p key={line}>{line}</p>
+        {infoRows.map((row) => (
+          <div key={row.key} className="flex items-start gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={row.icon} alt="" aria-hidden className="mt-0.5 size-[24px] shrink-0" />
+            <div className="text-start">
+              <p className="font-bold">{row.label}</p>
+              {row.value}
+            </div>
+          </div>
         ))}
-      </div>
-
-      <a
-        href={`mailto:${contact.email}`}
-        aria-label={contact.email}
-        className={`absolute left-[689px] top-[5704px] size-[24px] cursor-pointer transition-opacity hover:opacity-80 ${mirror}`}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/assets/identity-07.svg" alt="" className="block size-full" />
-      </a>
-      <a
-        href={whatsappUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={contact.phone}
-        className={`absolute left-[689px] top-[5775px] size-[24px] cursor-pointer transition-opacity hover:opacity-80 ${mirror}`}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/assets/identity-08.svg" alt="" className="block size-full" />
-      </a>
-      <div className={`absolute left-[688px] top-[5845px] size-[24px] ${mirror}`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/assets/identity-09.svg" alt="" className="block size-full" />
       </div>
     </>
   );
