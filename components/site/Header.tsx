@@ -18,6 +18,10 @@ const NAV_IDS = NAV_ITEMS.map((item) => item.id);
 export function Header({ site }: { site: SiteContent }) {
   const { nav } = site;
   const active = useActiveSection(NAV_IDS, "about");
+  // The canvas is mirrored horizontally for English (see Canvas.tsx) so the
+  // whole page reads left-to-right; text/logo units counter-mirror
+  // themselves so their content stays upright while their position mirrors.
+  const mirror = site.locale === "en" ? "-scale-x-100" : "";
 
   // Opening the page directly on a hash (e.g. /#brands) should land on that
   // section — native fragment navigation doesn't work here (see
@@ -50,7 +54,7 @@ export function Header({ site }: { site: SiteContent }) {
           key={id}
           href={`#${id}`}
           onClick={(e) => handleNavClick(e, id)}
-          className={`absolute top-[65px] -translate-x-1/2 whitespace-nowrap text-[20px] text-[#0676bd] hover:underline ${
+          className={`absolute top-[65px] -translate-x-1/2 whitespace-nowrap text-[20px] text-[#0676bd] hover:underline ${mirror} ${
             active === id ? "font-bold" : "font-normal"
           }`}
           style={{ left }}
@@ -62,14 +66,14 @@ export function Header({ site }: { site: SiteContent }) {
       <LanguageSwitcher
         current={site.locale}
         options={site.languages}
-        className="absolute left-[190px] top-[57px] h-[44px] w-[165px] cursor-pointer appearance-none rounded-[25px] border border-solid border-[#0676bd] bg-white px-4 text-center font-roboto text-[13px] font-bold text-[#0676bd] transition-colors hover:bg-[#0676bd]/5 focus:outline-none"
+        className={`absolute left-[190px] top-[57px] h-[44px] w-[165px] cursor-pointer appearance-none rounded-[25px] border border-solid border-[#0676bd] bg-white px-4 text-center font-roboto text-[13px] font-bold text-[#0676bd] transition-colors hover:bg-[#0676bd]/5 focus:outline-none ${mirror}`}
       />
 
       <button
         type="button"
         onClick={() => scrollToTop()}
         aria-label="Scroll to top"
-        className="absolute left-[1090px] top-[34px] h-[93px] w-[163px] cursor-pointer bg-transparent p-0 transition-opacity hover:opacity-90"
+        className={`absolute left-[1090px] top-[34px] h-[93px] w-[163px] cursor-pointer bg-transparent p-0 transition-opacity hover:opacity-90 ${mirror}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

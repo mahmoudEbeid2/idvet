@@ -4,9 +4,11 @@ import { useContactModal } from "./ContactModalContext";
 
 export function ContactTriggerButton({
   className,
+  style,
   children,
 }: {
   className?: string;
+  style?: React.CSSProperties;
   children: React.ReactNode;
 }) {
   const { open } = useContactModal();
@@ -14,6 +16,7 @@ export function ContactTriggerButton({
     <button
       type="button"
       onClick={open}
+      style={style}
       className={`cursor-pointer ${className ?? ""}`.trim()}
     >
       {children}

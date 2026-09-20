@@ -22,11 +22,12 @@ const IMAGES = [
 
 export function Gallery({ site }: { site: SiteContent }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const mirror = site.locale === "en" ? "-scale-x-100" : "";
 
   return (
     <>
       <div className="absolute left-[514px] top-[4682px] flex h-[40px] w-[411px] items-center justify-center">
-        <p className="text-[36px] font-medium leading-[normal] text-[#0075be]">
+        <p className={`text-[36px] font-medium leading-[normal] text-[#0075be] ${mirror}`}>
           {site.gallery.title}
         </p>
       </div>
@@ -40,7 +41,7 @@ export function Gallery({ site }: { site: SiteContent }) {
             type="button"
             onClick={() => setLightboxIndex(i)}
             aria-label={`${site.gallery.title} ${i + 1}`}
-            className="group absolute size-[177.795px] cursor-pointer overflow-hidden rounded-md border border-black/5 bg-slate-100 p-0 transition-shadow duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#0075be]"
+            className={`group absolute size-[177.795px] cursor-pointer overflow-hidden rounded-md border border-black/5 bg-slate-100 p-0 transition-shadow duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#0075be] ${mirror}`}
             style={{ left: XS[col], top: ROWS[row] }}
           >
             <Image
@@ -69,6 +70,7 @@ export function Gallery({ site }: { site: SiteContent }) {
           initialIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           title={site.gallery.title}
+          locale={site.locale}
         />
       )}
     </>

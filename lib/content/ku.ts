@@ -121,10 +121,10 @@ export const ku: Omit<SiteContent, "languages"> = {
     phoneLabel: "تەلەفۆن / واتساپ",
     phone: "+964 773 599 5586",
     addressLabel: "ناونیشانی کۆمپانیا",
-    addressLines: ["Erbil, 44001, Kurdistan, Iraq", "Baghdad, 10082, iraq"],
+    addressLines: ["Erbil, 44001, Kurdistan, Iraq", "Baghdad, 10082, Iraq"],
   },
   footer: {
-    copyright: "جميع الحقوق محفوظة @ IDVET",
+    copyright: "جميع الحقوق محفوظة © IDVET",
   },
   form: {
     title: "پەیامێکمان بۆ بنێرە",

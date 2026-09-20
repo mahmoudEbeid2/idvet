@@ -82,7 +82,7 @@ export const en: Omit<SiteContent, "languages"> = {
         logoWidth: 182,
         logoHeight: 86,
         title: "Saudi Arabia — Veterinary Medicines & Supplements",
-        body: "AFAQCO is a Jordanian company specialized in manufacturing veterinary medicines and supplements, developing practical solutions grounded in scientific research to support the health and productivity of poultry, birds, and large animals, with a focus on manufacturing quality, technical support, and delivering effective results on farms.",
+        body: "AFAQCO is a Saudi company specialized in manufacturing veterinary medicines and supplements, developing practical solutions grounded in scientific research to support the health and productivity of poultry, birds, and large animals, with a focus on manufacturing quality, technical support, and delivering effective results on farms.",
         tags: ["Production support", "Supplements", "Feed additives", "Medicines"],
         linkText: "Visit AFAQCO ↗︎",
         href: "https://afaqco.net/en/",
@@ -122,10 +122,10 @@ export const en: Omit<SiteContent, "languages"> = {
     phoneLabel: "Phone / WhatsApp",
     phone: "+964 773 599 5586",
     addressLabel: "Headquarters",
-    addressLines: ["Erbil, 44001, Kurdistan, Iraq", "Baghdad, 10082, iraq"],
+    addressLines: ["Erbil, 44001, Kurdistan, Iraq", "Baghdad, 10082, Iraq"],
   },
   footer: {
-    copyright: "All rights reserved @ IDVET",
+    copyright: "All rights reserved © IDVET",
   },
   form: {
     title: "Send us a message",

@@ -17,6 +17,8 @@ export function MobileSite({ site }: { site: SiteContent }) {
   const [navOpen, setNavOpen] = useState(false);
   const [galleryLightboxIndex, setGalleryLightboxIndex] = useState<number | null>(null);
   const active = useActiveSection(MOBILE_NAV_IDS, "about");
+  const isEnglish = site.locale === "en";
+  const smAlign = isEnglish ? "sm:text-left" : "sm:text-right";
 
   // Opening the page directly on a hash (e.g. /#brands) should land on that
   // section on load — see lib/scrollToSection.ts for why this can't just be
@@ -99,10 +101,10 @@ export function MobileSite({ site }: { site: SiteContent }) {
           alt=""
           fill
           sizes="100vw"
-          className="scale-x-[-1] object-cover"
+          className={`object-cover ${isEnglish ? "" : "scale-x-[-1]"}`}
         />
       </section>
-      <section className="bg-[#0b1f36] px-4 py-10 text-center text-white sm:text-right">
+      <section className={`bg-[#0b1f36] px-4 py-10 text-center text-white ${smAlign}`}>
         <p className="mb-3 text-sm font-bold sm:text-base">{site.hero.eyebrow}</p>
         <h1 className="mb-4 text-2xl font-bold leading-tight sm:text-3xl">
           {site.hero.heading}
@@ -124,7 +126,7 @@ export function MobileSite({ site }: { site: SiteContent }) {
             <img
               src="/assets/arrow-icon.svg"
               alt=""
-              className="size-[22px] rotate-180 shrink-0 select-none"
+              className={`size-[22px] shrink-0 select-none ${isEnglish ? "" : "rotate-180"}`}
             />
           </a>
           <ContactTriggerButton className="flex h-[46px] shrink-0 cursor-pointer items-center justify-center border border-white bg-transparent px-6 text-sm font-normal text-white whitespace-nowrap transition-colors hover:bg-white/20 active:bg-white/30">
@@ -152,10 +154,10 @@ export function MobileSite({ site }: { site: SiteContent }) {
           />
         </div>
         <p className="text-2xl font-medium text-[#0075be]">{site.about.title}</p>
-        <p className="text-center text-xl font-bold leading-snug text-[#0075be] sm:text-right">
+        <p className={`text-center text-xl font-bold leading-snug text-[#0075be] ${smAlign}`}>
           {site.about.heading}
         </p>
-        <div className="flex w-full flex-col gap-3 text-center text-[#4d4d4d] sm:text-right">
+        <div className={`flex w-full flex-col gap-3 text-center text-[#4d4d4d] ${smAlign}`}>
           {site.about.paragraphs.map((p, i) => (
             <p key={i} className="leading-relaxed">
               {p}
@@ -175,7 +177,7 @@ export function MobileSite({ site }: { site: SiteContent }) {
         </p>
         <div className="flex flex-col gap-6">
           {site.services.items.map((item, i) => (
-            <div key={i} className="text-center sm:text-right">
+            <div key={i} className={`text-center ${smAlign}`}>
               <p className="mb-1 font-bold leading-snug">
                 {item.heading.split("\n").map((line, j) => (
                   <span key={j}>
@@ -218,10 +220,10 @@ export function MobileSite({ site }: { site: SiteContent }) {
                   />
                 ))}
               </div>
-              <p className="w-full text-center font-bold text-[#0075be] sm:text-right">
+              <p className={`w-full text-center font-bold text-[#0075be] ${smAlign}`}>
                 {card.title}
               </p>
-              <p className="w-full text-center text-sm leading-relaxed text-[#4d4d4d] sm:text-right">
+              <p className={`w-full text-center text-sm leading-relaxed text-[#4d4d4d] ${smAlign}`}>
                 {card.body}
               </p>
               <div className="flex flex-wrap justify-center gap-2" dir="ltr">
@@ -271,7 +273,7 @@ export function MobileSite({ site }: { site: SiteContent }) {
           {site.whyUs.items.map((item) => (
             <div
               key={item.title}
-              className="flex flex-col items-center gap-3 text-center sm:text-right"
+              className={`flex flex-col items-center gap-3 text-center ${smAlign}`}
             >
               <div className="relative size-[56px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -323,6 +325,7 @@ export function MobileSite({ site }: { site: SiteContent }) {
             initialIndex={galleryLightboxIndex}
             onClose={() => setGalleryLightboxIndex(null)}
             title={site.gallery.title}
+            locale={site.locale}
           />
         )}
       </section>
@@ -342,7 +345,9 @@ export function MobileSite({ site }: { site: SiteContent }) {
           </ContactTriggerButton>
         </div>
         <div
-          className="flex flex-col items-center gap-4 text-center sm:items-end sm:text-right"
+          className={`flex flex-col items-center gap-4 text-center ${
+            isEnglish ? "sm:items-start sm:text-left" : "sm:items-end sm:text-right"
+          }`}
           dir="ltr"
         >
           <div>

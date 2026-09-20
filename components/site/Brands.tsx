@@ -27,28 +27,33 @@ function useRevealed<T extends HTMLElement>() {
   return { ref, revealed };
 }
 
+// The text column (title + body + tags + link) is a fixed-height flex
+// column so all three cards line up exactly, regardless of how many lines
+// the title/body/tags wrap to in a given language — the link always sits
+// at the bottom via `mt-auto` instead of a hand-picked pixel offset.
+const COLUMN_TOP = 3530;
+const COLUMN_HEIGHT = 520;
+const DIVIDER_TOP = 3410;
+const DIVIDER_HEIGHT = COLUMN_TOP + COLUMN_HEIGHT - DIVIDER_TOP;
+const CLIENTS_STRIP_TOP = COLUMN_TOP + COLUMN_HEIGHT + 25;
+const CLIENTS_STRIP_BOTTOM = 4666;
+
 const CARD_POSITIONS = [
   {
     titleLeft: 1239,
-    titleTop: 3530,
     titleWidth: 328,
-    tagsLeft: 912,
     linkLeft: 1235,
     bodyAlign: "right" as const,
   },
   {
     titleLeft: 880,
-    titleTop: 3530,
     titleWidth: 329,
-    tagsLeft: 551,
     linkLeft: 875,
     bodyAlign: "justify" as const,
   },
   {
     titleLeft: 520,
-    titleTop: 3530,
     titleWidth: 332,
-    tagsLeft: 188,
     linkLeft: 515,
     bodyAlign: "justify" as const,
   },
@@ -60,12 +65,12 @@ const LOGO_POSITIONS = [
   { left: 330, top: 3410 },
 ];
 
-function ColumnDivider({ left, top }: { left: number; top: number }) {
+function ColumnDivider({ left, top, height }: { left: number; top: number; height: number }) {
   return (
-    <div className="absolute" style={{ left, top, width: 1.5, height: 527 }}>
-      <div className="absolute inset-0 rounded-full bg-[#b8b6b6]" />
-      <div className="absolute left-1/2 top-0 size-[6px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#b8b6b6]" />
-      <div className="absolute bottom-0 left-1/2 size-[6px] -translate-x-1/2 translate-y-1/2 rounded-full bg-[#b8b6b6]" />
+    <div className="absolute" style={{ left, top, width: 2, height }}>
+      <div className="absolute inset-0 rounded-full bg-[#9a9a9a]" />
+      <div className="absolute left-1/2 top-0 size-[6px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#9a9a9a]" />
+      <div className="absolute bottom-0 left-1/2 size-[6px] -translate-x-1/2 translate-y-1/2 rounded-full bg-[#9a9a9a]" />
     </div>
   );
 }
@@ -75,13 +80,19 @@ function BrandCardBlock({
   pos,
   logoPos,
   index,
+  isEnglish,
 }: {
   card: BrandCard;
   pos: (typeof CARD_POSITIONS)[number];
   logoPos: (typeof LOGO_POSITIONS)[number];
   index: number;
+  isEnglish: boolean;
 }) {
   const { ref, revealed } = useRevealed<HTMLDivElement>();
+  // The canvas is mirrored horizontally for English (see Canvas.tsx); each
+  // readable unit below counter-mirrors itself so its content stays
+  // upright while its position mirrors with everything else.
+  const mirror = isEnglish ? "-scale-x-100" : "";
 
   return (
     <div
@@ -105,11 +116,11 @@ function BrandCardBlock({
         ref={ref}
         aria-hidden
         className="absolute h-px w-px"
-        style={{ left: pos.tagsLeft, top: pos.titleTop + 150 }}
+        style={{ left: pos.titleLeft, top: COLUMN_TOP + 150 }}
       />
 
       <div
-        className="pointer-events-auto absolute overflow-hidden transition-transform duration-300 ease-out hover:scale-[1.04]"
+        className={`pointer-events-auto absolute overflow-hidden transition-transform duration-300 ease-out hover:scale-[1.04] ${mirror}`}
         style={{
           left: logoPos.left,
           top: logoPos.top,
@@ -143,50 +154,51 @@ function BrandCardBlock({
         )}
       </div>
 
+      {/* Text column: title, body, tags, link — equal height across all
+          three cards, link pinned to the bottom via mt-auto. */}
       <div
-        className={`absolute -translate-x-full ${
-          pos.bodyAlign === "justify" ? "text-justify" : "text-right"
-        }`}
-        style={{ left: pos.titleLeft, top: pos.titleTop, width: pos.titleWidth }}
+        className={`absolute -translate-x-full flex flex-col items-end text-right ${mirror}`}
+        style={{ left: pos.titleLeft, top: COLUMN_TOP, width: pos.titleWidth, height: COLUMN_HEIGHT }}
       >
         <p className="mb-[28px] text-[20px] font-bold leading-[28px] text-[#0075be]">
           {card.title}
         </p>
-        <p className="text-[18px] font-normal leading-[28px] text-[#4d4d4d]">
+        <p
+          className={`w-full text-[18px] font-normal leading-[28px] text-[#4d4d4d] ${
+            pos.bodyAlign === "justify" ? "text-justify" : "text-right"
+          }`}
+        >
           {card.body}
         </p>
-      </div>
 
-      <div
-        dir="ltr"
-        className="pointer-events-auto absolute flex flex-wrap gap-[16px]"
-        style={{ left: pos.tagsLeft, top: 3887, width: pos.titleWidth }}
-      >
-        {card.tags.map((tag) => (
-          <span
-            key={tag}
-            className="inline-flex h-[36px] items-center justify-center whitespace-nowrap rounded-[50px] border border-solid border-[#006db2] bg-white px-3 text-[12px] leading-none text-[#0075be] transition-colors duration-200 hover:bg-[#0075be] hover:text-white"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
+        <div dir="ltr" className="pointer-events-auto mt-[24px] flex w-full flex-wrap justify-end gap-[16px]">
+          {card.tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex h-[36px] items-center justify-center whitespace-nowrap rounded-[50px] border border-solid border-[#006db2] bg-white px-3 text-[12px] leading-none text-[#0075be] transition-colors duration-200 hover:bg-[#0075be] hover:text-white"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
 
-      <a
-        href={card.href}
-        target="_blank"
-        rel="noreferrer"
-        className="pointer-events-auto absolute -translate-x-full whitespace-nowrap text-[16px] font-bold leading-[36px] text-[#0075be] underline decoration-solid [text-underline-position:from-font] transition-colors duration-200 hover:text-[#006eb3]"
-        style={{ left: pos.linkLeft, top: 3937 }}
-      >
-        {card.linkText}
-      </a>
+        <a
+          href={card.href}
+          target="_blank"
+          rel="noreferrer"
+          className="pointer-events-auto mt-auto whitespace-nowrap text-[16px] font-bold leading-[36px] text-[#0075be] underline decoration-solid [text-underline-position:from-font] transition-colors duration-200 hover:text-[#006eb3]"
+        >
+          {card.linkText}
+        </a>
+      </div>
     </div>
   );
 }
 
 export function Brands({ site }: { site: SiteContent }) {
   const { brands } = site;
+  const isEnglish = site.locale === "en";
+  const mirror = isEnglish ? "-scale-x-100" : "";
   return (
     <>
       <span
@@ -195,7 +207,7 @@ export function Brands({ site }: { site: SiteContent }) {
         className="absolute left-0 top-[2469px] block h-px w-px"
       />
       <div className="absolute left-0 top-[3353px] h-[925px] w-[1440px] bg-[#f0efef]" />
-      <div className="absolute left-1/2 top-[2469px] h-[636px] w-[848px] -translate-x-1/2">
+      <div className={`absolute left-1/2 top-[2469px] h-[636px] w-[848px] -translate-x-1/2 ${mirror}`}>
         <Image
           src="/assets/brands-section.png"
           alt=""
@@ -206,10 +218,10 @@ export function Brands({ site }: { site: SiteContent }) {
         />
       </div>
 
-      <p className="absolute left-1/2 top-[3069px] w-[1065px] -translate-x-1/2 text-center text-[36px] font-bold leading-[18px] text-[#0075be]">
+      <p className={`absolute left-1/2 top-[3069px] w-[1065px] -translate-x-1/2 text-center text-[36px] font-bold leading-[18px] text-[#0075be] ${mirror}`}>
         {brands.title}
       </p>
-      <div className="absolute left-1/2 top-[3137px] w-[1065px] -translate-x-1/2 text-center">
+      <div className={`absolute left-1/2 top-[3137px] w-[1065px] -translate-x-1/2 text-center ${mirror}`}>
         <p className="mb-[10px] text-[32px] font-bold leading-[36px] text-[#0075be]">
           {brands.introHeading}
         </p>
@@ -225,13 +237,17 @@ export function Brands({ site }: { site: SiteContent }) {
           pos={CARD_POSITIONS[i]}
           logoPos={LOGO_POSITIONS[i]}
           index={i}
+          isEnglish={isEnglish}
         />
       ))}
 
-      <ColumnDivider left={900} top={3422} />
-      <ColumnDivider left={533} top={3422} />
+      <ColumnDivider left={900} top={DIVIDER_TOP} height={DIVIDER_HEIGHT} />
+      <ColumnDivider left={533} top={DIVIDER_TOP} height={DIVIDER_HEIGHT} />
 
-      <div className="absolute left-0 top-[3963px] h-[703px] w-[1440px] overflow-hidden">
+      <div
+        className={`absolute left-0 w-[1440px] overflow-hidden ${mirror}`}
+        style={{ top: CLIENTS_STRIP_TOP, height: CLIENTS_STRIP_BOTTOM - CLIENTS_STRIP_TOP }}
+      >
         <Image
           src="/assets/clients-strip.png"
           alt=""

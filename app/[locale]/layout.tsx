@@ -52,10 +52,13 @@ export default async function LocaleLayout({
   if (!isLocale(locale)) notFound();
   const site = content[locale];
 
+  const isEnglish = site.locale === "en";
+
   return (
-    <html lang={site.htmlLang} dir={site.locale === "en" ? "ltr" : "rtl"}>
+    <html lang={site.htmlLang} dir={isEnglish ? "ltr" : "rtl"}>
       <body
         className={`${ibmPlexSansArabic.variable} ${roboto.variable} antialiased`}
+        style={isEnglish ? { fontFamily: "var(--font-roboto), sans-serif" } : undefined}
       >
         {children}
       </body>

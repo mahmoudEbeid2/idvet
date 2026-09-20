@@ -12,9 +12,10 @@ import { Footer } from "./Footer";
 export const CANVAS_HEIGHT = 6058;
 
 export function Canvas({ site }: { site: SiteContent }) {
+  const isEnglish = site.locale === "en";
   return (
     <div
-      className="relative w-[1440px] overflow-hidden bg-white"
+      className={`relative w-[1440px] overflow-hidden bg-white ${isEnglish ? "-scale-x-100" : ""}`}
       style={{ height: CANVAS_HEIGHT }}
     >
       <Header site={site} />

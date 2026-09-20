@@ -45,6 +45,8 @@ function splitIntoWordTokens(text: string) {
 
 export function Hero({ site }: { site: SiteContent }) {
   const { hero } = site;
+  const isEnglish = site.locale === "en";
+  const mirror = isEnglish ? "-scale-x-100" : "";
   const bgRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
 
@@ -191,11 +193,11 @@ export function Hero({ site }: { site: SiteContent }) {
           absolute left/top values valid) so it must stay pointer-events-none,
           with the actual links opting back in individually. */}
       <div ref={textRef} className="pointer-events-none absolute inset-0">
-        <p className="hero-eyebrow absolute left-[1252px] top-[326px] w-[330px] -translate-x-full text-right text-[16px] font-bold leading-[normal] text-white">
+        <p className={`hero-eyebrow absolute left-[1252px] top-[326px] w-[330px] -translate-x-full text-start text-[16px] font-bold leading-[normal] text-white ${mirror}`}>
           {hero.eyebrow}
         </p>
 
-        <p className="absolute left-[1252px] top-[367px] w-[482px] -translate-x-full text-right text-[36px] font-bold leading-[46px] text-white">
+        <p className={`absolute left-[1252px] top-[367px] w-[482px] -translate-x-full text-start text-[36px] font-bold leading-[46px] text-white ${mirror}`}>
           {wordTokens.map((token, i) => {
             if (/^\s+$/.test(token)) return <span key={i}>{token}</span>;
             const delay = 0.25 + wordIndex * perWordDelay;
@@ -208,7 +210,7 @@ export function Hero({ site }: { site: SiteContent }) {
           })}
         </p>
 
-        <p className="hero-paragraph absolute left-[1252px] top-[588px] w-[482px] -translate-x-full text-right text-[16px] font-normal leading-[28px] text-white">
+        <p className={`hero-paragraph absolute left-[1252px] top-[588px] w-[482px] -translate-x-full text-start text-[16px] font-normal leading-[28px] text-white ${mirror}`}>
           {hero.paragraph}
         </p>
 
@@ -216,17 +218,19 @@ export function Hero({ site }: { site: SiteContent }) {
           <a
             href="#brands"
             onClick={handlePrimaryCtaClick}
-            className="hero-cta hero-shine flex h-[48px] shrink-0 cursor-pointer items-center justify-center gap-[14px] bg-[#0676bd] px-6 text-[15px] font-bold text-white whitespace-nowrap transition-all duration-200 hover:bg-[#0568a8] hover:shadow-md active:bg-[#045990]"
+            className={`hero-cta hero-shine flex h-[48px] shrink-0 cursor-pointer items-center justify-center gap-[14px] bg-[#0676bd] px-6 text-[15px] font-bold text-white whitespace-nowrap transition-all duration-200 hover:bg-[#0568a8] hover:shadow-md active:bg-[#045990] ${mirror}`}
           >
             <span className="whitespace-nowrap">{hero.ctaPrimary}</span>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/assets/arrow-icon.svg"
               alt=""
-              className="size-[24px] rotate-180 shrink-0 select-none"
+              className={`size-[24px] shrink-0 select-none ${isEnglish ? "" : "rotate-180"}`}
             />
           </a>
-          <ContactTriggerButton className="hero-cta flex h-[48px] shrink-0 cursor-pointer items-center justify-center border border-white bg-transparent px-8 text-[15px] font-normal text-white whitespace-nowrap transition-all duration-200 hover:bg-white/20 hover:shadow-sm active:bg-white/30">
+          <ContactTriggerButton
+            className={`hero-cta flex h-[48px] shrink-0 cursor-pointer items-center justify-center border border-white bg-transparent px-8 text-[15px] font-normal text-white whitespace-nowrap transition-all duration-200 hover:bg-white/20 hover:shadow-sm active:bg-white/30 ${mirror}`}
+          >
             <span className="whitespace-nowrap">{hero.ctaSecondary}</span>
           </ContactTriggerButton>
         </div>
@@ -234,7 +238,7 @@ export function Hero({ site }: { site: SiteContent }) {
 
       {/* Tagline strip */}
       <div className="absolute left-0 top-[961px] h-[150px] w-[1440px] bg-[#f0efef]" />
-      <p className="absolute left-[763px] top-[1018px] w-[1074px] -translate-x-1/2 text-center text-[24px] font-medium leading-[36px] text-[#848484] whitespace-pre-wrap">
+      <p className={`absolute left-[763px] top-[1018px] w-[1074px] -translate-x-1/2 text-center text-[24px] font-medium leading-[36px] text-[#848484] whitespace-pre-wrap ${mirror}`}>
         {site.tagline}
       </p>
     </>

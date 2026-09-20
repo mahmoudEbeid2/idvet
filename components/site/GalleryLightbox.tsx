@@ -8,6 +8,7 @@ interface GalleryLightboxProps {
   initialIndex: number;
   onClose: () => void;
   title?: string;
+  locale?: string;
 }
 
 export function GalleryLightbox({
@@ -15,7 +16,9 @@ export function GalleryLightbox({
   initialIndex,
   onClose,
   title,
+  locale,
 }: GalleryLightboxProps) {
+  const isRTL = locale !== "en";
   const [mounted, setMounted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,15 +81,18 @@ export function GalleryLightbox({
         return;
       }
 
-      // In RTL: ArrowLeft moves forward (next), ArrowRight moves back (prev)
+      // RTL: ArrowLeft moves forward (next), ArrowRight moves back (prev).
+      // LTR: the reverse — ArrowRight is forward (next).
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        goToNext();
+        if (isRTL) goToNext();
+        else goToPrev();
         return;
       }
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        goToPrev();
+        if (isRTL) goToPrev();
+        else goToNext();
         return;
       }
 
@@ -112,7 +118,7 @@ export function GalleryLightbox({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [mounted, onClose, goToNext, goToPrev]);
+  }, [mounted, onClose, goToNext, goToPrev, isRTL]);
 
   // Touch swipe handling
   function handleTouchStart(e: React.TouchEvent) {
@@ -127,7 +133,8 @@ export function GalleryLightbox({
   function handleTouchEnd() {
     if (touchStartXRef.current === null || touchEndXRef.current === null) return;
     const diff = touchStartXRef.current - touchEndXRef.current;
-    // In RTL: dragging left (diff > 50) moves to next image; dragging right (diff < -50) moves to previous
+    // Swiping left ("forward") always advances, regardless of direction —
+    // this matches the physical drag gesture, not the reading direction.
     if (Math.abs(diff) > 45) {
       if (diff > 0) {
         goToNext();
@@ -158,7 +165,7 @@ export function GalleryLightbox({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      dir="rtl"
+      dir={isRTL ? "rtl" : "ltr"}
     >
       {/* Top bar: Counter & Close button */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between p-4 md:p-6">
@@ -196,11 +203,11 @@ export function GalleryLightbox({
         </button>
       </div>
 
-      {/* Navigation: RTL "Next" arrow on the Left (points left ←) */}
+      {/* Left-side arrow (points left ←): "next" in RTL reading order, "previous" in LTR */}
       <button
         type="button"
-        onClick={goToNext}
-        aria-label="Next image / وێنەی داهاتوو / الصورة التالية"
+        onClick={isRTL ? goToNext : goToPrev}
+        aria-label={isRTL ? "Next image / وێنەی داهاتوو / الصورة التالية" : "Previous image"}
         className="group absolute left-3 md:left-6 z-20 flex size-11 md:size-14 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md border border-white/10 transition-all duration-200 hover:bg-[#0075be] hover:border-[#0075be] hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#0075be]"
       >
         <svg
@@ -214,11 +221,11 @@ export function GalleryLightbox({
         </svg>
       </button>
 
-      {/* Navigation: RTL "Previous" arrow on the Right (points right →) */}
+      {/* Right-side arrow (points right →): "previous" in RTL reading order, "next" in LTR */}
       <button
         type="button"
-        onClick={goToPrev}
-        aria-label="Previous image / وێنەی پێشوو / الصورة السابقة"
+        onClick={isRTL ? goToPrev : goToNext}
+        aria-label={isRTL ? "Previous image / وێنەی پێشوو / الصورة السابقة" : "Next image"}
         className="group absolute right-3 md:right-6 z-20 flex size-11 md:size-14 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md border border-white/10 transition-all duration-200 hover:bg-[#0075be] hover:border-[#0075be] hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#0075be]"
       >
         <svg
