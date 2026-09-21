@@ -32,7 +32,7 @@ function useRevealed<T extends HTMLElement>() {
 // the title/body/tags wrap to in a given language — the link always sits
 // at the bottom via `mt-auto` instead of a hand-picked pixel offset.
 const COLUMN_TOP = 3530;
-const COLUMN_HEIGHT = 520;
+const COLUMN_HEIGHT = 420;
 const DIVIDER_TOP = 3410;
 const DIVIDER_HEIGHT = COLUMN_TOP + COLUMN_HEIGHT - DIVIDER_TOP;
 const CLIENTS_STRIP_TOP = COLUMN_TOP + COLUMN_HEIGHT + 25;
@@ -43,27 +43,20 @@ const CARD_POSITIONS = [
     titleLeft: 1239,
     titleWidth: 328,
     linkLeft: 1235,
-    bodyAlign: "right" as const,
   },
   {
     titleLeft: 880,
     titleWidth: 329,
     linkLeft: 875,
-    bodyAlign: "justify" as const,
   },
   {
     titleLeft: 520,
     titleWidth: 332,
     linkLeft: 515,
-    bodyAlign: "justify" as const,
   },
 ];
 
-const LOGO_POSITIONS = [
-  { left: 1031, top: 3424 },
-  { left: 549, top: 3422 },
-  { left: 330, top: 3410 },
-];
+const LOGO_TOPS = [3424, 3422, 3410];
 
 function ColumnDivider({ left, top, height }: { left: number; top: number; height: number }) {
   return (
@@ -78,13 +71,13 @@ function ColumnDivider({ left, top, height }: { left: number; top: number; heigh
 function BrandCardBlock({
   card,
   pos,
-  logoPos,
+  logoTop,
   index,
   isEnglish,
 }: {
   card: BrandCard;
   pos: (typeof CARD_POSITIONS)[number];
-  logoPos: (typeof LOGO_POSITIONS)[number];
+  logoTop: number;
   index: number;
   isEnglish: boolean;
 }) {
@@ -122,8 +115,8 @@ function BrandCardBlock({
       <div
         className={`pointer-events-auto absolute overflow-hidden transition-transform duration-300 ease-out hover:scale-[1.04] ${mirror}`}
         style={{
-          left: logoPos.left,
-          top: logoPos.top,
+          left: pos.titleLeft - pos.titleWidth / 2 - card.logoWidth / 2,
+          top: logoTop,
           width: card.logoWidth,
           // The two-part logo's inset percentages below are computed against
           // an 80px-tall box; a single-image logo instead uses its own
@@ -149,7 +142,7 @@ function BrandCardBlock({
           <img
             src={card.logo[0]}
             alt=""
-            className="absolute inset-0 size-full object-cover object-right"
+            className="absolute inset-0 size-full object-contain object-center"
           />
         )}
       </div>
@@ -157,21 +150,17 @@ function BrandCardBlock({
       {/* Text column: title, body, tags, link — equal height across all
           three cards, link pinned to the bottom via mt-auto. */}
       <div
-        className={`absolute -translate-x-full flex flex-col items-end text-right ${mirror}`}
+        className={`absolute -translate-x-full flex flex-col items-center text-center ${mirror}`}
         style={{ left: pos.titleLeft, top: COLUMN_TOP, width: pos.titleWidth, height: COLUMN_HEIGHT }}
       >
         <p className="mb-[28px] text-[20px] font-bold leading-[28px] text-[#0075be]">
           {card.title}
         </p>
-        <p
-          className={`w-full text-[18px] font-normal leading-[28px] text-[#4d4d4d] ${
-            pos.bodyAlign === "justify" ? "text-justify" : "text-right"
-          }`}
-        >
+        <p className="w-full text-center text-[18px] font-normal leading-[28px] text-[#4d4d4d]">
           {card.body}
         </p>
 
-        <div dir="ltr" className="pointer-events-auto mt-[24px] flex w-full flex-wrap justify-end gap-[16px]">
+        <div dir="ltr" className="pointer-events-auto mt-[12px] flex w-full flex-wrap justify-center gap-[16px]">
           {card.tags.map((tag) => (
             <span
               key={tag}
@@ -235,7 +224,7 @@ export function Brands({ site }: { site: SiteContent }) {
           key={card.title}
           card={card}
           pos={CARD_POSITIONS[i]}
-          logoPos={LOGO_POSITIONS[i]}
+          logoTop={LOGO_TOPS[i]}
           index={i}
           isEnglish={isEnglish}
         />
