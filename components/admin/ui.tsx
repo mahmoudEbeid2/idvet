@@ -1,4 +1,6 @@
 import Link from "next/link";
+import type { Lang } from "@/lib/admin/forms";
+import type { AdminMessages } from "@/lib/admin/i18n";
 import s from "./admin.module.css";
 
 export function PageHeader({
@@ -17,7 +19,7 @@ export function PageHeader({
       <div>
         {back && (
           <Link href={back.href} className={s.back}>
-            → {back.label}
+            {back.label}
           </Link>
         )}
         <h1>{title}</h1>
@@ -87,27 +89,20 @@ export function Notice({ tone, children }: { tone: "ok" | "err" | "info"; childr
   );
 }
 
-export function StatusBadge({ published }: { published: boolean }) {
+export function StatusBadge({ published, t }: { published: boolean; t: AdminMessages }) {
   return published ? (
-    <span className={`${s.badge} ${s.bGreen}`}>منشور</span>
+    <span className={`${s.badge} ${s.bGreen}`}>{t.common.published}</span>
   ) : (
-    <span className={`${s.badge} ${s.bGray}`}>مسودة</span>
+    <span className={`${s.badge} ${s.bGray}`}>{t.common.draft}</span>
   );
 }
 
-export function MissingBadge({ langs }: { langs: string[] }) {
+/** "Missing translation: Kurdish, English" for the languages with an empty field. */
+export function MissingBadge({ langs, t }: { langs: Lang[]; t: AdminMessages }) {
   if (langs.length === 0) return null;
-  return <span className={`${s.badge} ${s.bAmber}`}>ترجمة ناقصة: {langs.join("، ")}</span>;
+  return (
+    <span className={`${s.badge} ${s.bAmber}`}>
+      {t.common.missing(langs.map((l) => t.common.langNames[l]).join(t.common.listSep))}
+    </span>
+  );
 }
-
-/** Arabic count + noun, e.g. "3 صور", "صورة واحدة". */
-export function arCount(n: number, forms: { one: string; two: string; few: string; many: string }) {
-  if (n === 1) return forms.one;
-  if (n === 2) return forms.two;
-  if (n === 0 || (n % 100 >= 3 && n % 100 <= 10)) return `${n} ${forms.few}`;
-  return `${n} ${forms.many}`;
-}
-
-export const IMAGES = { one: "صورة واحدة", two: "صورتان", few: "صور", many: "صورة" };
-export const CERTS = { one: "شهادة واحدة", two: "شهادتان", few: "شهادات", many: "شهادة" };
-export const PRODUCTS = { one: "منتج واحد", two: "منتجان", few: "منتجات", many: "منتج" };

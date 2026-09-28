@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { deleteImage, moveImage } from "@/app/admin/actions";
 import type { AdminImage } from "@/lib/admin/data";
+import { withFile } from "@/lib/admin/i18n";
+import { useAdminT } from "./AdminLang";
 import { ConfirmDeleteButton } from "./ConfirmDeleteButton";
 import { upload } from "./upload";
 import { Card } from "./ui";
@@ -30,6 +32,7 @@ export function LaterIcon() {
 
 export function ImageManager({ productId, images, color }: { productId: string; images: AdminImage[]; color: string }) {
   const router = useRouter();
+  const t = useAdminT();
   const [items, setItems] = useState(images);
   // Take the server's list again whenever it changes (after router.refresh()).
   const serverKey = images.map((i) => i.id).join();
@@ -51,11 +54,11 @@ export function ImageManager({ productId, images, color }: { productId: string; 
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
       if (!TYPES.includes(file.type)) {
-        failed.push(`${file.name}: الملف ليس صورة صالحة. استخدم JPG أو PNG أو WEBP.`);
+        failed.push(withFile(file.name, t.errors.notImage));
         continue;
       }
       if (file.size > MAX_BYTES) {
-        failed.push(`${file.name}: الملف أكبر من 15MB.`);
+        failed.push(withFile(file.name, t.errors.tooBig(15)));
         continue;
       }
       setProgress({ index, total: files.length, fraction: 0 });
@@ -63,7 +66,7 @@ export function ImageManager({ productId, images, color }: { productId: string; 
       body.set("file", file);
       body.set("productId", productId);
       try {
-        const image = await upload<AdminImage>("/api/admin/uploads/image?target=product", body, (fraction) =>
+        const image = await upload<AdminImage>("/api/admin/uploads/image?target=product", body, t, (fraction) =>
           setProgress({ index, total: files.length, fraction }),
         );
         setItems((list) => [...list, image]);
@@ -100,8 +103,8 @@ export function ImageManager({ productId, images, color }: { productId: string; 
   return (
     <Card
       id="images"
-      title="صور المنتج"
-      description="الصورة الأولى هي الصورة الرئيسية في البطاقات. الصور بخلفية بيضاء تبدو أفضل. JPG أو PNG أو WEBP حتى 15MB، وتُصغَّر تلقائياً."
+      title={t.images.title}
+      description={t.images.description}
     >
       <div className={`${s.stack} ${s.stackTight}`}>
         {items.length > 0 && (
@@ -111,7 +114,7 @@ export function ImageManager({ productId, images, color }: { productId: string; 
                 <div className={s.pic} style={{ background: color }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={image.src} alt="" width={image.width} height={image.height} loading="lazy" />
-                  {i === 0 && <span className={s.mainTag}>الصورة الرئيسية</span>}
+                  {i === 0 && <span className={s.mainTag}>{t.images.main}</span>}
                 </div>
                 <div className={s.bar}>
                   <div style={{ display: "flex" }}>
@@ -120,8 +123,8 @@ export function ImageManager({ productId, images, color }: { productId: string; 
                       className={s.iconBtn}
                       disabled={i === 0}
                       onClick={() => move(i, -1)}
-                      aria-label="تقديم"
-                      title="تقديم"
+                      aria-label={t.common.earlier}
+                      title={t.common.earlier}
                     >
                       <EarlierIcon />
                     </button>
@@ -130,13 +133,13 @@ export function ImageManager({ productId, images, color }: { productId: string; 
                       className={s.iconBtn}
                       disabled={i === items.length - 1}
                       onClick={() => move(i, 1)}
-                      aria-label="تأخير"
-                      title="تأخير"
+                      aria-label={t.common.later}
+                      title={t.common.later}
                     >
                       <LaterIcon />
                     </button>
                   </div>
-                  <ConfirmDeleteButton label="حذف" variant="del" onConfirm={() => remove(image.id)} />
+                  <ConfirmDeleteButton label={t.common.delete} variant="del" onConfirm={() => remove(image.id)} />
                 </div>
               </li>
             ))}
@@ -158,17 +161,15 @@ export function ImageManager({ productId, images, color }: { productId: string; 
         >
           {progress ? (
             <>
-              <b>
-                جارٍ رفع {progress.index + 1} من {progress.total}…
-              </b>
+              <b>{t.images.uploading(progress.index + 1, progress.total)}</b>
               <span className={s.progress} role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
                 <i style={{ width: `${percent}%` }} />
               </span>
             </>
           ) : (
             <>
-              <b>اختر صوراً أو اسحبها إلى هنا</b>
-              <span>يمكنك اختيار أكثر من صورة مرة واحدة</span>
+              <b>{t.images.drop}</b>
+              <span>{t.images.dropSub}</span>
             </>
           )}
           <input

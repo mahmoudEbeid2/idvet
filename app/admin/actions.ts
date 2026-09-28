@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -8,6 +8,8 @@ import { deleteUpload, deleteUploadFolder, uploadPathFromUrl } from "@/lib/stora
 import { clearLoginFailures, clientIp, loginBlockedFor, recordLoginFailure } from "@/lib/admin/rateLimit";
 import { endSession, requireAdmin, startSession } from "@/lib/admin/session";
 import { adminConfig, safeEqual } from "@/lib/admin/token";
+import { ADMIN_LANG_COOKIE, isAdminLang } from "@/lib/admin/i18n";
+import { getAdminT } from "@/lib/admin/lang";
 import {
   PRESET_ICONS,
   SLUG_PATTERN,
@@ -29,22 +31,36 @@ function fieldsOf(form: FormData): Record<string, string> {
   return fields;
 }
 
+// ---------------------------------------------------------------- language
+
+/** Saves the dashboard language (no session needed: the login page has the switcher too). */
+export async function setAdminLang(lang: string): Promise<void> {
+  if (!isAdminLang(lang)) return;
+  (await cookies()).set(ADMIN_LANG_COOKIE, lang, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
+}
+
 // ---------------------------------------------------------------- session
 
 export async function login(_prev: FormState, form: FormData): Promise<FormState> {
   const config = adminConfig();
   const email = text(form, "email", 200);
-  if (!config) return { error: "لوحة التحكم غير مُعدّة بعد. أضف متغيرات البيئة المطلوبة.", fields: { email } };
+  const t = await getAdminT();
+  if (!config) return { error: t.errors.notConfigured, fields: { email } };
 
   const ip = clientIp(await headers());
   const wait = loginBlockedFor(ip);
-  if (wait) return { error: `محاولات كثيرة. حاول مرة أخرى بعد ${wait} دقيقة.`, fields: { email } };
+  if (wait) return { error: t.errors.tooManyAttempts(wait), fields: { email } };
 
   const password = typeof form.get("password") === "string" ? (form.get("password") as string) : "";
   const ok = safeEqual(email.toLowerCase(), config.email.toLowerCase()) && safeEqual(password, config.password);
   if (!ok) {
     recordLoginFailure(ip);
-    return { error: "البريد الإلكتروني أو كلمة المرور غير صحيحة.", fields: { email } };
+    return { error: t.errors.badLogin, fields: { email } };
   }
 
   clearLoginFailures(ip);
@@ -62,6 +78,7 @@ export async function logout(): Promise<void> {
 
 export async function saveCategory(_prev: FormState, form: FormData): Promise<FormState> {
   await requireAdmin();
+  const t = await getAdminT();
   const id = text(form, "id", 40);
   const fields = fieldsOf(form);
   const names = translated(form, "name", 80);
@@ -71,21 +88,21 @@ export async function saveCategory(_prev: FormState, form: FormData): Promise<Fo
   let slug = text(form, "slug", 80).toLowerCase();
 
   if (!names.nameKu && !names.nameAr && !names.nameEn) {
-    return { error: "اكتب اسم القسم بلغة واحدة على الأقل.", fields };
+    return { error: t.errors.categoryNameRequired, fields };
   }
-  if (!isHexColor(color)) return { error: "اختر لون الخلفية.", fields };
+  if (!isHexColor(color)) return { error: t.errors.colorRequired, fields };
   const uploadedIcon = /^\/uploads\/categories\/[0-9a-f-]{36}\.(webp|png)$/.test(icon);
   if (!(PRESET_ICONS as readonly string[]).includes(icon) && !uploadedIcon) {
-    return { error: "اختر أيقونة للقسم.", fields };
+    return { error: t.errors.iconRequired, fields };
   }
   if (slug && !SLUG_PATTERN.test(slug)) {
-    return { error: "الرابط يقبل الأحرف الإنجليزية الصغيرة والأرقام والشرطة (-) فقط.", fields };
+    return { error: t.errors.slugInvalid, fields };
   }
   const explicitSlug = Boolean(slug);
   slug ||= slugify(names.nameEn) || randomSlug("category");
 
   const previous = id ? await prisma.category.findUnique({ where: { id } }) : null;
-  if (id && !previous) return { error: "القسم غير موجود. ربما حُذف.", fields };
+  if (id && !previous) return { error: t.errors.categoryGone, fields };
 
   const data = { ...names, ...descriptions, color, icon, sortOrder: int(form, "sortOrder") };
   const saved = await withUniqueSlug(slug, explicitSlug, (candidate) =>
@@ -93,7 +110,7 @@ export async function saveCategory(_prev: FormState, form: FormData): Promise<Fo
       ? prisma.category.update({ where: { id }, data: { ...data, slug: candidate } })
       : prisma.category.create({ data: { ...data, slug: candidate } }),
   );
-  if (!saved) return { error: "هذا الرابط مستخدم لقسم آخر.", fields };
+  if (!saved) return { error: t.errors.categorySlugTaken, fields };
 
   if (previous && previous.icon !== icon) await deleteUpload(uploadPathFromUrl(previous.icon));
   redirect(previous ? `/admin/categories/${saved.id}?saved=1` : "/admin/categories?created=1");
@@ -101,19 +118,20 @@ export async function saveCategory(_prev: FormState, form: FormData): Promise<Fo
 
 export async function deleteCategory(id: string): Promise<FormState> {
   await requireAdmin();
+  const t = await getAdminT();
   const category = await prisma.category.findUnique({
     where: { id: String(id) },
     include: { _count: { select: { products: true } } },
   });
   if (!category) redirect("/admin/categories");
   if (category._count.products > 0) {
-    return { error: `لا يمكن حذف القسم لأن فيه ${category._count.products} منتج.` };
+    return { error: t.errors.categoryHasProducts(t.count.products(category._count.products)) };
   }
   try {
     await prisma.category.delete({ where: { id: category.id } });
   } catch (error) {
     // A product was added in the meantime (onDelete: Restrict).
-    if (error instanceof Prisma.PrismaClientKnownRequestError) return { error: "لا يمكن حذف قسم فيه منتجات." };
+    if (error instanceof Prisma.PrismaClientKnownRequestError) return { error: t.errors.categoryHasProductsNow };
     throw error;
   }
   await deleteUpload(uploadPathFromUrl(category.icon));
@@ -124,6 +142,7 @@ export async function deleteCategory(id: string): Promise<FormState> {
 
 export async function saveProduct(_prev: FormState, form: FormData): Promise<FormState> {
   await requireAdmin();
+  const t = await getAdminT();
   const id = text(form, "id", 40);
   const fields = fieldsOf(form);
   const categoryId = text(form, "categoryId", 40);
@@ -145,26 +164,26 @@ export async function saveProduct(_prev: FormState, form: FormData): Promise<For
   };
 
   if (!categoryId || !(await prisma.category.findUnique({ where: { id: categoryId }, select: { id: true } }))) {
-    return { error: "اختر القسم.", fields };
+    return { error: t.errors.chooseCategory, fields };
   }
   if (!data.nameKu && !data.nameAr && !data.nameEn) {
-    return { error: "اكتب اسم المنتج بلغة واحدة على الأقل.", fields };
+    return { error: t.errors.productNameRequired, fields };
   }
   if (slug && !SLUG_PATTERN.test(slug)) {
-    return { error: "الرابط يقبل الأحرف الإنجليزية الصغيرة والأرقام والشرطة (-) فقط.", fields };
+    return { error: t.errors.slugInvalid, fields };
   }
   const explicitSlug = Boolean(slug);
   slug ||= slugify(data.nameEn) || slugify(code) || randomSlug("product");
 
   if (id && !(await prisma.product.findUnique({ where: { id }, select: { id: true } }))) {
-    return { error: "المنتج غير موجود. ربما حُذف.", fields };
+    return { error: t.errors.productGone, fields };
   }
   const saved = await withUniqueSlug(slug, explicitSlug, (candidate) =>
     id
       ? prisma.product.update({ where: { id }, data: { ...data, slug: candidate } })
       : prisma.product.create({ data: { ...data, slug: candidate } }),
   );
-  if (!saved) return { error: "هذا الرابط مستخدم لمنتج آخر.", fields };
+  if (!saved) return { error: t.errors.productSlugTaken, fields };
 
   redirect(`/admin/products/${saved.id}?${id ? "saved" : "created"}=1`);
 }
@@ -208,7 +227,7 @@ export async function updateCertificate(id: string, form: FormData): Promise<For
   await requireAdmin();
   const titles = translated(form, "title", 200);
   if (!titles.titleKu && !titles.titleAr && !titles.titleEn) {
-    return { error: "اكتب عنوان الشهادة بلغة واحدة على الأقل.", fields: fieldsOf(form) };
+    return { error: (await getAdminT()).errors.certificateTitleRequired, fields: fieldsOf(form) };
   }
   await prisma.certificate.update({
     where: { id: String(id) },

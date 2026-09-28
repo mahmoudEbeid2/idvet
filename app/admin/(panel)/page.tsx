@@ -1,51 +1,52 @@
 import Link from "next/link";
 import { getDashboard } from "@/lib/admin/data";
-import { Card, CERTS, IMAGES, PageHeader, StatusBadge, arCount } from "@/components/admin/ui";
+import { getAdminT } from "@/lib/admin/lang";
+import { Card, PageHeader, StatusBadge } from "@/components/admin/ui";
 import s from "@/components/admin/admin.module.css";
 
 export default async function DashboardPage() {
-  const { counts, recent } = await getDashboard();
+  const [{ counts, recent }, t] = await Promise.all([getDashboard(), getAdminT()]);
 
   return (
     <>
       <PageHeader
-        title="الرئيسية"
-        description="ملخص الكتالوج. كل ما تضيفه هنا يظهر مباشرة في صفحة المنتجات على الموقع."
+        title={t.dashboard.title}
+        description={t.dashboard.description}
         actions={
           <>
             <Link href="/admin/categories/new" className={`${s.btn} ${s.secondary}`}>
-              قسم جديد
+              {t.dashboard.newCategory}
             </Link>
             <Link href="/admin/products/new" className={`${s.btn} ${s.primary}`}>
-              منتج جديد
+              {t.dashboard.newProduct}
             </Link>
           </>
         }
       />
       <div className={s.stats}>
         <Link href="/admin/products" className={s.stat}>
-          <p>المنتجات</p>
+          <p>{t.dashboard.products}</p>
           <b>{counts.products}</b>
-          <small>{counts.published} منشور</small>
+          <small>{t.dashboard.publishedCount(counts.published)}</small>
         </Link>
         <Link href="/admin/categories" className={s.stat}>
-          <p>الأقسام</p>
+          <p>{t.dashboard.categories}</p>
           <b>{counts.categories}</b>
         </Link>
         <div className={s.stat}>
-          <p>الصور</p>
+          <p>{t.dashboard.images}</p>
           <b>{counts.images}</b>
         </div>
         <div className={s.stat}>
-          <p>شهادات PDF</p>
+          <p>{t.dashboard.certificates}</p>
           <b>{counts.certificates}</b>
         </div>
       </div>
       <Card
-        title="آخر المنتجات المعدّلة"
+        title={t.dashboard.recent}
         actions={
           <Link href="/admin/products" className={s.link}>
-            كل المنتجات
+            {t.dashboard.allProducts}
           </Link>
         }
       >
@@ -60,18 +61,18 @@ export default async function DashboardPage() {
                     </b>
                   </span>
                   <span className={s.rowSub}>
-                    {arCount(p.images, IMAGES)} · {arCount(p.certificates, CERTS)}
+                    {t.count.images(p.images)} · {t.count.certificates(p.certificates)}
                   </span>
-                  <StatusBadge published={p.published} />
+                  <StatusBadge published={p.published} t={t} />
                 </Link>
               </li>
             ))}
           </ul>
         ) : (
           <p className={s.empty}>
-            لا توجد منتجات بعد.{" "}
+            {t.dashboard.empty}{" "}
             <Link href="/admin/products/new" className={s.link}>
-              أضف أول منتج
+              {t.dashboard.addFirst}
             </Link>
           </p>
         )}

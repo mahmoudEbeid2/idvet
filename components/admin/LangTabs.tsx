@@ -2,6 +2,8 @@
 
 import { useId, useState } from "react";
 import { LANGS, type Lang } from "@/lib/admin/forms";
+import { adminDir } from "@/lib/admin/i18n";
+import { useAdminLang, useAdminT } from "./AdminLang";
 import s from "./admin.module.css";
 
 const LABELS: Record<Lang, string> = { Ku: "کوردی", Ar: "العربية", En: "English" };
@@ -14,35 +16,38 @@ export function langAttrs(lang: Lang) {
 /**
  * Kurdish / Arabic / English tabs. All three panels stay in the DOM (inactive
  * ones hidden) so the form always submits every language. A green dot marks
- * tabs that have any text.
+ * tabs that have any text. Opens on the dashboard's own language.
  */
 export function LangTabs({
   initialFilled,
-  defaultTab = "Ku",
   children,
 }: {
   initialFilled: Record<Lang, boolean>;
-  defaultTab?: Lang;
   children: (lang: Lang) => React.ReactNode;
 }) {
   const id = useId();
-  const [tab, setTab] = useState<Lang>(defaultTab);
+  const adminLang = useAdminLang();
+  const t = useAdminT();
+  const rtl = adminDir(adminLang) === "rtl";
+  const [tab, setTab] = useState<Lang>(adminLang === "ku" ? "Ku" : adminLang === "en" ? "En" : "Ar");
   const [filled, setFilled] = useState(initialFilled);
 
   function onKeyDown(event: React.KeyboardEvent) {
     const i = LANGS.indexOf(tab);
-    // RTL: ArrowLeft moves to the next tab.
-    const delta = event.key === "ArrowLeft" ? 1 : event.key === "ArrowRight" ? -1 : 0;
+    // The arrow pointing in the reading direction moves to the next tab.
+    const next = rtl ? "ArrowLeft" : "ArrowRight";
+    const previous = rtl ? "ArrowRight" : "ArrowLeft";
+    const delta = event.key === next ? 1 : event.key === previous ? -1 : 0;
     if (!delta) return;
     event.preventDefault();
-    const next = LANGS[(i + delta + LANGS.length) % LANGS.length];
-    setTab(next);
-    document.getElementById(`${id}-tab-${next}`)?.focus();
+    const target = LANGS[(i + delta + LANGS.length) % LANGS.length];
+    setTab(target);
+    document.getElementById(`${id}-tab-${target}`)?.focus();
   }
 
   return (
     <>
-      <div className={s.tabs} role="tablist" aria-label="اللغة" onKeyDown={onKeyDown}>
+      <div className={s.tabs} role="tablist" aria-label={t.common.languageTabs} onKeyDown={onKeyDown}>
         {LANGS.map((lang) => (
           <button
             key={lang}

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { deleteCertificate, moveCertificate, updateCertificate } from "@/app/admin/actions";
 import type { AdminCertificate } from "@/lib/admin/data";
 import { formatBytes } from "@/lib/catalog/format";
+import { withFile } from "@/lib/admin/i18n";
+import { useAdminT } from "./AdminLang";
 import { ConfirmDeleteButton } from "./ConfirmDeleteButton";
 import { EarlierIcon, LaterIcon } from "./ImageManager";
 import { upload } from "./upload";
@@ -14,24 +16,26 @@ import s from "./admin.module.css";
 const MAX_BYTES = 20 * 1024 * 1024;
 
 function CertificateFields({ certificate }: { certificate?: AdminCertificate }) {
+  const t = useAdminT();
+  const c = t.certificates;
   return (
     <>
       <div className={s.grid3}>
-        <Field label="العنوان بالكردية">
+        <Field label={c.titleKu}>
           <input name="titleKu" className={s.in} dir="rtl" lang="ckb" placeholder="بڕوانامەی شیکاری" defaultValue={certificate?.titleKu} />
         </Field>
-        <Field label="العنوان بالعربية">
+        <Field label={c.titleAr}>
           <input name="titleAr" className={s.in} dir="rtl" lang="ar" placeholder="شهادة تحليل المنتج (COA)" defaultValue={certificate?.titleAr} />
         </Field>
-        <Field label="العنوان بالإنجليزية">
+        <Field label={c.titleEn}>
           <input name="titleEn" className={`${s.in} ${s.latin}`} lang="en" placeholder="Certificate of Analysis" defaultValue={certificate?.titleEn} />
         </Field>
       </div>
       <div className={s.grid2}>
-        <Field label="الجهة المُصدِرة" hint="اختياري">
+        <Field label={c.issuer} hint={t.common.optional}>
           <input name="issuer" className={s.in} dir="auto" placeholder="SGS" defaultValue={certificate?.issuer} />
         </Field>
-        <Field label="تاريخ الإصدار" hint="اختياري، كما هو مكتوب على الشهادة">
+        <Field label={c.issuedOn} hint={c.issuedOnHint}>
           <input name="issuedOn" className={`${s.in} ${s.latin}`} placeholder="03/2026" defaultValue={certificate?.issuedOn} />
         </Field>
       </div>
@@ -41,6 +45,7 @@ function CertificateFields({ certificate }: { certificate?: AdminCertificate }) 
 
 export function CertificateManager({ productId, certificates }: { productId: string; certificates: AdminCertificate[] }) {
   const router = useRouter();
+  const t = useAdminT();
   const [items, setItems] = useState(certificates);
   const serverKey = certificates.map((c) => `${c.id}:${c.titleKu}:${c.titleAr}:${c.titleEn}:${c.issuer}:${c.issuedOn}`).join();
   const [seenKey, setSeenKey] = useState(serverKey);
@@ -96,18 +101,18 @@ export function CertificateManager({ productId, certificates }: { productId: str
     const form = event.currentTarget;
     const body = new FormData(form);
     const file = body.get("file");
-    if (!(file instanceof File) || file.size === 0) return setAddNotice({ tone: "err", text: "اختر ملف PDF." });
-    if (file.size > MAX_BYTES) return setAddNotice({ tone: "err", text: `${file.name}: الملف أكبر من 20MB.` });
+    if (!(file instanceof File) || file.size === 0) return setAddNotice({ tone: "err", text: t.errors.choosePdf });
+    if (file.size > MAX_BYTES) return setAddNotice({ tone: "err", text: withFile(file.name, t.errors.tooBig(20)) });
     if (!["titleKu", "titleAr", "titleEn"].some((name) => String(body.get(name) ?? "").trim())) {
-      return setAddNotice({ tone: "err", text: "اكتب عنوان الشهادة بلغة واحدة على الأقل." });
+      return setAddNotice({ tone: "err", text: t.errors.certificateTitleRequired });
     }
     body.set("productId", productId);
     setAddNotice(null);
     setProgress(0);
     try {
-      await upload("/api/admin/uploads/certificate", body, setProgress);
+      await upload("/api/admin/uploads/certificate", body, t, setProgress);
       form.reset();
-      setAddNotice({ tone: "ok", text: "تمت إضافة الشهادة." });
+      setAddNotice({ tone: "ok", text: t.certificates.added });
       router.refresh();
     } catch (error) {
       setAddNotice({ tone: "err", text: (error as Error).message });
@@ -117,7 +122,7 @@ export function CertificateManager({ productId, certificates }: { productId: str
   }
 
   return (
-    <Card id="certificates" title="الشهادات (PDF)" description="تظهر في صفحة المنتج، ويفتحها الزائر داخل الصفحة. PDF حتى 20MB.">
+    <Card id="certificates" title={t.certificates.title} description={t.certificates.description}>
       <div className={s.stack}>
         {items.length > 0 && (
           <ul className={s.certs}>
@@ -136,12 +141,13 @@ export function CertificateManager({ productId, certificates }: { productId: str
                             <bdi>{part}</bdi>
                           </span>
                         ))}
-                      {certificate.missing.length > 0 && ` · ترجمة ناقصة: ${certificate.missing.join("، ")}`}
+                      {certificate.missing.length > 0 &&
+                        ` · ${t.common.missing(certificate.missing.map((l) => t.common.langNames[l]).join(t.common.listSep))}`}
                     </span>
                   </span>
                   <span className={s.certTools}>
                     <a href={certificate.src} target="_blank" rel="noopener" className={s.link}>
-                      فتح
+                      {t.common.open}
                     </a>
                     <button
                       type="button"
@@ -152,9 +158,9 @@ export function CertificateManager({ productId, certificates }: { productId: str
                         setEditing(editing === certificate.id ? null : certificate.id);
                       }}
                     >
-                      تعديل
+                      {t.common.edit}
                     </button>
-                    <button type="button" className={s.iconBtn} disabled={i === 0} onClick={() => move(i, -1)} aria-label="تقديم" title="تقديم">
+                    <button type="button" className={s.iconBtn} disabled={i === 0} onClick={() => move(i, -1)} aria-label={t.common.earlier} title={t.common.earlier}>
                       <EarlierIcon />
                     </button>
                     <button
@@ -162,12 +168,12 @@ export function CertificateManager({ productId, certificates }: { productId: str
                       className={s.iconBtn}
                       disabled={i === items.length - 1}
                       onClick={() => move(i, 1)}
-                      aria-label="تأخير"
-                      title="تأخير"
+                      aria-label={t.common.later}
+                      title={t.common.later}
                     >
                       <LaterIcon />
                     </button>
-                    <ConfirmDeleteButton label="حذف" variant="del" onConfirm={() => remove(certificate.id)} />
+                    <ConfirmDeleteButton label={t.common.delete} variant="del" onConfirm={() => remove(certificate.id)} />
                   </span>
                 </div>
                 {editing === certificate.id && (
@@ -180,10 +186,10 @@ export function CertificateManager({ productId, certificates }: { productId: str
                     )}
                     <div style={{ display: "flex", gap: 8 }}>
                       <button type="submit" className={`${s.btn} ${s.primary}`} disabled={saving}>
-                        {saving ? "جارٍ الحفظ…" : "حفظ"}
+                        {saving ? t.common.saving : t.common.save}
                       </button>
                       <button type="button" className={`${s.btn} ${s.secondary}`} onClick={() => setEditing(null)}>
-                        إلغاء
+                        {t.common.cancel}
                       </button>
                     </div>
                   </form>
@@ -194,8 +200,8 @@ export function CertificateManager({ productId, certificates }: { productId: str
         )}
 
         <form method="post" className={s.addBox} onSubmit={add} noValidate>
-          <b>إضافة شهادة</b>
-          <Field label="ملف PDF" htmlFor="certificate-file">
+          <b>{t.certificates.add}</b>
+          <Field label={t.certificates.file} htmlFor="certificate-file">
             <input id="certificate-file" name="file" type="file" className={s.fileIn} accept="application/pdf,.pdf" />
           </Field>
           <CertificateFields />
@@ -211,7 +217,7 @@ export function CertificateManager({ productId, certificates }: { productId: str
           )}
           <div>
             <button className={`${s.btn} ${s.primary}`} type="submit" disabled={progress !== null}>
-              {progress !== null ? `جارٍ الرفع… ${Math.round(progress * 100)}%` : "رفع الشهادة"}
+              {progress !== null ? t.certificates.uploading(Math.round(progress * 100)) : t.certificates.upload}
             </button>
           </div>
         </form>

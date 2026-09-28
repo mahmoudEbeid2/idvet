@@ -6,6 +6,7 @@ import { KNOWN_BRAND_NAMES } from "@/lib/catalog/brands";
 import type { Lang } from "@/lib/admin/forms";
 import { LangTabs, filledLangs, langAttrs } from "./LangTabs";
 import { FormError } from "./FormError";
+import { useAdminT } from "./AdminLang";
 import { useFormAction } from "./useFormAction";
 import { Card, Field } from "./ui";
 import s from "./admin.module.css";
@@ -22,6 +23,8 @@ export function ProductForm({
   categories: { id: string; name: string }[];
 }) {
   const { state, pending, onSubmit } = useFormAction(saveProduct);
+  const t = useAdminT();
+  const f = t.productForm;
   const isNew = !product;
   const v = (name: string) => (product ? String(product[name] ?? "") : "");
 
@@ -39,12 +42,12 @@ export function ProductForm({
       {product && <input type="hidden" name="id" value={product.id} />}
       <FormError state={state} />
 
-      <Card title="المعلومات الأساسية">
+      <Card title={f.basics}>
         <div className={s.grid2}>
-          <Field label="القسم" htmlFor="categoryId">
+          <Field label={f.category} htmlFor="categoryId">
             <select id="categoryId" name="categoryId" className={s.in} defaultValue={v("categoryId")}>
               <option value="" disabled>
-                اختر القسم…
+                {f.chooseCategory}
               </option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -53,7 +56,7 @@ export function ProductForm({
               ))}
             </select>
           </Field>
-          <Field label="البراند" htmlFor="brand" hint="اكتب HiPro أو Vet Care أو Jamuh ليظهر شعار البراند تلقائياً.">
+          <Field label={f.brand} htmlFor="brand" hint={f.brandHint}>
             <input id="brand" name="brand" list="brands" className={`${s.in} ${s.latin}`} defaultValue={v("brand")} />
             <datalist id="brands">
               {KNOWN_BRAND_NAMES.map((name) => (
@@ -61,50 +64,49 @@ export function ProductForm({
               ))}
             </datalist>
           </Field>
-          <Field label="الاسم التجاري (كما على العبوة)" htmlFor="code" hint="بالأحرف اللاتينية، مثل: AMOXI-VET 50%">
+          <Field label={f.code} htmlFor="code" hint={f.codeHint}>
             <input id="code" name="code" className={`${s.in} ${s.latin}`} defaultValue={v("code")} />
           </Field>
-          <Field label="الحالة">
+          <Field label={f.status}>
             <label className={s.check}>
-              <input type="checkbox" name="published" defaultChecked={product ? product.published : true} /> منشور على
-              الموقع
+              <input type="checkbox" name="published" defaultChecked={product ? product.published : true} />{" "}
+              {f.publishedOnSite}
             </label>
           </Field>
         </div>
       </Card>
 
       <Card
-        title="النصوص"
-        description="اكتب النصوص بالكردية والعربية والإنجليزية. الحقل الفارغ في لغة ما يُعرض من لغة أخرى."
+        title={f.texts}
+        description={f.textsDescription}
       >
         <div className={`${s.stack} ${s.stackTight}`}>
           <LangTabs
             initialFilled={filledLangs(product as Record<string, string> | undefined, TEXT_FIELDS)}
-            defaultTab={isNew ? "Ku" : "Ar"}
           >
             {(lang) => (
               <>
-                <Field label="اسم المنتج" htmlFor={`name${lang}`}>
+                <Field label={f.name} htmlFor={`name${lang}`}>
                   {input("name", lang)}
                 </Field>
-                <Field label="وصف مختصر" htmlFor={`summary${lang}`} hint="يظهر تحت اسم المنتج. جملتان أو ثلاث.">
+                <Field label={f.summary} htmlFor={`summary${lang}`} hint={f.summaryHint}>
                   {input("summary", lang, 3)}
                 </Field>
                 <div className={s.grid3}>
-                  <Field label="الشكل الصيدلاني" htmlFor={`dosageForm${lang}`}>
+                  <Field label={f.dosageForm} htmlFor={`dosageForm${lang}`}>
                     {input("dosageForm", lang)}
                   </Field>
-                  <Field label="العبوات المتوفرة" htmlFor={`packaging${lang}`}>
+                  <Field label={f.packaging} htmlFor={`packaging${lang}`}>
                     {input("packaging", lang)}
                   </Field>
-                  <Field label="الحيوانات المستهدفة" htmlFor={`species${lang}`}>
+                  <Field label={f.species} htmlFor={`species${lang}`}>
                     {input("species", lang)}
                   </Field>
                 </div>
-                <Field label="عن المنتج (وصف تفصيلي)" htmlFor={`about${lang}`} hint="افصل بين الفقرات بسطر فارغ.">
+                <Field label={f.about} htmlFor={`about${lang}`} hint={f.aboutHint}>
                   {input("about", lang, 6)}
                 </Field>
-                <Field label="طريقة الاستخدام" htmlFor={`usage${lang}`} hint="كل خطوة في سطر مستقل، وتظهر كقائمة مرقّمة.">
+                <Field label={f.usage} htmlFor={`usage${lang}`} hint={f.usageHint}>
                   {input("usage", lang, 5)}
                 </Field>
               </>
@@ -113,12 +115,12 @@ export function ProductForm({
         </div>
       </Card>
 
-      <Card title="إعدادات">
+      <Card title={t.common.settings}>
         <div className={s.grid2}>
-          <Field label="الرابط (Slug)" htmlFor="slug" hint="اختياري. يُنشأ تلقائياً من الاسم الإنجليزي أو الاسم التجاري.">
+          <Field label={t.common.slug} htmlFor="slug" hint={f.slugHint}>
             <input id="slug" name="slug" className={`${s.in} ${s.latin}`} defaultValue={v("slug")} placeholder="amoxi-vet-50" />
           </Field>
-          <Field label="الترتيب" htmlFor="sortOrder" hint="الرقم الأصغر يظهر أولاً في القوائم.">
+          <Field label={t.common.order} htmlFor="sortOrder" hint={f.orderHint}>
             <input
               id="sortOrder"
               name="sortOrder"
@@ -132,10 +134,10 @@ export function ProductForm({
 
       <div className={s.formActions}>
         <button className={`${s.btn} ${s.primary}`} type="submit" disabled={pending}>
-          {pending ? "جارٍ الحفظ…" : isNew ? "حفظ ومتابعة لإضافة الصور" : "حفظ التعديلات"}
+          {pending ? t.common.saving : isNew ? f.createSubmit : t.common.saveChanges}
         </button>
         <Link href="/admin/products" className={`${s.link} ${s.linkMuted}`}>
-          رجوع
+          {t.common.back}
         </Link>
       </div>
     </form>

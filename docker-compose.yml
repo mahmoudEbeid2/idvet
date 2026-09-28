@@ -21,6 +21,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      # The app only starts once the database schema is up to date.
+      migrate:
+        condition: service_completed_successfully
     networks:
       - traefik_webgateway
       - idvet_internal
@@ -59,14 +62,16 @@ services:
     networks:
       - idvet_internal
 
-  # One-off: apply database migrations (also seeds the 4 product categories).
-  #   docker compose --profile tools run --rm migrate
+  # Applies pending database migrations (the first one also seeds the 4 product
+  # categories), then exits. Runs on every `docker compose up`, before the app
+  # starts; with nothing pending it's a no-op. Manual run:
+  #   docker compose run --rm migrate
   migrate:
     build:
       context: .
       dockerfile: Dockerfile
       target: builder
-    profiles: ["tools"]
+    restart: "no"
     command: ["npx", "prisma", "migrate", "deploy"]
     environment:
       - DATABASE_URL=${INTERNAL_DATABASE_URL:-postgresql://${POSTGRES_USER:-idvet}:${POSTGRES_PASSWORD:-idvet}@db:5432/${POSTGRES_DB:-idvet}}

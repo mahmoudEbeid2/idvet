@@ -1,20 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getCategoryOptions, listAdminProducts } from "@/lib/admin/data";
-import {
-  CERTS,
-  Card,
-  IMAGES,
-  MissingBadge,
-  Notice,
-  PRODUCTS,
-  PageHeader,
-  StatusBadge,
-  arCount,
-} from "@/components/admin/ui";
+import { getAdminT } from "@/lib/admin/lang";
+import { Card, MissingBadge, Notice, PageHeader, StatusBadge } from "@/components/admin/ui";
 import s from "@/components/admin/admin.module.css";
 
-export const metadata: Metadata = { title: "المنتجات" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getAdminT()).products.title };
+}
 
 type Search = { q?: string; category?: string; status?: string; deleted?: string };
 
@@ -25,23 +18,27 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
     category: typeof params.category === "string" ? params.category : "",
     status: typeof params.status === "string" ? params.status : "",
   };
-  const [{ products, total }, categories] = await Promise.all([listAdminProducts(filter), getCategoryOptions()]);
+  const [{ products, total }, categories, t] = await Promise.all([
+    listAdminProducts(filter),
+    getCategoryOptions(),
+    getAdminT(),
+  ]);
   const filtered = Boolean(filter.q || filter.category || filter.status);
 
   return (
     <>
       <PageHeader
-        title="المنتجات"
-        description={`${arCount(total, PRODUCTS)} في الكتالوج.`}
+        title={t.products.title}
+        description={t.products.inCatalog(t.count.products(total))}
         actions={
           <Link href="/admin/products/new" className={`${s.btn} ${s.primary}`}>
-            منتج جديد
+            {t.products.newProduct}
           </Link>
         }
       />
       {params.deleted && (
         <div style={{ marginBottom: 16 }}>
-          <Notice tone="ok">تم حذف المنتج وملفاته.</Notice>
+          <Notice tone="ok">{t.products.deleted}</Notice>
         </div>
       )}
       <form className={s.filters} method="get" role="search">
@@ -50,28 +47,28 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           name="q"
           type="search"
           defaultValue={filter.q}
-          placeholder="بحث بالاسم أو الاسم التجاري…"
-          aria-label="بحث"
+          placeholder={t.products.searchPlaceholder}
+          aria-label={t.products.search}
         />
-        <select className={s.in} name="category" defaultValue={filter.category} aria-label="القسم">
-          <option value="">كل الأقسام</option>
+        <select className={s.in} name="category" defaultValue={filter.category} aria-label={t.products.category}>
+          <option value="">{t.products.allCategories}</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
             </option>
           ))}
         </select>
-        <select className={s.in} name="status" defaultValue={filter.status} aria-label="الحالة">
-          <option value="">كل الحالات</option>
-          <option value="published">منشور</option>
-          <option value="draft">مسودة</option>
+        <select className={s.in} name="status" defaultValue={filter.status} aria-label={t.products.status}>
+          <option value="">{t.products.allStatuses}</option>
+          <option value="published">{t.common.published}</option>
+          <option value="draft">{t.common.draft}</option>
         </select>
         <button className={`${s.btn} ${s.secondary}`} type="submit">
-          تصفية
+          {t.products.filter}
         </button>
         {filtered && (
           <Link href="/admin/products" className={s.link}>
-            مسح التصفية
+            {t.products.clearFilter}
           </Link>
         )}
       </form>
@@ -86,7 +83,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={p.image} alt="" loading="lazy" />
                     ) : (
-                      "بدون صورة"
+                      t.common.noImage
                     )}
                   </span>
                   <span className={s.rowText}>
@@ -101,10 +98,10 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
                     </span>
                   </span>
                   <span className={s.badges}>
-                    <MissingBadge langs={p.missing} />
-                    <span className={`${s.badge} ${s.bGray}`}>{arCount(p.images, IMAGES)}</span>
-                    <span className={`${s.badge} ${s.bGray}`}>{arCount(p.certificates, CERTS)}</span>
-                    <StatusBadge published={p.published} />
+                    <MissingBadge langs={p.missing} t={t} />
+                    <span className={`${s.badge} ${s.bGray}`}>{t.count.images(p.images)}</span>
+                    <span className={`${s.badge} ${s.bGray}`}>{t.count.certificates(p.certificates)}</span>
+                    <StatusBadge published={p.published} t={t} />
                   </span>
                 </Link>
               </li>
@@ -112,9 +109,9 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           </ul>
         ) : (
           <p className={s.empty}>
-            {filtered ? "لا توجد منتجات مطابقة." : "لا توجد منتجات بعد."}{" "}
+            {filtered ? t.products.noMatch : t.products.empty}{" "}
             <Link href="/admin/products/new" className={s.link}>
-              أضف منتجاً
+              {t.products.addOne}
             </Link>
           </p>
         )}

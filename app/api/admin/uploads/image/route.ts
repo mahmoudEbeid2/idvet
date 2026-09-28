@@ -2,6 +2,8 @@ import sharp, { type OutputInfo } from "sharp";
 import { prisma } from "@/lib/prisma";
 import { saveUpload, uploadUrl } from "@/lib/storage";
 import { guardUpload, jsonError } from "@/lib/admin/uploadGuard";
+import { withFile } from "@/lib/admin/i18n";
+import { getAdminT } from "@/lib/admin/lang";
 
 // Image uploads (a Route Handler, not a Server Action: actions cap bodies at 1MB).
 //   target=product        → a ProductImage (≤15MB, rotated, ≤1600px, WebP)
@@ -13,17 +15,18 @@ const ACCEPTED = new Set(["jpeg", "png", "webp"]);
 export async function POST(request: Request) {
   const target = new URL(request.url).searchParams.get("target") === "category-icon" ? "category-icon" : "product";
   const limit = LIMITS[target];
-  const rejected = guardUpload(request, limit);
+  const t = await getAdminT();
+  const rejected = guardUpload(request, limit, t);
   if (rejected) return rejected;
 
   const form = await request.formData().catch(() => null);
   const file = form?.get("file");
-  if (!(file instanceof File) || file.size === 0) return jsonError("اختر ملف صورة.", 400);
-  if (file.size > limit) return jsonError(`${file.name}: الملف أكبر من ${limit / (1024 * 1024)}MB.`, 413);
+  if (!(file instanceof File) || file.size === 0) return jsonError(t.errors.chooseImage, 400);
+  if (file.size > limit) return jsonError(withFile(file.name, t.errors.tooBig(limit / (1024 * 1024))), 413);
 
   const productId = String(form?.get("productId") ?? "");
   if (target === "product" && !(await prisma.product.findUnique({ where: { id: productId }, select: { id: true } }))) {
-    return jsonError("المنتج غير موجود.", 404);
+    return jsonError(t.errors.productNotFound, 404);
   }
 
   const input = Buffer.from(await file.arrayBuffer());
@@ -38,7 +41,7 @@ export async function POST(request: Request) {
       .webp({ quality: target === "product" ? 82 : 90 })
       .toBuffer({ resolveWithObject: true });
   } catch {
-    return jsonError(`${file.name}: الملف ليس صورة صالحة. استخدم JPG أو PNG أو WEBP.`, 415);
+    return jsonError(withFile(file.name, t.errors.notImage), 415);
   }
 
   if (target === "category-icon") {

@@ -1,4 +1,5 @@
-/* Admin dashboard styles, ported from docs/design/admin-dashboard.html. Arabic RTL. */
+/* Admin dashboard styles, ported from docs/design/admin-dashboard.html. Written with logical
+   properties (start/end), so the same rules serve Kurdish/Arabic (RTL) and English (LTR). */
 
 .root {
   --brand: #0676bd;
@@ -986,4 +987,47 @@ a.row:hover {
   padding: 10px 12px;
   overflow-x: auto;
   white-space: pre;
+}
+
+/* ---------- Language switcher (components/admin/AdminLang.tsx) ---------- */
+.langSwitch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 999px;
+}
+.langSwitch button {
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: inherit;
+  opacity: 0.75;
+  cursor: pointer;
+}
+.langSwitch button:hover {
+  opacity: 1;
+}
+.langSwitch button[aria-pressed="true"] {
+  background: var(--brand);
+  color: #fff;
+  opacity: 1;
+}
+.langSwitch button:disabled {
+  cursor: progress;
+}
+.sideLang {
+  padding: 0 20px 16px;
+  color: #fff;
+}
+.loginLang {
+  display: flex;
+  justify-content: center;
+  color: var(--ink-2);
+}
+
+/* The reorder chevrons are drawn for RTL ("earlier" points right); mirror them for English. */
+:global(html[dir="ltr"]) .iconBtn svg {
+  transform: scaleX(-1);
 }

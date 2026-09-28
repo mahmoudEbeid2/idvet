@@ -1,17 +1,19 @@
 "use client";
 
 import { login } from "@/app/admin/actions";
+import { useAdminT } from "./AdminLang";
 import { useFormAction } from "./useFormAction";
 import { Field } from "./ui";
 import s from "./admin.module.css";
 
 export function LoginForm({ next }: { next: string }) {
   const { state, pending, onSubmit } = useFormAction(login);
+  const t = useAdminT();
 
   return (
     <form method="post" onSubmit={onSubmit} className={s.stack} style={{ gap: 16 }}>
       <input type="hidden" name="next" value={next} />
-      <Field label="البريد الإلكتروني" htmlFor="email">
+      <Field label={t.login.email} htmlFor="email">
         <input
           id="email"
           name="email"
@@ -22,7 +24,7 @@ export function LoginForm({ next }: { next: string }) {
           defaultValue={state.fields?.email}
         />
       </Field>
-      <Field label="كلمة المرور" htmlFor="password">
+      <Field label={t.login.password} htmlFor="password">
         <input
           id="password"
           name="password"
@@ -38,7 +40,7 @@ export function LoginForm({ next }: { next: string }) {
         </p>
       )}
       <button className={`${s.btn} ${s.primary}`} type="submit" disabled={pending} style={{ width: "100%" }}>
-        {pending ? "جارٍ الدخول…" : "دخول"}
+        {pending ? t.login.submitting : t.login.submit}
       </button>
     </form>
   );

@@ -73,11 +73,10 @@ e.g. `openssl rand -base64 48`); `/admin/login` tells you which ones are missing
 # 1. Set POSTGRES_*, DATABASE_URL, ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_SESSION_SECRET
 cp .env.production.example .env
 
-# 2. Build and start
-docker compose up -d --build db app
-
-# 3. Apply migrations (creates the catalog tables + seeds categories); re-run after each deploy
-docker compose --profile tools run --rm migrate
+# 2. Build and start. The `migrate` service runs first on every `up` (applies pending database
+#    migrations; the first run creates the tables and seeds the categories) and the app starts
+#    only after it succeeds. If it fails, `docker compose logs migrate` shows why.
+docker compose up -d --build
 ```
 
 Uploaded files live in the `idvet_uploads` volume (mounted at `/app/storage/uploads`); back it up

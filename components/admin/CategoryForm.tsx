@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { saveCategory } from "@/app/admin/actions";
 import { COLOR_SWATCHES, PRESET_ICONS, type Lang } from "@/lib/admin/forms";
+import { withFile } from "@/lib/admin/i18n";
+import { useAdminT } from "./AdminLang";
 import { LangTabs, filledLangs, langAttrs } from "./LangTabs";
 import { FormError } from "./FormError";
 import { useFormAction } from "./useFormAction";
@@ -27,6 +29,8 @@ export interface CategoryFormValues {
 
 export function CategoryForm({ category, nextSortOrder = 0 }: { category?: CategoryFormValues; nextSortOrder?: number }) {
   const { state, pending, onSubmit } = useFormAction(saveCategory);
+  const t = useAdminT();
+  const f = t.categoryForm;
   const [icon, setIcon] = useState(category?.icon ?? PRESET_ICONS[0]);
   const [color, setColor] = useState(category?.color ?? COLOR_SWATCHES[0]);
   const [iconUpload, setIconUpload] = useState<{ busy: boolean; error?: string }>({ busy: false });
@@ -48,14 +52,14 @@ export function CategoryForm({ category, nextSortOrder = 0 }: { category?: Categ
     event.currentTarget.value = "";
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
-      setIconUpload({ busy: false, error: `${file.name}: الملف أكبر من 2MB.` });
+      setIconUpload({ busy: false, error: withFile(file.name, t.errors.tooBig(2)) });
       return;
     }
     setIconUpload({ busy: true });
     const body = new FormData();
     body.set("file", file);
     try {
-      const { src } = await upload<{ src: string }>("/api/admin/uploads/image?target=category-icon", body);
+      const { src } = await upload<{ src: string }>("/api/admin/uploads/image?target=category-icon", body, t);
       setIcon(src);
       setIconUpload({ busy: false });
     } catch (error) {
@@ -71,23 +75,22 @@ export function CategoryForm({ category, nextSortOrder = 0 }: { category?: Categ
       <FormError state={state} />
 
       <Card
-        title="الاسم والوصف"
-        description="اكتب الاسم بالكردية والعربية والإنجليزية. إذا تركت لغة فارغة يظهر الاسم من لغة أخرى."
+        title={f.nameAndDescription}
+        description={f.nameAndDescriptionHint}
       >
         <div className={`${s.stack} ${s.stackTight}`}>
           <LangTabs
             initialFilled={filledLangs(category as unknown as Record<string, string>, ["name", "description"])}
-            defaultTab={isNew ? "Ku" : "Ar"}
           >
             {(lang) => (
               <>
-                <Field label="اسم القسم" htmlFor={`name${lang}`}>
+                <Field label={f.name} htmlFor={`name${lang}`}>
                   {text("name", lang)}
                 </Field>
                 <Field
-                  label="وصف قصير"
+                  label={f.description}
                   htmlFor={`description${lang}`}
-                  hint="يظهر على بطاقة القسم وفي أعلى صفحة القسم. سطر أو سطران."
+                  hint={f.descriptionHint}
                 >
                   {text("description", lang)}
                 </Field>
@@ -97,9 +100,9 @@ export function CategoryForm({ category, nextSortOrder = 0 }: { category?: Categ
         </div>
       </Card>
 
-      <Card title="الأيقونة واللون">
+      <Card title={f.iconAndColor}>
         <div className={s.grid2}>
-          <Field label="الأيقونة">
+          <Field label={f.icon}>
             <div className={s.icons}>
               {icons.map((src) => (
                 <button
@@ -116,7 +119,7 @@ export function CategoryForm({ category, nextSortOrder = 0 }: { category?: Categ
               ))}
             </div>
             <label className={`${s.link} ${s.uploadLink}`}>
-              {iconUpload.busy ? "جارٍ رفع الأيقونة…" : "أو ارفع أيقونة خاصة (PNG بخلفية شفافة، حتى 2MB)"}
+              {iconUpload.busy ? f.uploadingIcon : f.uploadIcon}
               <input type="file" hidden accept="image/png,image/jpeg,image/webp" onChange={onIconFile} disabled={iconUpload.busy} />
             </label>
             {iconUpload.error && (
@@ -125,7 +128,7 @@ export function CategoryForm({ category, nextSortOrder = 0 }: { category?: Categ
               </p>
             )}
           </Field>
-          <Field label="لون الخلفية" hint="يظهر خلف الأيقونة وخلف صور منتجات هذا القسم.">
+          <Field label={f.color} hint={f.colorHint}>
             <div className={s.swatches}>
               {COLOR_SWATCHES.map((swatch) => (
                 <button
@@ -140,7 +143,7 @@ export function CategoryForm({ category, nextSortOrder = 0 }: { category?: Categ
               <input
                 type="color"
                 value={color}
-                aria-label="لون مخصص"
+                aria-label={f.customColor}
                 onChange={(e) => setColor(e.currentTarget.value)}
               />
             </div>
@@ -148,16 +151,16 @@ export function CategoryForm({ category, nextSortOrder = 0 }: { category?: Categ
         </div>
       </Card>
 
-      <Card title="إعدادات">
+      <Card title={t.common.settings}>
         <div className={s.grid2}>
           <Field
-            label="الرابط (Slug)"
+            label={t.common.slug}
             htmlFor="slug"
-            hint="اختياري. يظهر في عنوان الصفحة: /products/الرابط. إذا تركته فارغاً يُنشأ من الاسم الإنجليزي."
+            hint={f.slugHint}
           >
             <input id="slug" name="slug" className={`${s.in} ${s.latin}`} defaultValue={v("slug")} placeholder="poultry-care" />
           </Field>
-          <Field label="الترتيب" htmlFor="sortOrder" hint="الرقم الأصغر يظهر أولاً.">
+          <Field label={t.common.order} htmlFor="sortOrder" hint={f.orderHint}>
             <input
               id="sortOrder"
               name="sortOrder"
@@ -171,10 +174,10 @@ export function CategoryForm({ category, nextSortOrder = 0 }: { category?: Categ
 
       <div className={s.formActions}>
         <button className={`${s.btn} ${s.primary}`} type="submit" disabled={pending || iconUpload.busy}>
-          {pending ? "جارٍ الحفظ…" : isNew ? "إضافة القسم" : "حفظ التعديلات"}
+          {pending ? t.common.saving : isNew ? f.createSubmit : t.common.saveChanges}
         </button>
         <Link href="/admin/categories" className={`${s.link} ${s.linkMuted}`}>
-          رجوع
+          {t.common.back}
         </Link>
       </div>
     </form>

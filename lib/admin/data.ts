@@ -2,15 +2,18 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { missingLocales, pick } from "@/lib/catalog/i18n";
 import { uploadUrl } from "@/lib/storage";
+import { getAdminLang } from "./lang";
 import { requireAdmin } from "./session";
 
 // Admin reads. Each one checks the session: layouts don't re-run on every
 // client navigation, so pages can't rely on the panel layout's check alone.
+// Names are picked in the dashboard language, falling back like the site does.
 
 const PRODUCT_TEXT = ["name", "summary", "dosageForm", "packaging", "species", "about", "usage"] as const;
 
 export async function getDashboard() {
   await requireAdmin();
+  const lang = await getAdminLang();
   const [products, published, categories, images, certificates, recent] = await Promise.all([
     prisma.product.count(),
     prisma.product.count({ where: { published: true } }),
@@ -27,8 +30,8 @@ export async function getDashboard() {
     counts: { products, published, categories, images, certificates },
     recent: recent.map((p) => ({
       id: p.id,
-      name: pick(p, "name", "ar") || p.code,
-      category: pick(p.category, "name", "ar"),
+      name: pick(p, "name", lang) || p.code,
+      category: pick(p.category, "name", lang),
       published: p.published,
       images: p._count.images,
       certificates: p._count.certificates,
@@ -38,12 +41,14 @@ export async function getDashboard() {
 
 export async function getCategoryOptions() {
   await requireAdmin();
+  const lang = await getAdminLang();
   const rows = await prisma.category.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] });
-  return rows.map((c) => ({ id: c.id, name: pick(c, "name", "ar") }));
+  return rows.map((c) => ({ id: c.id, name: pick(c, "name", lang) }));
 }
 
 export async function listAdminCategories() {
   await requireAdmin();
+  const lang = await getAdminLang();
   const rows = await prisma.category.findMany({
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     include: { _count: { select: { products: true } } },
@@ -51,9 +56,9 @@ export async function listAdminCategories() {
   return rows.map((c) => ({
     id: c.id,
     slug: c.slug,
-    nameAr: pick(c, "name", "ar"),
-    nameKu: c.nameKu,
-    nameEn: c.nameEn,
+    name: pick(c, "name", lang),
+    /** The category's names in the other languages, for the row's second line. */
+    otherNames: [c.nameKu, c.nameAr, c.nameEn].filter((n) => n.trim() && n !== pick(c, "name", lang)),
     icon: c.icon,
     color: c.color,
     sortOrder: c.sortOrder,
@@ -71,6 +76,7 @@ export type ProductFilter = { q?: string; category?: string; status?: string };
 
 export async function listAdminProducts(filter: ProductFilter) {
   await requireAdmin();
+  const lang = await getAdminLang();
   const q = filter.q?.trim().slice(0, 100);
   const where: Prisma.ProductWhereInput = {
     ...(filter.category ? { categoryId: filter.category } : {}),
@@ -103,10 +109,10 @@ export async function listAdminProducts(filter: ProductFilter) {
       for (const c of p.certificates) for (const l of missingLocales(c, ["title"])) missing.add(l);
       return {
         id: p.id,
-        name: pick(p, "name", "ar") || p.code,
+        name: pick(p, "name", lang) || p.code,
         code: p.code,
         brand: p.brand,
-        category: pick(p.category, "name", "ar"),
+        category: pick(p.category, "name", lang),
         color: p.category.color,
         image: p.images[0] ? uploadUrl(p.images[0].path) : null,
         images: p._count.images,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { useAdminT } from "./AdminLang";
 import s from "./admin.module.css";
 
 /**
@@ -23,6 +24,7 @@ export function ConfirmDeleteButton({
 }) {
   const [armedAt, setArmedAt] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
+  const t = useAdminT();
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const className = variant === "btn" ? `${s.btn} ${s.danger}` : s.del;
 
@@ -62,7 +64,7 @@ export function ConfirmDeleteButton({
         });
       }}
     >
-      {pending ? "جارٍ الحذف…" : variant === "del" ? "اضغط للتأكيد" : "اضغط مرة أخرى للتأكيد"}
+      {pending ? t.common.deleting : variant === "del" ? t.common.confirmShort : t.common.confirmLong}
     </button>
   );
 }
