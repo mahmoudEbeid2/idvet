@@ -9,7 +9,9 @@ import { Gallery } from "./Gallery";
 import { Contact } from "./Contact";
 import { Footer } from "./Footer";
 
-export const CANVAS_HEIGHT = 6058;
+import { CANVAS_HEIGHT } from "./canvasSize";
+
+export { CANVAS_HEIGHT };
 
 export function Canvas({ site }: { site: SiteContent }) {
   const isEnglish = site.locale === "en";

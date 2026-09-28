@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+
+const noopSubscribe = () => () => {};
 
 interface GalleryLightboxProps {
   images: string[];
@@ -19,10 +21,10 @@ export function GalleryLightbox({
   locale,
 }: GalleryLightboxProps) {
   const isRTL = locale !== "en";
-  const [mounted, setMounted] = useState(false);
+  // true on the client, false during SSR: the portal needs document.body.
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isLoading, setIsLoading] = useState(true);
-  const [direction, setDirection] = useState<"next" | "prev" | null>(null);
 
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -33,7 +35,6 @@ export function GalleryLightbox({
   const total = images.length;
 
   useEffect(() => {
-    setMounted(true);
     lastActiveElementRef.current = document.activeElement as HTMLElement | null;
 
     // Lock body scroll and preserve scroll position
@@ -47,13 +48,11 @@ export function GalleryLightbox({
   }, []);
 
   const goToNext = useCallback(() => {
-    setDirection("next");
     setIsLoading(true);
     setCurrentIndex((prev) => (prev + 1) % total);
   }, [total]);
 
   const goToPrev = useCallback(() => {
-    setDirection("prev");
     setIsLoading(true);
     setCurrentIndex((prev) => (prev - 1 + total) % total);
   }, [total]);

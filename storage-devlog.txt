@@ -1,0 +1,92 @@
+
+> idvet@0.1.0 dev
+> next dev -p 3009
+
+▲ Next.js 16.3.5 (Turbopack)
+- Local:         http://localhost:3009
+- Network:       http://192.168.0.96:3009
+- Environments: .env
+✓ Ready in 823ms
+✓ Running next.config.ts took 52ms
+
+ GET /admin/login?next=%2Fadmin 200 in 334ms (next.js: 130ms, proxy.ts: 5ms, application-code: 200ms)
+ GET /admin/login 200 in 56ms (next.js: 6ms, proxy.ts: 5ms, application-code: 46ms)
+ POST /admin/login 200 in 145ms (next.js: 13ms, proxy.ts: 8ms, application-code: 125ms)
+  └─ ƒ login({}, {}) in 4ms app/admin/actions.ts
+ GET /admin 200 in 302ms (next.js: 39ms, proxy.ts: 4ms, application-code: 260ms)
+ POST /admin/login 200 in 352ms (next.js: 6ms, proxy.ts: 5ms, application-code: 341ms)
+  └─ ƒ login({"error":"البريد الإلكتروني أو كلمة المرور غير صحيحة.","fields":{"email":"admin@idvet.co"}}, {}) in 19ms app/admin/actions.ts
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /admin/categories 200 in 214ms (next.js: 38ms, proxy.ts: 5ms, application-code: 171ms)
+ GET /admin/categories/new 200 in 109ms (next.js: 31ms, proxy.ts: 6ms, application-code: 71ms)
+ GET /admin 200 in 85ms (next.js: 7ms, proxy.ts: 5ms, application-code: 73ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /ku 200 in 859ms (next.js: 55ms, generate-params: 665ms, application-code: 140ms)
+[browser] Image with src "/assets/hero-img.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <ScrollAndMaybeFocusHandler cacheNode={{rsc:{...}, ...}}>
+      <InnerScrollHandlerNew focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+        <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+          <LoadingBoundary name="/" loading={null}>
+            <HTTPAccessFallbackBoundary notFound={{...}} forbidden={undefined} unauthorized={undefined}>
+              <HTTPAccessFallbackErrorBoundary pathname="/ku" notFound={{...}} forbidden={undefined} ...>
+                <RedirectBoundary>
+                  <RedirectErrorBoundary router={{...}}>
+                    <InnerLayoutRouter url="/ku" tree={[...]} params={{locale:"ku"}} cacheNode={{rsc:{...}, ...}} ...>
+                      <SegmentViewNode type="layout" pagePath="[locale]/l...">
+                        <SegmentTrieNode>
+                        <link>
+                        <LocaleLayout>
+                          <html lang="ckb" dir="rtl">
+                            <body
+                              className="ibm_plex_sans_arabic_abe45358-module__QZKqra__variable roboto_25cd4eb2-module..."
+-                             cz-shortcut-listen="true"
+                            >
+                    ...
+        ...
+ 
+ GET /admin/categories/new 200 in 71ms (next.js: 6ms, proxy.ts: 5ms, application-code: 59ms)
+ GET /admin/categories?created=1 200 in 66ms (next.js: 6ms, proxy.ts: 4ms, application-code: 56ms)
+ POST /admin/categories/new 200 in 141ms (next.js: 7ms, proxy.ts: 6ms, application-code: 128ms)
+  └─ ƒ saveCategory({}, {}) in 34ms app/admin/actions.ts
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /admin/categories/cmuk3dqzf0000youdsvy99q3w 200 in 825ms (next.js: 728ms, proxy.ts: 4ms, application-code: 94ms)
+ POST /api/admin/uploads/image?target=category-icon 201 in 277ms (next.js: 84ms, application-code: 192ms)
+ GET /uploads/categories/86b38a15-47bd-40bb-8b7a-dd65d4cf0383.webp 200 in 846ms (next.js: 825ms, application-code: 21ms)
+ GET /admin/categories/cmuk3dqzf0000youdsvy99q3w?saved=1 200 in 60ms (next.js: 9ms, proxy.ts: 3ms, application-code: 47ms)
+ POST /admin/categories/cmuk3dqzf0000youdsvy99q3w 200 in 135ms (next.js: 18ms, proxy.ts: 5ms, application-code: 112ms)
+  └─ ƒ saveCategory({}, {}) in 30ms app/admin/actions.ts
+ GET /admin/categories?deleted=1 200 in 96ms (next.js: 10ms, proxy.ts: 4ms, application-code: 82ms)
+ POST /admin/categories/cmuk3dqzf0000youdsvy99q3w?saved=1 200 in 187ms (next.js: 19ms, proxy.ts: 5ms, application-code: 163ms)
+  └─ ƒ deleteCategory("cmuk3dqzf0000youdsvy99q3w") in 47ms app/admin/actions.ts
+ GET /admin/products/new 200 in 151ms (next.js: 47ms, proxy.ts: 4ms, application-code: 100ms)
+ POST /admin/products/new 200 in 52ms (next.js: 9ms, proxy.ts: 6ms, application-code: 37ms)
+  └─ ƒ saveProduct({}, {}) in 22ms app/admin/actions.ts
+✓ Compiled in 219ms
+ GET /ku 200 in 112ms (next.js: 21ms, generate-params: 15ms, application-code: 75ms)
+ GET /admin/products/new 200 in 206ms (next.js: 21ms, proxy.ts: 5ms, application-code: 180ms)
+ POST /admin/products/new 200 in 88ms (next.js: 13ms, proxy.ts: 9ms, application-code: 66ms)
+  └─ ƒ saveProduct({"error":"اكتب اسم المنتج بلغة واحدة على الأقل.","fields":{"aboutAr":"","aboutEn":"","aboutKu":"","...":"24 items not stringified"}}, {}) in 48ms app/admin/actions.ts
+ GET /admin/products/cmuk3gxk10001youdyzty1dlz?created=1 200 in 1065ms (next.js: 922ms, proxy.ts: 5ms, application-code: 139ms)
+ POST /admin/products/new 200 in 1135ms (next.js: 10ms, proxy.ts: 6ms, application-code: 1120ms)
+  └─ ƒ saveProduct({"error":"اكتب اسم المنتج بلغة واحدة على الأقل.","fields":{"aboutAr":"","aboutEn":"","aboutKu":"","...":"24 items not stringified"}}, {}) in 31ms app/admin/actions.ts
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ POST /api/admin/uploads/image?target=product 201 in 233ms (next.js: 9ms, application-code: 224ms)
+ POST /api/admin/uploads/image?target=product 415 in 27ms (next.js: 6ms, application-code: 20ms)
+ GET /uploads/products/cmuk3gxk10001youdyzty1dlz/a89df2c8-3364-449e-b3bd-dfbf938ba0ab.webp 200 in 58ms (next.js: 16ms, application-code: 42ms)
+ POST /api/admin/uploads/image?target=product 201 in 177ms (next.js: 4ms, application-code: 173ms)
+ GET /uploads/products/cmuk3gxk10001youdyzty1dlz/a1a101f9-7de1-4544-9d7c-676b834e3b7e.webp 200 in 25ms (next.js: 10ms, application-code: 15ms)
+ GET /admin/products/cmuk3gxk10001youdyzty1dlz?created=1 200 in 175ms (next.js: 25ms, proxy.ts: 7ms, application-code: 144ms)

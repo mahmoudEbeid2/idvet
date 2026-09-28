@@ -4,19 +4,15 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { SiteContent } from "@/lib/content";
 import { ContactTriggerButton } from "./ContactTriggerButton";
-import { scrollToSection, scrollToTop } from "@/lib/scrollToSection";
-import { useActiveSection } from "@/lib/useActiveSection";
+import { scrollToSection } from "@/lib/scrollToSection";
 import { GalleryLightbox } from "./GalleryLightbox";
-import { LanguageSwitcher } from "./LanguageSwitcher";
+import { MobileContactFooter } from "./MobileContactFooter";
+import { MobileHeader } from "./MobileHeader";
 
 const GALLERY_IMAGES = Array.from({ length: 10 }, (_, i) => `gallery-${i + 1}.png`);
 
-const MOBILE_NAV_IDS = ["about", "services", "brands", "contact"] as const;
-
 export function MobileSite({ site }: { site: SiteContent }) {
-  const [navOpen, setNavOpen] = useState(false);
   const [galleryLightboxIndex, setGalleryLightboxIndex] = useState<number | null>(null);
-  const active = useActiveSection(MOBILE_NAV_IDS, "about");
   const isEnglish = site.locale === "en";
   const smAlign = isEnglish ? "sm:text-left" : "sm:text-right";
 
@@ -30,69 +26,9 @@ export function MobileSite({ site }: { site: SiteContent }) {
     }
   }, []);
 
-  function handleNavClick(id: string) {
-    setNavOpen(false);
-    scrollToSection(id, { fallbackHref: `/${site.locale}` });
-  }
-
-  const mobileLabels: Record<(typeof MOBILE_NAV_IDS)[number], string> = {
-    about: site.nav.about,
-    services: site.nav.services,
-    brands: site.nav.brands,
-    contact: site.nav.contact,
-  };
-
   return (
     <div className="lg:hidden">
-      {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-black/5 bg-white shadow-xs">
-        <div className="flex items-center justify-between px-5 pt-5 pb-4">
-          <button
-            type="button"
-            onClick={() => {
-              setNavOpen(false);
-              scrollToTop();
-            }}
-            aria-label="Scroll to top"
-            className="cursor-pointer bg-transparent p-0"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/idvet-logo.svg" alt="IDVET" className="h-12 w-auto" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setNavOpen((v) => !v)}
-            aria-label="menu"
-            className="flex h-10 w-10 flex-col items-center justify-center gap-1.5"
-          >
-            <span className="block h-0.5 w-6 bg-[#0676bd]" />
-            <span className="block h-0.5 w-6 bg-[#0676bd]" />
-            <span className="block h-0.5 w-6 bg-[#0676bd]" />
-          </button>
-        </div>
-        {navOpen && (
-          <nav className="flex flex-col items-center gap-3 border-t border-black/5 px-4 py-4 text-center text-[#0676bd]">
-            {MOBILE_NAV_IDS.map((id) => (
-              <a
-                key={id}
-                href={`#${id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick(id);
-                }}
-                className={active === id ? "font-bold" : "font-normal"}
-              >
-                {mobileLabels[id]}
-              </a>
-            ))}
-            <LanguageSwitcher
-              current={site.locale}
-              options={site.languages}
-              className="mt-1 w-fit cursor-pointer appearance-none rounded-full border border-[#0676bd] bg-white px-4 py-2 text-center font-roboto text-sm font-bold text-[#0676bd] focus:outline-none"
-            />
-          </nav>
-        )}
-      </header>
+      <MobileHeader site={site} />
 
       {/* Hero */}
       <section className="relative h-[320px] w-full sm:h-[420px]">
@@ -330,61 +266,7 @@ export function MobileSite({ site }: { site: SiteContent }) {
         )}
       </section>
 
-      {/* Contact */}
-      <section
-        id="contact-m"
-        className="scroll-mt-[73px] bg-[#006eb3] px-4 py-12 text-white"
-      >
-        <p className="mb-3 text-center text-2xl font-medium">{site.contact.heading}</p>
-        <p className="mb-6 text-center text-sm leading-relaxed text-white/90">
-          {site.contact.body}
-        </p>
-        <div className="mb-8 flex justify-center">
-          <ContactTriggerButton className="rounded-full bg-white px-6 py-3 text-sm font-bold text-[#006eb3]">
-            {site.contact.cta}
-          </ContactTriggerButton>
-        </div>
-        <div
-          className={`flex flex-col items-center gap-4 text-center ${
-            isEnglish ? "sm:items-start sm:text-left" : "sm:items-end sm:text-right"
-          }`}
-          dir="ltr"
-        >
-          <div>
-            <p className="font-bold">{site.contact.emailLabel}</p>
-            <a
-              href={`mailto:${site.contact.email}`}
-              className="text-sm underline-offset-4 hover:underline"
-            >
-              {site.contact.email}
-            </a>
-          </div>
-          <div>
-            <p className="font-bold">{site.contact.phoneLabel}</p>
-            <a
-              href={`https://wa.me/${site.contact.phone.replace(/[^0-9]/g, "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm underline-offset-4 hover:underline"
-            >
-              {site.contact.phone}
-            </a>
-          </div>
-          <div>
-            <p className="font-bold">{site.contact.addressLabel}</p>
-            {site.contact.addressLines.map((line) => (
-              <p key={line} className="text-sm">
-                {line}
-              </p>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-[#006eb3] px-4 py-6 text-center text-sm font-light text-white">
-        {site.footer.copyright}
-      </footer>
+      <MobileContactFooter site={site} />
     </div>
   );
 }

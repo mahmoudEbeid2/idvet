@@ -7,7 +7,7 @@ const contactSchema = z.object({
   email: z.string().trim().email().max(200),
   phone: z.string().trim().max(50).optional().or(z.literal("")),
   message: z.string().trim().min(10).max(2000),
-  locale: z.enum(["ku", "ar"]),
+  locale: z.enum(["ku", "ar", "en"]),
 });
 
 export async function POST(request: Request) {

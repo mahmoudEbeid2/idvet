@@ -42,20 +42,63 @@ Docker Compose + Prisma) for the contact form.
    npm run dev
    ```
 
-   Visit [http://localhost:3000](http://localhost:3000) — it redirects to `/ku`.
+   Visit [http://localhost:3009](http://localhost:3009) — it redirects to `/ku`.
 
-Environment variables live in `.env` (already set up for the local Docker Postgres instance;
-see `.env.example` for the shape).
+Environment variables live in `.env` (see `.env.example`). Besides `DATABASE_URL`, the admin
+dashboard needs `ADMIN_EMAIL`, `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` (32+ characters,
+e.g. `openssl rand -base64 48`); `/admin/login` tells you which ones are missing.
+
+## Product catalog + admin dashboard
+
+- **Public pages** (`/{ku,ar,en}/products`, `/…/products/[category]`, `/…/products/[category]/[product]`)
+  render at request time from the database (`lib/catalog/data.ts` calls `connection()`), so the
+  build never needs a database. Unpublished products 404; a product URL with the wrong category
+  redirects to the right one. Empty translations fall back to ar → ku → en.
+- **Admin** (`/admin`, Arabic RTL, `noindex`) manages categories, products, product images and
+  certificate PDFs. Login is `ADMIN_EMAIL` / `ADMIN_PASSWORD`; the session is an HMAC-signed
+  httpOnly cookie (7 days), login attempts are rate-limited. `proxy.ts` guards `/admin/*`, and every
+  admin page, Server Action and upload route checks the session again.
+- **Uploads** go through route handlers (`/api/admin/uploads/image|certificate`, outside the proxy
+  matcher so large bodies aren't truncated). Images are rotated, resized to ≤1600px and stored as
+  WebP (max 15MB); PDFs are checked for the `%PDF-` header (max 20MB). Files are written to
+  `UPLOAD_DIR` (default `./storage/uploads`, git-ignored) and served by `app/uploads/[...path]/route.ts`
+  with immutable caching.
+- **Schema:** `Category`, `Product`, `ProductImage`, `Certificate` in `prisma/schema.prisma`. The
+  `…_catalog` migration also seeds the 4 categories (names, icons, colors; descriptions are left empty
+  to be written from `/admin`).
+
+## Deployment (Docker Compose)
+
+```bash
+# 1. Set POSTGRES_*, DATABASE_URL, ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_SESSION_SECRET
+cp .env.production.example .env
+
+# 2. Build and start
+docker compose up -d --build db app
+
+# 3. Apply migrations (creates the catalog tables + seeds categories); re-run after each deploy
+docker compose --profile tools run --rm migrate
+```
+
+Uploaded files live in the `idvet_uploads` volume (mounted at `/app/storage/uploads`); back it up
+together with the database. `.env` is excluded from the image (`.dockerignore`), so secrets only
+ever come from the container environment.
 
 ## Project structure
 
-- `app/[locale]/` — the two locale routes (`ku`, `ar`), sharing one root layout
+- `app/[locale]/` — the locale routes (`ku`, `ar`, `en`), sharing one root layout; `products/` holds
+  the catalog pages
+- `app/admin/` — the admin dashboard (its own root layout) and its Server Actions (`actions.ts`)
+- `app/api/admin/uploads/` — image and certificate upload route handlers; `app/uploads/` serves files
+- `components/site/products/` — catalog UI; `components/admin/` — dashboard UI
+- `lib/catalog/` — public data layer, translation fallback, brand logos/countries, formatting
+- `lib/admin/` — session/token, rate limiting, form helpers, admin queries; `lib/storage.ts` — uploads
 - `components/site/` — the page sections (Header, Hero, About, Services, Brands, WhyUs,
   Gallery, Contact, Footer) plus `FigmaCanvas` (the responsive scaling wrapper) and the
   contact modal
 - `lib/content/` — typed per-locale copy (`ku.ts`, `ar.ts`) consumed by every section component
 - `app/api/contact/route.ts` — validates (Zod) and persists contact form submissions
-- `prisma/schema.prisma` — `ContactSubmission` model
+- `prisma/schema.prisma` — `ContactSubmission`, `Category`, `Product`, `ProductImage`, `Certificate`
 - `public/assets/` — images/icons exported from Figma
 
 ## Design fidelity notes

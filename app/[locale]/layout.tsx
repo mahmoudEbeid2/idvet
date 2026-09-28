@@ -1,20 +1,7 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans_Arabic, Roboto } from "next/font/google";
-import { notFound } from "next/navigation";
+import { ibmPlexSansArabic, roboto } from "@/lib/fonts";
 import { isLocale, locales, content } from "@/lib/content";
 import "../globals.css";
-
-const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
-  variable: "--font-ibm-plex-sans-arabic",
-  subsets: ["arabic", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const roboto = Roboto({
-  variable: "--font-roboto",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -29,6 +16,9 @@ export async function generateMetadata({
   if (!isLocale(locale)) return {};
   const site = content[locale];
   return {
+    // Resolves relative Open Graph image URLs (product pages). NEXT_PUBLIC_* is
+    // inlined at build time and the Docker build doesn't pass it, hence the fallback.
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://idvet.co"),
     title: `IDVET — ${site.hero.eyebrow}`,
     description: site.hero.paragraph,
     icons: {
@@ -49,13 +39,15 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  if (!isLocale(locale)) notFound();
-  const site = content[locale];
+  // An unknown locale (/fr/…) still renders this layout with the default
+  // locale: every page under it calls notFound(), and not-found.tsx can only
+  // show the site header if the layout itself doesn't throw.
+  const site = content[isLocale(locale) ? locale : "ku"];
 
   const isEnglish = site.locale === "en";
 
   return (
-    <html lang={site.htmlLang} dir={isEnglish ? "ltr" : "rtl"}>
+    <html lang={site.htmlLang} dir={isEnglish ? "ltr" : "rtl"} data-scroll-behavior="smooth">
       <body
         className={`${ibmPlexSansArabic.variable} ${roboto.variable} antialiased`}
         style={isEnglish ? { fontFamily: "var(--font-roboto), sans-serif" } : undefined}

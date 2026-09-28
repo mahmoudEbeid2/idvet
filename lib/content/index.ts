@@ -33,5 +33,6 @@ export type {
   BrandCard,
   ServiceItem,
   WhyUsItem,
+  PluralForms,
   LanguageOption,
 } from "./types";

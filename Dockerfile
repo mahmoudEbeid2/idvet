@@ -18,7 +18,9 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-RUN npx prisma generate
+# prisma.config.ts requires DATABASE_URL to be set; generate never connects,
+# so a placeholder is enough (.env is not part of the build context).
+RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" npx prisma generate
 RUN npm run build
 
 # Stage 3: Runner
@@ -29,9 +31,12 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3009
 ENV HOSTNAME="0.0.0.0"
+# Uploaded product images, category icons and certificate PDFs (mount a volume here)
+ENV UPLOAD_DIR=/app/storage/uploads
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+RUN mkdir -p /app/storage/uploads && chown -R nextjs:nodejs /app/storage
 
 # Copy static assets and standalone server
 COPY --from=builder /app/public ./public

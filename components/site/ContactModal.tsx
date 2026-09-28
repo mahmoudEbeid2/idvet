@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { Locale, SiteContent } from "@/lib/content";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -17,6 +17,16 @@ export function ContactModal({
   onClose: () => void;
 }) {
   const [status, setStatus] = useState<Status>("idle");
+  const titleId = useId();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -53,10 +63,13 @@ export function ContactModal({
           locale === "en" ? "text-left" : "text-right"
         }`}
         dir={locale === "en" ? "ltr" : "rtl"}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-[#006eb3]">{form.title}</h2>
+          <h2 id={titleId} className="text-xl font-bold text-[#006eb3]">{form.title}</h2>
           <button
             type="button"
             onClick={onClose}

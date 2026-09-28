@@ -15,3 +15,103 @@ model ContactSubmission {
   locale    String
   createdAt DateTime @default(now())
 }
+
+// Visitor-facing text is stored once per language (Ku/Ar/En). An empty
+// translation falls back to ar → ku → en at read time (lib/catalog/i18n.ts).
+
+model Category {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  nameKu        String    @default("")
+  nameAr        String    @default("")
+  nameEn        String    @default("")
+  descriptionKu String    @default("")
+  descriptionAr String    @default("")
+  descriptionEn String    @default("")
+  /// Preset "/assets/products/icon-*.svg" or an uploaded "/uploads/categories/*.png".
+  icon          String
+  /// Tint behind the icon and behind this category's product images.
+  color         String
+  sortOrder     Int       @default(0)
+  products      Product[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([sortOrder])
+}
+
+model Product {
+  id           String         @id @default(cuid())
+  slug         String         @unique
+  categoryId   String
+  category     Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  brand        String         @default("")
+  /// Trade name as printed on the pack, e.g. "AMOXI-VET 50%".
+  code         String         @default("")
+  nameKu       String         @default("")
+  nameAr       String         @default("")
+  nameEn       String         @default("")
+  summaryKu    String         @default("")
+  summaryAr    String         @default("")
+  summaryEn    String         @default("")
+  dosageFormKu String         @default("")
+  dosageFormAr String         @default("")
+  dosageFormEn String         @default("")
+  packagingKu  String         @default("")
+  packagingAr  String         @default("")
+  packagingEn  String         @default("")
+  speciesKu    String         @default("")
+  speciesAr    String         @default("")
+  speciesEn    String         @default("")
+  /// Paragraphs separated by a blank line.
+  aboutKu      String         @default("")
+  aboutAr      String         @default("")
+  aboutEn      String         @default("")
+  /// One usage step per line.
+  usageKu      String         @default("")
+  usageAr      String         @default("")
+  usageEn      String         @default("")
+  published    Boolean        @default(false)
+  sortOrder    Int            @default(0)
+  images       ProductImage[]
+  certificates Certificate[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([categoryId, published, sortOrder])
+  @@index([published, sortOrder])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  /// Relative to UPLOAD_DIR, served at /uploads/<path>.
+  path      String
+  width     Int
+  height    Int
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([productId, sortOrder])
+}
+
+model Certificate {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  titleKu   String   @default("")
+  titleAr   String   @default("")
+  titleEn   String   @default("")
+  issuer    String   @default("")
+  /// Free text, as written on the certificate (e.g. "03/2026").
+  issuedOn  String   @default("")
+  /// Relative to UPLOAD_DIR, served at /uploads/<path>.
+  path      String
+  /// Bytes.
+  size      Int
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([productId, sortOrder])
+}

@@ -111,7 +111,11 @@ export function Hero({ site }: { site: SiteContent }) {
   const wordCount = wordTokens.filter((t) => !/^\s+$/.test(t)).length;
   const wordRevealWindow = 0.6; // seconds, total spread across all words
   const perWordDelay = wordCount > 0 ? wordRevealWindow / wordCount : 0;
+  // Delay per token (whitespace tokens get none), computed up front so render stays pure.
   let wordIndex = 0;
+  const wordDelays = wordTokens.map((token) =>
+    /^\s+$/.test(token) ? 0 : 0.25 + wordIndex++ * perWordDelay,
+  );
 
   return (
     <>
@@ -200,10 +204,8 @@ export function Hero({ site }: { site: SiteContent }) {
         <p className={`absolute left-[1252px] top-[367px] w-[482px] -translate-x-full text-start text-[36px] font-bold leading-[46px] text-white ${mirror}`}>
           {wordTokens.map((token, i) => {
             if (/^\s+$/.test(token)) return <span key={i}>{token}</span>;
-            const delay = 0.25 + wordIndex * perWordDelay;
-            wordIndex += 1;
             return (
-              <span key={i} className="hero-word" style={{ animationDelay: `${delay}s` }}>
+              <span key={i} className="hero-word" style={{ animationDelay: `${wordDelays[i]}s` }}>
                 {token}
               </span>
             );

@@ -9,6 +9,13 @@ services:
       - PORT=3009
       - DATABASE_URL=${INTERNAL_DATABASE_URL:-postgresql://${POSTGRES_USER:-idvet}:${POSTGRES_PASSWORD:-idvet}@db:5432/${POSTGRES_DB:-idvet}}
       - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://idvet.co}
+      # Admin dashboard (/admin). The login page lists whichever of these is missing.
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      - ADMIN_SESSION_SECRET=${ADMIN_SESSION_SECRET:-}
+      - UPLOAD_DIR=/app/storage/uploads
+    volumes:
+      - idvet_uploads:/app/storage/uploads
     ports:
       - "3009:3009"
     depends_on:
@@ -52,6 +59,23 @@ services:
     networks:
       - idvet_internal
 
+  # One-off: apply database migrations (also seeds the 4 product categories).
+  #   docker compose --profile tools run --rm migrate
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    profiles: ["tools"]
+    command: ["npx", "prisma", "migrate", "deploy"]
+    environment:
+      - DATABASE_URL=${INTERNAL_DATABASE_URL:-postgresql://${POSTGRES_USER:-idvet}:${POSTGRES_PASSWORD:-idvet}@db:5432/${POSTGRES_DB:-idvet}}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - idvet_internal
+
   adminer:
     image: adminer:latest
     restart: unless-stopped
@@ -64,6 +88,7 @@ services:
 
 volumes:
   idvet_db_data:
+  idvet_uploads:
 
 networks:
   traefik_webgateway:
