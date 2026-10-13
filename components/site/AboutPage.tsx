@@ -6,9 +6,11 @@ import { ContactTriggerButton } from "./ContactTriggerButton";
 // Unlike the home page it is real responsive layout, not the scaled 1440px
 // canvas: from lg it matches the design's measurements (content 1065px wide,
 // like every home section), below lg the sections stack. Logical start/end
-// classes mirror it for English the way the home canvas is mirrored.
+// classes mirror it for English the way the home canvas is mirrored. Below
+// 720px everything (text, images, icons, buttons) is centered.
 
 const container = "mx-auto w-full max-w-[1097px] px-4";
+const centerSmall = "max-[719px]:text-center";
 
 function Paragraphs({ block, className }: { block: AboutBlock; className: string }) {
   return (
@@ -40,7 +42,7 @@ export function AboutPage({ site }: { site: SiteContent }) {
           />
         </div>
         <div className={`${container} relative py-10 lg:flex lg:h-[811px] lg:flex-col lg:justify-center lg:py-0`}>
-          <div className="lg:max-w-[443px]">
+          <div className={`lg:max-w-[443px] ${centerSmall}`}>
             <p className="text-sm font-bold sm:text-base lg:leading-[44px]">{site.hero.eyebrow}</p>
             <h1 className="mt-3 text-[30px] font-bold leading-[1.4] sm:text-[40px] lg:mt-[65px] lg:text-[48px] lg:leading-[74px]">
               {t.hero.heading}
@@ -48,7 +50,7 @@ export function AboutPage({ site }: { site: SiteContent }) {
             <p className="mt-4 text-base leading-[28px] text-white/90 lg:mt-[21px] lg:min-h-[112px] lg:max-w-[435px] lg:text-[20px] lg:text-white">
               {t.hero.body}
             </p>
-            <div className="mt-8 flex flex-wrap gap-[15px] lg:mt-[69px]">
+            <div className="mt-8 flex flex-wrap gap-[15px] max-[719px]:justify-center lg:mt-[69px]">
               <a
                 href={`/${site.locale}#brands`}
                 className="inline-flex h-[44px] min-w-[165px] items-center justify-center gap-2 bg-[#0676bd] px-3 text-[13px] font-bold transition-colors hover:bg-[#0568a8]"
@@ -72,7 +74,7 @@ export function AboutPage({ site }: { site: SiteContent }) {
       {/* Who we are — the hand is clipped by the section's bottom edge. */}
       <section className="relative overflow-hidden bg-[#f0efef]">
         <div className={`${container} relative py-10 lg:min-h-[292px] lg:pt-[39px] lg:pb-8`}>
-          <div className="relative z-10 xl:max-w-[705px]">
+          <div className={`relative z-10 xl:max-w-[705px] ${centerSmall}`}>
             <h2 className="text-[28px] font-medium leading-[36px] text-[#0075be] lg:text-[36px]">
               {t.whoWeAre.title}
             </h2>
@@ -101,7 +103,7 @@ export function AboutPage({ site }: { site: SiteContent }) {
               className="object-cover"
             />
           </div>
-          <div className="w-full lg:max-w-[705px] lg:pt-[67px] lg:pb-[74px]">
+          <div className={`w-full lg:max-w-[705px] lg:pt-[67px] lg:pb-[74px] ${centerSmall}`}>
             <h2 className="text-[28px] font-medium leading-[36px] lg:text-[36px]">{t.story.title}</h2>
             <Paragraphs block={t.story} className="mt-4 text-base leading-[28px] lg:mt-[19px] lg:text-[20px]" />
           </div>
@@ -114,8 +116,8 @@ export function AboutPage({ site }: { site: SiteContent }) {
           { block: t.mission, icon: "/assets/about/mission-icon.png" },
           { block: t.vision, icon: "/assets/about/vision-icon.png" },
         ].map(({ block, icon }) => (
-          <div key={icon}>
-            <div className="relative size-[96px] lg:size-[126px]">
+          <div key={icon} className={centerSmall}>
+            <div className="relative size-[96px] max-[719px]:mx-auto lg:size-[126px]">
               <Image src={icon} alt="" fill sizes="126px" className="object-cover" />
             </div>
             <h2 className="mt-6 text-[28px] font-bold leading-[38px] text-[#0075be] lg:mt-[35px] lg:text-[36px]">
