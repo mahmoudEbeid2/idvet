@@ -25,9 +25,9 @@ export function Services({ site }: { site: SiteContent }) {
         />
       </div>
 
-      <p className={`absolute left-[1253px] top-[1659px] w-[345px] -translate-x-full text-start text-[36px] font-medium leading-[18px] text-white ${mirror}`}>
+      <h2 className={`absolute left-[1253px] top-[1659px] w-[345px] -translate-x-full text-start text-[36px] font-medium leading-[18px] text-white ${mirror}`}>
         {services.title}
-      </p>
+      </h2>
       <p className={`absolute left-[1253px] top-[1715px] w-[705px] -translate-x-full text-start text-[36px] font-medium leading-[18px] text-white ${mirror}`}>
         {services.subtitle}
       </p>
@@ -38,14 +38,14 @@ export function Services({ site }: { site: SiteContent }) {
           className={`absolute left-[1253px] w-[705px] -translate-x-full text-start ${mirror}`}
           style={{ top: ITEM_TOPS[i] }}
         >
-          <p className="text-[20px] font-bold leading-[36px] text-white">
+          <h3 className="text-[20px] font-bold leading-[36px] text-white">
             {item.heading.split("\n").map((line, j) => (
               <span key={j}>
                 {j > 0 && <br />}
                 {line}
               </span>
             ))}
-          </p>
+          </h3>
           <p className="text-[20px] font-normal leading-[36px] text-white">
             {item.body}
           </p>

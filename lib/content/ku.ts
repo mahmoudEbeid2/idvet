@@ -58,6 +58,7 @@ export const ku: Omit<SiteContent, "languages"> = {
       "idvet نوێنەری تایبەتی HiPro، Jamuh و Vet Care لە عێراقە. ئێمە دڵنیایی لە کوالێتی و بەردەستبوونی بەرهەمەکان دەدەین و بە شێوەیەکی خێرا و متمانەپێکراو دەیانگەیەنینە سەرجەم پارێزگاکانی عێراق.",
     cards: [
       {
+        name: "HiPro",
         logo: ["/assets/hipro-logo.png"],
         logoWidth: 222,
         logoHeight: 59,
@@ -68,6 +69,7 @@ export const ku: Omit<SiteContent, "languages"> = {
         href: "https://www.hipro-feed.com/",
       },
       {
+        name: "VetCare",
         logo: ["/assets/vetcare-logo-part1.svg", "/assets/vetcare-logo-part2.svg"],
         logoWidth: 383,
         logoHeight: 80,
@@ -78,6 +80,7 @@ export const ku: Omit<SiteContent, "languages"> = {
         href: "https://vetcare-jo.com/",
       },
       {
+        name: "Jamuh",
         logo: ["/assets/jamuh-logo.png"],
         logoWidth: 178,
         logoHeight: 96,
@@ -180,6 +183,11 @@ export const ku: Omit<SiteContent, "languages"> = {
   },
   footer: {
     copyright: "جميع الحقوق محفوظة © IDVET",
+  },
+  imageAlts: {
+    hero: "دوو دەست دەوری نەخشەی عێراقیان داوە لەگەڵ هێماکانی دابەشکردن، گواستنەوە و چاودێریی ڤێتێرنەری",
+    brandsShowcase: "کۆنتەینەری شینی IDVET کە مانگا، مەڕ، بزن و پەلەوەری تێدایە",
+    clientsStrip: "بارهەڵگرێکی IDVET بەرهەمە ڤێتێرنەرییەکان لە شارێکی عێراق دەگوازێتەوە",
   },
   form: {
     title: "پەیامێکمان بۆ بنێرە",

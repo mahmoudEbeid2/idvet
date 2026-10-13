@@ -19,6 +19,8 @@ export interface WhyUsItem {
 }
 
 export interface BrandCard {
+  /** Brand name, used as the logo's alt text. */
+  name: string;
   logo: string[];
   logoWidth: number;
   logoHeight: number;
@@ -158,6 +160,12 @@ export interface SiteContent {
   };
   footer: {
     copyright: string;
+  };
+  /** Alt text for the home page's content images (decorative ones use ""). */
+  imageAlts: {
+    hero: string;
+    brandsShowcase: string;
+    clientsStrip: string;
   };
   form: {
     title: string;

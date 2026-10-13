@@ -89,7 +89,7 @@ export function ProductCard({
             src={product.image.src}
             width={product.image.width}
             height={product.image.height}
-            alt=""
+            alt={product.name}
             loading="lazy"
             decoding="async"
           />

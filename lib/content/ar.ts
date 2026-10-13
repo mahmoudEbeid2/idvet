@@ -57,6 +57,7 @@ export const ar: Omit<SiteContent, "languages"> = {
       "idvet هي الوكيل الحصري في العراق لكلٍّ من HiPro وPharmavet، مع ضمان جودة المنتج وتوفّره وسرعة وصوله إلى جميع المحافظات.",
     cards: [
       {
+        name: "HiPro",
         logo: ["/assets/hipro-logo.png"],
         logoWidth: 222,
         logoHeight: 59,
@@ -67,6 +68,7 @@ export const ar: Omit<SiteContent, "languages"> = {
         href: "https://www.hipro-feed.com/",
       },
       {
+        name: "VetCare",
         logo: ["/assets/vetcare-logo-part1.svg", "/assets/vetcare-logo-part2.svg"],
         logoWidth: 383,
         logoHeight: 80,
@@ -77,6 +79,7 @@ export const ar: Omit<SiteContent, "languages"> = {
         href: "https://vetcare-jo.com/",
       },
       {
+        name: "Jamuh",
         logo: ["/assets/jamuh-logo.png"],
         logoWidth: 178,
         logoHeight: 96,
@@ -198,6 +201,11 @@ export const ar: Omit<SiteContent, "languages"> = {
   },
   footer: {
     copyright: "جميع الحقوق محفوظة © IDVET",
+  },
+  imageAlts: {
+    hero: "يدان تحيطان بخريطة العراق مع رموز التوزيع والنقل والرعاية البيطرية",
+    brandsShowcase: "حاوية IDVET الزرقاء وبداخلها أبقار وأغنام وماعز ودواجن",
+    clientsStrip: "شاحنة IDVET تنقل المنتجات البيطرية في إحدى المدن العراقية",
   },
   form: {
     title: "أرسل لنا رسالة",

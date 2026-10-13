@@ -17,7 +17,7 @@ export function MobileContactFooter({ site }: { site: SiteContent }) {
         id="contact-m"
         className="scroll-mt-[73px] bg-[#006eb3] px-4 py-12 text-white"
       >
-        <p className="mb-3 text-center text-2xl font-medium">{site.contact.heading}</p>
+        <h2 className="mb-3 text-center text-2xl font-medium">{site.contact.heading}</h2>
         <p className="mb-6 text-center text-sm leading-relaxed text-white/90">
           {site.contact.body}
         </p>

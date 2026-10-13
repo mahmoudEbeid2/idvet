@@ -70,9 +70,9 @@ export function Contact({ site }: { site: SiteContent }) {
       />
       <div className="absolute left-[-1px] top-[5624px] h-[434px] w-[1440px] bg-[#006eb3]" />
 
-      <p className={`absolute left-[1253px] top-[5695px] w-[513px] -translate-x-full text-start text-[28px] font-medium leading-[normal] text-white ${mirror}`}>
+      <h2 className={`absolute left-[1253px] top-[5695px] w-[513px] -translate-x-full text-start text-[28px] font-medium leading-[normal] text-white ${mirror}`}>
         {contact.heading}
-      </p>
+      </h2>
       <p
         className={`absolute left-[1253px] w-[482px] -translate-x-full text-start text-[20px] font-normal leading-[28px] text-white ${mirror}`}
         style={{ top: bodyTop }}

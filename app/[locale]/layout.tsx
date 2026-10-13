@@ -1,35 +1,35 @@
 import type { Metadata } from "next";
 import { ibmPlexSansArabic, roboto } from "@/lib/fonts";
 import { isLocale, locales, content } from "@/lib/content";
+import { GTM_ID, SITE_URL, siteJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/site/JsonLd";
 import "../globals.css";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  if (!isLocale(locale)) return {};
-  const site = content[locale];
-  return {
-    // Resolves relative Open Graph image URLs (product pages). NEXT_PUBLIC_* is
-    // inlined at build time and the Docker build doesn't pass it, hence the fallback.
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://idvet.co"),
-    title: `IDVET — ${site.hero.eyebrow}`,
-    description: site.hero.paragraph,
-    icons: {
-      icon: [
-        { url: "/icon.svg", type: "image/svg+xml" },
-        { url: "/assets/idvet-logo.svg", type: "image/svg+xml" },
-      ],
-      apple: "/icon.svg",
-    },
-  };
-}
+// Shared by every page under /{locale}; each page sets its own title,
+// description, canonical, hreflang and Open Graph through pageMetadata().
+export const metadata: Metadata = {
+  // Resolves relative Open Graph image URLs.
+  metadataBase: new URL(SITE_URL),
+  applicationName: "IDVET",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/assets/idvet-logo.svg", type: "image/svg+xml" },
+    ],
+    apple: "/icon.svg",
+  },
+};
+
+// Google Tag Manager, verbatim from the container's install snippet.
+const GTM_SCRIPT = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`;
 
 export default async function LocaleLayout({
   children,
@@ -48,10 +48,24 @@ export default async function LocaleLayout({
 
   return (
     <html lang={site.htmlLang} dir={isEnglish ? "ltr" : "rtl"} data-scroll-behavior="smooth">
+      <head>
+        {/* Google Tag Manager — as high in <head> as possible */}
+        <script dangerouslySetInnerHTML={{ __html: GTM_SCRIPT }} />
+      </head>
       <body
         className={`${ibmPlexSansArabic.variable} ${roboto.variable} antialiased`}
         style={isEnglish ? { fontFamily: "var(--font-roboto), sans-serif" } : undefined}
       >
+        {/* Google Tag Manager (noscript) — immediately after <body> */}
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+        <JsonLd data={siteJsonLd(site)} />
         {children}
       </body>
     </html>

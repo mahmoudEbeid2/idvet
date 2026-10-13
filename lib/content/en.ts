@@ -59,6 +59,7 @@ export const en: Omit<SiteContent, "languages"> = {
       "idvet is the exclusive agent in Iraq for HiPro, Jamuh, and Vet Care, guaranteeing product quality, availability, and fast delivery to every province.",
     cards: [
       {
+        name: "HiPro",
         logo: ["/assets/hipro-logo.png"],
         logoWidth: 222,
         logoHeight: 59,
@@ -69,6 +70,7 @@ export const en: Omit<SiteContent, "languages"> = {
         href: "https://www.hipro-feed.com/",
       },
       {
+        name: "VetCare",
         logo: ["/assets/vetcare-logo-part1.svg", "/assets/vetcare-logo-part2.svg"],
         logoWidth: 383,
         logoHeight: 80,
@@ -79,6 +81,7 @@ export const en: Omit<SiteContent, "languages"> = {
         href: "https://vetcare-jo.com/",
       },
       {
+        name: "Jamuh",
         logo: ["/assets/jamuh-logo.png"],
         logoWidth: 178,
         logoHeight: 96,
@@ -181,6 +184,11 @@ export const en: Omit<SiteContent, "languages"> = {
   },
   footer: {
     copyright: "All rights reserved © IDVET",
+  },
+  imageAlts: {
+    hero: "Hands around a map of Iraq with icons for distribution, transport and veterinary care",
+    brandsShowcase: "The blue IDVET container holding cows, sheep, goats and poultry",
+    clientsStrip: "An IDVET truck delivering veterinary products through an Iraqi city",
   },
   form: {
     title: "Send us a message",

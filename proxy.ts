@@ -4,8 +4,10 @@ import { SESSION_COOKIE, verifyToken } from "@/lib/admin/token";
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
+  // Arabic is the site's main language (DEFAULT_LOCALE in lib/seo.ts):
+  // idvet.co → idvet.co/ar, permanently.
   if (pathname === "/") {
-    return NextResponse.redirect(new URL("/ar", request.url));
+    return NextResponse.redirect(new URL(`/ar${search}`, request.url), 308);
   }
 
   // /admin/*: send visitors without a valid session to the login page. This is

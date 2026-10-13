@@ -225,3 +225,34 @@ export async function getRelated(
       : [];
   return [...same, ...rest].map((row) => toCard(row, locale));
 }
+
+export interface SitemapCatalog {
+  categories: { slug: string; name: string; updatedAt: Date }[];
+  products: { slug: string; name: string; categorySlug: string; updatedAt: Date; images: string[] }[];
+}
+
+/** Every category with published products and every published product (sitemap, llms.txt). */
+export async function getSitemapCatalog(locale: Locale): Promise<SitemapCatalog> {
+  await connection();
+  const [categories, products] = await Promise.all([
+    prisma.category.findMany({
+      where: { products: { some: published } },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    }),
+    prisma.product.findMany({
+      where: published,
+      include: { category: true, images: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] } },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    }),
+  ]);
+  return {
+    categories: categories.map((c) => ({ slug: c.slug, name: pick(c, "name", locale), updatedAt: c.updatedAt })),
+    products: products.map((p) => ({
+      slug: p.slug,
+      name: pick(p, "name", locale) || p.code,
+      categorySlug: p.category.slug,
+      updatedAt: p.updatedAt,
+      images: p.images.map((image) => uploadUrl(image.path)),
+    })),
+  };
+}

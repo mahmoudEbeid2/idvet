@@ -87,7 +87,7 @@ export function ProductGallery({
               onClick={() => setIndex(i)}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image.src} width={image.width} height={image.height} alt="" loading="lazy" />
+              <img src={image.src} width={image.width} height={image.height} alt={`${name} ${i + 1}`} loading="lazy" />
             </button>
           ))}
         </div>
@@ -197,7 +197,7 @@ function Lightbox({
               onClick={() => onSelect(i)}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image.src} alt="" loading="lazy" />
+              <img src={image.src} alt={`${name} ${i + 1}`} loading="lazy" />
             </button>
           ))}
         </div>

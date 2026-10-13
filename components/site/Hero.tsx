@@ -127,7 +127,7 @@ export function Hero({ site }: { site: SiteContent }) {
               <div className="relative h-[810px] w-[1440px]">
                 <Image
                   src="/assets/hero-img.png"
-                  alt=""
+                  alt={site.imageAlts.hero}
                   fill
                   sizes="1440px"
                   className="object-cover"
@@ -201,7 +201,7 @@ export function Hero({ site }: { site: SiteContent }) {
           {hero.eyebrow}
         </p>
 
-        <p className={`absolute left-[1252px] top-[367px] w-[482px] -translate-x-full text-start text-[36px] font-bold leading-[46px] text-white ${mirror}`}>
+        <h1 className={`absolute left-[1252px] top-[367px] w-[482px] -translate-x-full text-start text-[36px] font-bold leading-[46px] text-white ${mirror}`}>
           {wordTokens.map((token, i) => {
             if (/^\s+$/.test(token)) return <span key={i}>{token}</span>;
             return (
@@ -210,7 +210,7 @@ export function Hero({ site }: { site: SiteContent }) {
               </span>
             );
           })}
-        </p>
+        </h1>
 
         <p className={`hero-paragraph absolute left-[1252px] top-[588px] w-[482px] -translate-x-full text-start text-[16px] font-normal leading-[28px] text-white ${mirror}`}>
           {hero.paragraph}

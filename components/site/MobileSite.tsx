@@ -34,7 +34,7 @@ export function MobileSite({ site }: { site: SiteContent }) {
       <section className="relative h-[320px] w-full sm:h-[420px]">
         <Image
           src="/assets/hero-img.png"
-          alt=""
+          alt={site.imageAlts.hero}
           fill
           sizes="100vw"
           className={`object-cover ${isEnglish ? "" : "scale-x-[-1]"}`}
@@ -89,10 +89,10 @@ export function MobileSite({ site }: { site: SiteContent }) {
             className="block size-full"
           />
         </div>
-        <p className="text-2xl font-medium text-[#0075be]">{site.about.title}</p>
-        <p className={`text-center text-xl font-bold leading-snug text-[#0075be] ${smAlign}`}>
+        <h2 className="text-2xl font-medium text-[#0075be]">{site.about.title}</h2>
+        <h3 className={`text-center text-xl font-bold leading-snug text-[#0075be] ${smAlign}`}>
           {site.about.heading}
-        </p>
+        </h3>
         <div className={`flex w-full flex-col gap-3 text-center text-[#4d4d4d] ${smAlign}`}>
           {site.about.paragraphs.map((p, i) => (
             <p key={i} className="leading-relaxed">
@@ -107,21 +107,21 @@ export function MobileSite({ site }: { site: SiteContent }) {
         id="services-m"
         className="scroll-mt-[73px] bg-[#0075be] px-4 py-12 text-white"
       >
-        <p className="mb-2 text-center text-2xl font-medium">{site.services.title}</p>
+        <h2 className="mb-2 text-center text-2xl font-medium">{site.services.title}</h2>
         <p className="mb-8 text-center text-lg font-medium text-white/90">
           {site.services.subtitle}
         </p>
         <div className="flex flex-col gap-6">
           {site.services.items.map((item, i) => (
             <div key={i} className={`text-center ${smAlign}`}>
-              <p className="mb-1 font-bold leading-snug">
+              <h3 className="mb-1 font-bold leading-snug">
                 {item.heading.split("\n").map((line, j) => (
                   <span key={j}>
                     {j > 0 && <br />}
                     {line}
                   </span>
                 ))}
-              </p>
+              </h3>
               <p className="text-sm leading-relaxed text-white/90">{item.body}</p>
             </div>
           ))}
@@ -130,12 +130,12 @@ export function MobileSite({ site }: { site: SiteContent }) {
 
       {/* Brands */}
       <section id="brands-m" className="scroll-mt-[73px] px-4 py-12">
-        <p className="mb-2 text-center text-2xl font-bold text-[#0075be]">
+        <h2 className="mb-2 text-center text-2xl font-bold text-[#0075be]">
           {site.brands.title}
-        </p>
-        <p className="mb-2 text-center text-lg font-bold text-[#0075be]">
+        </h2>
+        <h3 className="mb-2 text-center text-lg font-bold text-[#0075be]">
           {site.brands.introHeading}
-        </p>
+        </h3>
         <p className="mb-8 text-center text-sm leading-relaxed text-[#4d4d4d]">
           {site.brands.introBody}
         </p>
@@ -146,19 +146,19 @@ export function MobileSite({ site }: { site: SiteContent }) {
               className="flex flex-col items-center gap-3 rounded-2xl bg-[#f7f7f7] p-5"
             >
               <div className="relative h-[50px] w-[160px]">
-                {card.logo.map((src) => (
+                {card.logo.map((src, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={src}
                     src={src}
-                    alt=""
+                    alt={i === 0 ? card.name : ""}
                     className="absolute inset-0 mx-auto size-full object-contain"
                   />
                 ))}
               </div>
-              <p className={`w-full text-center font-bold text-[#0075be] ${smAlign}`}>
+              <h3 className={`w-full text-center font-bold text-[#0075be] ${smAlign}`}>
                 {card.title}
-              </p>
+              </h3>
               <p className={`w-full text-center text-sm leading-relaxed text-[#4d4d4d] ${smAlign}`}>
                 {card.body}
               </p>
@@ -189,7 +189,7 @@ export function MobileSite({ site }: { site: SiteContent }) {
       <div className="relative h-[220px] w-full">
         <Image
           src="/assets/clients-strip.png"
-          alt=""
+          alt={site.imageAlts.clientsStrip}
           fill
           loading="lazy"
           sizes="100vw"
@@ -199,9 +199,9 @@ export function MobileSite({ site }: { site: SiteContent }) {
 
       {/* Why us */}
       <section id="why-us-m" className="bg-[#f0efef] px-4 py-12">
-        <p className="mb-2 text-center text-2xl font-medium text-[#196cb5]">
+        <h2 className="mb-2 text-center text-2xl font-medium text-[#196cb5]">
           {site.whyUs.title}
-        </p>
+        </h2>
         <p className="mb-8 text-center text-lg font-medium text-[#196cb5]">
           {site.whyUs.subtitle}
         </p>
@@ -215,7 +215,7 @@ export function MobileSite({ site }: { site: SiteContent }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.icon} alt="" className="block size-full" />
               </div>
-              <p className="font-bold text-[#196cb5]">{item.title}</p>
+              <h3 className="font-bold text-[#196cb5]">{item.title}</h3>
               <p className="text-sm leading-relaxed text-[#196cb5]">{item.body}</p>
             </div>
           ))}
@@ -224,9 +224,9 @@ export function MobileSite({ site }: { site: SiteContent }) {
 
       {/* Gallery */}
       <section id="gallery-m" className="px-4 py-12">
-        <p className="mb-6 text-center text-2xl font-medium text-[#0075be]">
+        <h2 className="mb-6 text-center text-2xl font-medium text-[#0075be]">
           {site.gallery.title}
-        </p>
+        </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {GALLERY_IMAGES.map((src, i) => (
             <button

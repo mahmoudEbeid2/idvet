@@ -130,7 +130,7 @@ function BrandCardBlock({
           <>
             <div className="absolute" style={{ inset: "13.85% 64.43% 13.83% 13.86%" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={card.logo[0]} alt="" className="block size-full object-contain" />
+              <img src={card.logo[0]} alt={card.name} className="block size-full object-contain" />
             </div>
             <div className="absolute" style={{ inset: "23.91% 13.85% 23.91% 37.78%" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -141,7 +141,7 @@ function BrandCardBlock({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={card.logo[0]}
-            alt=""
+            alt={card.name}
             className="absolute inset-0 size-full object-contain object-center"
           />
         )}
@@ -153,9 +153,9 @@ function BrandCardBlock({
         className={`absolute -translate-x-full flex flex-col items-center text-center ${mirror}`}
         style={{ left: pos.titleLeft, top: COLUMN_TOP, width: pos.titleWidth, height: COLUMN_HEIGHT }}
       >
-        <p className="mb-[28px] text-[20px] font-bold leading-[28px] text-[#0075be]">
+        <h3 className="mb-[28px] text-[20px] font-bold leading-[28px] text-[#0075be]">
           {card.title}
-        </p>
+        </h3>
         <p className="w-full text-center text-[18px] font-normal leading-[28px] text-[#4d4d4d]">
           {card.body}
         </p>
@@ -199,7 +199,7 @@ export function Brands({ site }: { site: SiteContent }) {
       <div className={`absolute left-1/2 top-[2469px] h-[636px] w-[848px] -translate-x-1/2 ${mirror}`}>
         <Image
           src="/assets/brands-section.png"
-          alt=""
+          alt={site.imageAlts.brandsShowcase}
           fill
           loading="lazy"
           sizes="848px"
@@ -207,13 +207,13 @@ export function Brands({ site }: { site: SiteContent }) {
         />
       </div>
 
-      <p className={`absolute left-1/2 top-[3069px] w-[1065px] -translate-x-1/2 text-center text-[36px] font-bold leading-[18px] text-[#0075be] ${mirror}`}>
+      <h2 className={`absolute left-1/2 top-[3069px] w-[1065px] -translate-x-1/2 text-center text-[36px] font-bold leading-[18px] text-[#0075be] ${mirror}`}>
         {brands.title}
-      </p>
+      </h2>
       <div className={`absolute left-1/2 top-[3137px] w-[1065px] -translate-x-1/2 text-center ${mirror}`}>
-        <p className="mb-[10px] text-[32px] font-bold leading-[36px] text-[#0075be]">
+        <h3 className="mb-[10px] text-[32px] font-bold leading-[36px] text-[#0075be]">
           {brands.introHeading}
-        </p>
+        </h3>
         <p className="text-[24px] font-normal leading-[36px] text-[#4d4d4d]">
           {brands.introBody}
         </p>
@@ -239,7 +239,7 @@ export function Brands({ site }: { site: SiteContent }) {
       >
         <Image
           src="/assets/clients-strip.png"
-          alt=""
+          alt={site.imageAlts.clientsStrip}
           loading="lazy"
           fill
           sizes="1440px"

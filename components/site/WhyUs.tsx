@@ -11,9 +11,9 @@ export function WhyUs({ site }: { site: SiteContent }) {
   const mirror = site.locale === "en" ? "-scale-x-100" : "";
   return (
     <>
-      <p className={`absolute left-[1253px] top-[5200px] w-[345px] -translate-x-full text-start text-[36px] font-medium leading-[18px] text-[#196cb5] ${mirror}`}>
+      <h2 className={`absolute left-[1253px] top-[5200px] w-[345px] -translate-x-full text-start text-[36px] font-medium leading-[18px] text-[#196cb5] ${mirror}`}>
         {whyUs.title}
-      </p>
+      </h2>
       <p className={`absolute left-[1253px] top-[5256px] w-[1039px] -translate-x-full text-start text-[36px] font-medium leading-[18px] text-[#196cb5] ${mirror}`}>
         {whyUs.subtitle}
       </p>
@@ -33,9 +33,9 @@ export function WhyUs({ site }: { site: SiteContent }) {
               className={`absolute -translate-x-full text-start ${mirror}`}
               style={{ left: pos.textLeft, width: pos.width, top: 5414 }}
             >
-              <p className="mb-0 text-[20px] font-bold leading-[28px] text-[#196cb5]">
+              <h3 className="mb-0 text-[20px] font-bold leading-[28px] text-[#196cb5]">
                 {item.title}
-              </p>
+              </h3>
               <p className="text-[20px] font-normal leading-[28px] text-[#196cb5]">
                 {item.body}
               </p>

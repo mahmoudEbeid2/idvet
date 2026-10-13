@@ -27,9 +27,9 @@ export function Gallery({ site }: { site: SiteContent }) {
   return (
     <>
       <div className="absolute left-[514px] top-[4682px] flex h-[40px] w-[411px] items-center justify-center">
-        <p className={`text-[36px] font-medium leading-[normal] text-[#0075be] ${mirror}`}>
+        <h2 className={`text-[36px] font-medium leading-[normal] text-[#0075be] ${mirror}`}>
           {site.gallery.title}
-        </p>
+        </h2>
       </div>
 
       {IMAGES.map((src, i) => {
