@@ -31,6 +31,11 @@ export interface BrandCard {
   href: string;
 }
 
+export interface AboutBlock {
+  title: string;
+  paragraphs: string[];
+}
+
 /** Plural forms for one noun; "{n}" is replaced with the count. See lib/catalog/format.ts. */
 export interface PluralForms {
   zero?: string;
@@ -160,6 +165,17 @@ export interface SiteContent {
   };
   footer: {
     copyright: string;
+  };
+  /** The /{locale}/about page. The hero eyebrow and buttons reuse `hero`. */
+  aboutPage: {
+    metaTitle: string;
+    hero: { heading: string; body: string };
+    whoWeAre: AboutBlock;
+    /** Story, mission and vision open with a one-line lead paragraph. */
+    story: AboutBlock;
+    mission: AboutBlock;
+    vision: AboutBlock;
+    imageAlts: { hero: string; story: string };
   };
   /** Alt text for the home page's content images (decorative ones use ""). */
   imageAlts: {

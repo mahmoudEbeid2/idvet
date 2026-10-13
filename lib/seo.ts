@@ -87,7 +87,7 @@ export function pageMetadata({
 
 // ── JSON-LD ────────────────────────────────────────────────────────────────
 
-const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 
 /** Organization + WebSite (with a catalog SearchAction), on every public page. */
 export function siteJsonLd(site: SiteContent) {

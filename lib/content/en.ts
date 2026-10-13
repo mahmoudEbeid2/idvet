@@ -185,6 +185,48 @@ export const en: Omit<SiteContent, "languages"> = {
   footer: {
     copyright: "All rights reserved © IDVET",
   },
+  aboutPage: {
+    metaTitle: "About us — IDVET",
+    hero: {
+      heading: "A trusted partner for animal health in Iraq",
+      body: "We connect global animal-health expertise with the needs of the Iraqi market through reliable veterinary products, organized distribution and ongoing support that reaches the vet and the farm.",
+    },
+    whoWeAre: {
+      title: "Who we are",
+      paragraphs: [
+        "IDVET is an Iraqi company specialized in importing and distributing animal-health products and solutions. We work with trusted international companies and manufacturers to provide veterinary products that meet the needs of veterinarians, farms and the livestock sector in Iraq.",
+        "Our role goes beyond supplying the product: it extends to understanding needs, giving technical advice, ensuring continuity of supply and following up after the sale, building long-term relationships with our customers and partners.",
+      ],
+    },
+    story: {
+      title: "Our story",
+      paragraphs: [
+        "We exist to bring reliable solutions closer to the farm",
+        "Animal health starts with a reliable product, but it also depends on that product being available at the right time, being used correctly, and having a partner who understands the daily reality of the farm.",
+        "That is where IDVET comes in: building a reliable link between global animal-health companies and the Iraqi market.",
+        "We select the right products, organize import and distribution, and support veterinarians and farmers with the information and follow-up that help them make better decisions on the farm.",
+        "For us, delivering the product is not the end of the process; it is the beginning of an ongoing relationship with the customer.",
+      ],
+    },
+    mission: {
+      title: "Our mission",
+      paragraphs: [
+        "Reliable solutions that reach wherever they are needed",
+        "To provide the Iraqi market with reliable veterinary products and solutions through strong partnerships with international manufacturers, an efficient distribution system and continuous technical support that helps veterinarians and farmers improve animal health and sustain production.",
+      ],
+    },
+    vision: {
+      title: "Our vision",
+      paragraphs: [
+        "To be a partner the animal-health sector can rely on",
+        "We aim to build an integrated network that connects global veterinary expertise and products with the needs of the Iraqi market, helping raise the standard of animal care and supporting the growth and sustainability of the livestock sector.",
+      ],
+    },
+    imageAlts: {
+      hero: "A 3D map of Iraq linked by a glowing distribution network",
+      story: "Two hands joining puzzle pieces",
+    },
+  },
   imageAlts: {
     hero: "Hands around a map of Iraq with icons for distribution, transport and veterinary care",
     brandsShowcase: "The blue IDVET container holding cows, sheep, goats and poultry",

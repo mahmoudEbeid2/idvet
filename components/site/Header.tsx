@@ -16,8 +16,8 @@ const NAV_ITEMS = [
 
 const NAV_IDS = NAV_ITEMS.map((item) => item.id);
 
-/** Which page the header is on: home, the catalog, or anything else (404, error). */
-export type HeaderPage = "home" | "products" | "other";
+/** Which page the header is on: home, the catalog, the About page, or anything else (404, error). */
+export type HeaderPage = "home" | "products" | "about" | "other";
 
 /**
  * The desktop header, drawn on the 1440px canvas — the only desktop header in
@@ -79,11 +79,12 @@ export function Header({
       <div className="absolute left-0 top-0 h-[150px] w-[1440px] bg-white" />
 
       {NAV_ITEMS.map(({ id, left }) =>
-        id === "products" ? (
+        id === "products" || id === "about" ? (
+          // Page links: the catalog and the About page.
           <a
             key={id}
-            href={`${home}/products`}
-            aria-current={page === "products" ? "page" : undefined}
+            href={`${home}/${id}`}
+            aria-current={page === id ? "page" : undefined}
             className={`absolute top-[65px] -translate-x-1/2 whitespace-nowrap text-[20px] text-[#0676bd] hover:underline ${mirror} ${
               active === id ? "font-bold" : "font-normal"
             }`}

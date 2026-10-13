@@ -2,6 +2,7 @@ import type { SiteContent } from "@/lib/content";
 import { ContactModalProvider } from "../ContactModalContext";
 import { SiteFooter } from "../SiteFooter";
 import { SiteHeader } from "../SiteHeader";
+import type { HeaderPage } from "../Header";
 import s from "./catalog.module.css";
 
 /**
@@ -18,7 +19,7 @@ export function CatalogShell({
 }: {
   site: SiteContent;
   languagePath: string;
-  page?: "products" | "other";
+  page?: Exclude<HeaderPage, "home">;
   children: React.ReactNode;
 }) {
   return (

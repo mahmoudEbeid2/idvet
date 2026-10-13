@@ -79,19 +79,32 @@ export function MobileHeader({
       </div>
       {navOpen && (
         <nav className="flex flex-col items-center gap-3 border-t border-black/5 px-4 py-4 text-center text-[#0676bd]">
-          {MOBILE_NAV_IDS.map((id) => (
-            <a
-              key={id}
-              href={isHome ? `#${id}` : `${home}#${id}`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavClick(id);
-              }}
-              className={active === id ? "font-bold" : "font-normal"}
-            >
-              {mobileLabels[id]}
-            </a>
-          ))}
+          {MOBILE_NAV_IDS.map((id) =>
+            id === "about" ? (
+              // The About page, not a home section.
+              <a
+                key={id}
+                href={`${home}/about`}
+                aria-current={page === "about" ? "page" : undefined}
+                className={active === id ? "font-bold" : "font-normal"}
+                onClick={() => setNavOpen(false)}
+              >
+                {mobileLabels[id]}
+              </a>
+            ) : (
+              <a
+                key={id}
+                href={isHome ? `#${id}` : `${home}#${id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick(id);
+                }}
+                className={active === id ? "font-bold" : "font-normal"}
+              >
+                {mobileLabels[id]}
+              </a>
+            ),
+          )}
           <a
             href={`${home}/products`}
             aria-current={page === "products" ? "page" : undefined}

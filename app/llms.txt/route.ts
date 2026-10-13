@@ -29,6 +29,7 @@ export async function GET() {
     line("Home (Arabic)", "/ar", "about the company, services, brands and contact"),
     line("Home (English)", "/en"),
     line("Home (Kurdish)", "/ku"),
+    line("About us", "/en/about", "who IDVET is, its story, mission and vision"),
     line("Product catalog", "/en/products", "all published products, searchable with ?q="),
     "",
     "## Product categories",
