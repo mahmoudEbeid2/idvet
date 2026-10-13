@@ -227,6 +227,27 @@ export const en: Omit<SiteContent, "languages"> = {
       story: "Two hands joining puzzle pieces",
     },
   },
+  contactPage: {
+    metaTitle: "Contact us — IDVET",
+    hero: {
+      heading: "Let's stay in touch",
+      body: "Whether you're a veterinarian, a farm owner, a distributor or an international company looking for a partner in Iraq, the IDVET team is ready to listen to your needs and help you find the right solution.",
+    },
+    intro: {
+      title: "Contact us",
+      body: "Get in touch with us about veterinary products, technical support, distribution opportunities, international partnerships or any business inquiry.",
+    },
+    details: {
+      title: "Contact details",
+      phoneLabel: "Phone",
+      emailLabel: "Email",
+      addressLabel: "Address",
+    },
+    imageAlts: {
+      hero: "A glowing telephone handset linked to a global healthcare network",
+      hand: "A hand holding a phone showing the IDVET logo",
+    },
+  },
   imageAlts: {
     hero: "Hands around a map of Iraq with icons for distribution, transport and veterinary care",
     brandsShowcase: "The blue IDVET container holding cows, sheep, goats and poultry",

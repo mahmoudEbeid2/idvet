@@ -5,7 +5,7 @@ import type { SiteContent } from "@/lib/content";
 import { scrollToSection, scrollToTop } from "@/lib/scrollToSection";
 import { useActiveSection } from "@/lib/useActiveSection";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import type { HeaderPage } from "./Header";
+import { PAGE_NAV_IDS, type HeaderPage } from "./Header";
 
 const MOBILE_NAV_IDS = ["about", "services", "brands", "contact"] as const;
 
@@ -25,8 +25,9 @@ export function MobileHeader({
 }) {
   const [navOpen, setNavOpen] = useState(false);
   const isHome = page === "home";
-  // Same bold item as the home page on every page (see Header).
-  const active = useActiveSection(MOBILE_NAV_IDS, "about");
+  // Same bold item as the desktop Header.
+  const tracked = useActiveSection(MOBILE_NAV_IDS, "about");
+  const active = page === "about" || page === "contact" ? page : tracked;
   const home = `/${site.locale}`;
   const languages = site.languages.map((option) => ({ ...option, href: `${option.href}${languagePath}` }));
 
@@ -80,12 +81,11 @@ export function MobileHeader({
       {navOpen && (
         <nav className="flex flex-col items-center gap-3 border-t border-black/5 px-4 py-4 text-center text-[#0676bd]">
           {MOBILE_NAV_IDS.map((id) =>
-            id === "about" ? (
-              // The About page, not a home section.
+            PAGE_NAV_IDS.includes(id) ? (
               <a
                 key={id}
-                href={`${home}/about`}
-                aria-current={page === "about" ? "page" : undefined}
+                href={`${home}/${id}`}
+                aria-current={page === id ? "page" : undefined}
                 className={active === id ? "font-bold" : "font-normal"}
                 onClick={() => setNavOpen(false)}
               >

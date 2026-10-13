@@ -177,6 +177,14 @@ export interface SiteContent {
     vision: AboutBlock;
     imageAlts: { hero: string; story: string };
   };
+  /** The /{locale}/contact page. The hero eyebrow and buttons reuse `hero`, the details `contact`. */
+  contactPage: {
+    metaTitle: string;
+    hero: { heading: string; body: string };
+    intro: { title: string; body: string };
+    details: { title: string; phoneLabel: string; emailLabel: string; addressLabel: string };
+    imageAlts: { hero: string; hand: string };
+  };
   /** Alt text for the home page's content images (decorative ones use ""). */
   imageAlts: {
     hero: string;

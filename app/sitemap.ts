@@ -15,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "", lastModified: catalogUpdated, priority: 1 },
     { path: "/products", lastModified: catalogUpdated, priority: 0.9 },
     { path: "/about", priority: 0.8 },
+    { path: "/contact", priority: 0.8 },
     ...categories.map((c) => ({
       path: `/products/${c.slug}`,
       lastModified: newest([c.updatedAt, ...products.filter((p) => p.categorySlug === c.slug).map((p) => p.updatedAt)]),

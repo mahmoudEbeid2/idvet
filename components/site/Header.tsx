@@ -16,8 +16,11 @@ const NAV_ITEMS = [
 
 const NAV_IDS = NAV_ITEMS.map((item) => item.id);
 
-/** Which page the header is on: home, the catalog, the About page, or anything else (404, error). */
-export type HeaderPage = "home" | "products" | "about" | "other";
+/** Which page the header is on: home, the catalog, the About or Contact page, or anything else (404, error). */
+export type HeaderPage = "home" | "products" | "about" | "contact" | "other";
+
+/** Nav items that link to their own page rather than a home section. */
+export const PAGE_NAV_IDS: readonly string[] = ["products", "about", "contact"];
 
 /**
  * The desktop header, drawn on the 1440px canvas — the only desktop header in
@@ -38,9 +41,11 @@ export function Header({
   const { nav } = site;
   const home = `/${site.locale}`;
   const isHome = page === "home";
-  // The bold item looks the same on every page: "about", as on home before
-  // scrolling (off home no section is ever in view, so it stays).
-  const active = useActiveSection(NAV_IDS, "about");
+  // The bold item: the About/Contact page's own item there; elsewhere
+  // "about", as on home before scrolling (off home no section is ever in
+  // view, so it stays).
+  const tracked = useActiveSection(NAV_IDS, "about");
+  const active = page === "about" || page === "contact" ? page : tracked;
   const languages = site.languages.map((option) => ({ ...option, href: `${option.href}${languagePath}` }));
   // The canvas is mirrored horizontally for English (see Canvas.tsx) so the
   // whole page reads left-to-right; text/logo units counter-mirror
@@ -79,8 +84,7 @@ export function Header({
       <div className="absolute left-0 top-0 h-[150px] w-[1440px] bg-white" />
 
       {NAV_ITEMS.map(({ id, left }) =>
-        id === "products" || id === "about" ? (
-          // Page links: the catalog and the About page.
+        PAGE_NAV_IDS.includes(id) ? (
           <a
             key={id}
             href={`${home}/${id}`}

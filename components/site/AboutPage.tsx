@@ -1,26 +1,12 @@
 import Image from "next/image";
-import type { AboutBlock, SiteContent } from "@/lib/content/types";
-import { ContactTriggerButton } from "./ContactTriggerButton";
+import type { SiteContent } from "@/lib/content/types";
+import { centerSmall, container, HeroButtons, Paragraphs } from "./pageParts";
 
 // The About page body (Figma "Desktop - 3"), between SiteHeader and SiteFooter.
 // Unlike the home page it is real responsive layout, not the scaled 1440px
-// canvas: from lg it matches the design's measurements (content 1065px wide,
-// like every home section), below lg the sections stack. Logical start/end
-// classes mirror it for English the way the home canvas is mirrored. Below
-// 720px everything (text, images, icons, buttons) is centered.
-
-const container = "mx-auto w-full max-w-[1097px] px-4";
-const centerSmall = "max-[719px]:text-center";
-
-function Paragraphs({ block, className }: { block: AboutBlock; className: string }) {
-  return (
-    <div className={className}>
-      {block.paragraphs.map((p, i) => (
-        <p key={i}>{p}</p>
-      ))}
-    </div>
-  );
-}
+// canvas: from lg it matches the design's measurements, below lg the sections
+// stack (see pageParts). Logical start/end classes mirror it for English the
+// way the home canvas is mirrored.
 
 export function AboutPage({ site }: { site: SiteContent }) {
   const t = site.aboutPage;
@@ -50,23 +36,7 @@ export function AboutPage({ site }: { site: SiteContent }) {
             <p className="mt-4 text-base leading-[28px] text-white/90 lg:mt-[21px] lg:min-h-[112px] lg:max-w-[435px] lg:text-[20px] lg:text-white">
               {t.hero.body}
             </p>
-            <div className="mt-8 flex flex-wrap gap-[15px] max-[719px]:justify-center lg:mt-[69px]">
-              <a
-                href={`/${site.locale}#brands`}
-                className="inline-flex h-[44px] min-w-[165px] items-center justify-center gap-2 bg-[#0676bd] px-3 text-[13px] font-bold transition-colors hover:bg-[#0568a8]"
-              >
-                <span>{site.hero.ctaPrimary}</span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/assets/arrow-icon.svg"
-                  alt=""
-                  className={`size-[23px] shrink-0 ${isEnglish ? "" : "rotate-180"}`}
-                />
-              </a>
-              <ContactTriggerButton className="inline-flex h-[44px] min-w-[167px] items-center justify-center border border-white px-3 text-[13px] transition-colors hover:bg-white/15">
-                {site.hero.ctaSecondary}
-              </ContactTriggerButton>
-            </div>
+            <HeroButtons site={site} className="mt-8 lg:mt-[69px]" />
           </div>
         </div>
       </section>
@@ -79,7 +49,7 @@ export function AboutPage({ site }: { site: SiteContent }) {
               {t.whoWeAre.title}
             </h2>
             <Paragraphs
-              block={t.whoWeAre}
+              paragraphs={t.whoWeAre.paragraphs}
               className="mt-4 text-base leading-[28px] text-[#4d4d4d] lg:mt-[17px] lg:text-[20px]"
             />
           </div>
@@ -105,7 +75,7 @@ export function AboutPage({ site }: { site: SiteContent }) {
           </div>
           <div className={`w-full lg:max-w-[705px] lg:pt-[67px] lg:pb-[74px] ${centerSmall}`}>
             <h2 className="text-[28px] font-medium leading-[36px] lg:text-[36px]">{t.story.title}</h2>
-            <Paragraphs block={t.story} className="mt-4 text-base leading-[28px] lg:mt-[19px] lg:text-[20px]" />
+            <Paragraphs paragraphs={t.story.paragraphs} className="mt-4 text-base leading-[28px] lg:mt-[19px] lg:text-[20px]" />
           </div>
         </div>
       </section>
@@ -124,7 +94,7 @@ export function AboutPage({ site }: { site: SiteContent }) {
               {block.title}
             </h2>
             <Paragraphs
-              block={block}
+              paragraphs={block.paragraphs}
               className="mt-3 text-base leading-[32px] text-[#0075be] lg:mt-[17px] lg:text-[20px] lg:leading-[36px]"
             />
           </div>
