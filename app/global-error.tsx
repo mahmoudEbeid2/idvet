@@ -11,7 +11,7 @@ import "./globals.css";
 // (and header) as [locale]/error.tsx.
 export default function GlobalError({ retry }: { error: Error & { digest?: string }; retry: () => void }) {
   const first = (usePathname() ?? "/").split("/")[1] ?? "";
-  const site = content[isLocale(first) ? first : "ku"];
+  const site = content[isLocale(first) ? first : "ar"];
   const isEnglish = site.locale === "en";
   return (
     <html lang={site.htmlLang} dir={isEnglish ? "ltr" : "rtl"} data-scroll-behavior="smooth">

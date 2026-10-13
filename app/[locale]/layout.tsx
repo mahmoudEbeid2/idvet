@@ -42,7 +42,7 @@ export default async function LocaleLayout({
   // An unknown locale (/fr/…) still renders this layout with the default
   // locale: every page under it calls notFound(), and not-found.tsx can only
   // show the site header if the layout itself doesn't throw.
-  const site = content[isLocale(locale) ? locale : "ku"];
+  const site = content[isLocale(locale) ? locale : "ar"];
 
   const isEnglish = site.locale === "en";
 

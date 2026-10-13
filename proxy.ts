@@ -5,7 +5,7 @@ export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   if (pathname === "/") {
-    return NextResponse.redirect(new URL("/ku", request.url));
+    return NextResponse.redirect(new URL("/ar", request.url));
   }
 
   // /admin/*: send visitors without a valid session to the login page. This is

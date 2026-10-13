@@ -1,5 +1,6 @@
 import type { SiteContent } from "@/lib/content";
 import { ContactTriggerButton } from "./ContactTriggerButton";
+import { SocialLinks } from "./SocialLinks";
 
 /**
  * The phone/tablet (below lg) contact section and footer — the only one in the
@@ -64,6 +65,7 @@ export function MobileContactFooter({ site }: { site: SiteContent }) {
 
       {/* Footer */}
       <footer className="bg-[#006eb3] px-4 py-6 text-center text-sm font-light text-white">
+        <SocialLinks className="mb-4 justify-center" />
         {site.footer.copyright}
       </footer>
     </div>
