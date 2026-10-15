@@ -20,7 +20,7 @@ services:
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
       - MAIL_FROM=${MAIL_FROM:-}
-      - MAIL_TO=${MAIL_TO:-info@idvet.co}
+      - MAIL_TO=${MAIL_TO:-admin@idvet.co, info@idvet.co}
     volumes:
       - idvet_uploads:/app/storage/uploads
     ports:
