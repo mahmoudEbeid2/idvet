@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { setMessageStatus } from "@/app/admin/actions";
 import { CONTACT_STATUSES, getContactMessage } from "@/lib/admin/data";
-import { formatAdminDate, localeName } from "@/lib/admin/i18n";
+import { formatAdminDate, localeDir, localeName } from "@/lib/admin/i18n";
 import { getAdminLang, getAdminT } from "@/lib/admin/lang";
 import { InboxDelete, MarkRead } from "@/components/admin/InboxItemActions";
 import { InboxStatusBadge, StatusForm } from "@/components/admin/InboxParts";
@@ -93,7 +93,7 @@ export default async function MessagePage({
           </dl>
         </Card>
         <Card title={t.inbox.message}>
-          <p className={s.msgBody} dir="auto">
+          <p className={s.msgBody} dir={localeDir(message.locale)}>
             {message.message}
           </p>
         </Card>

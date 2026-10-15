@@ -1,3 +1,4 @@
+import { localeDir } from "@/lib/admin/i18n";
 import { escapeHtml, type Mail } from "@/lib/mailer";
 import { SITE_URL as PUBLIC_SITE_URL } from "@/lib/seo";
 
@@ -101,6 +102,12 @@ function plain(title: string, groups: [string, string | null | undefined][][], l
 
 const LANG_AR: Record<string, string> = { ar: "العربية", ku: "الكردية", en: "الإنجليزية" };
 
+/** The visitor's message, laid out in the direction of the language they wrote in. */
+function messageBlock(text: string, locale: string, margin = "0") {
+  const dir = localeDir(locale);
+  return `<p dir="${dir}" style="margin:${margin};padding:16px;background:#f7f9fb;border-radius:6px;font-family:${FONT};font-size:15px;line-height:1.8;color:${NAVY};text-align:${dir === "rtl" ? "right" : "left"};white-space:pre-wrap;word-break:break-word">${escapeHtml(text)}</p>`;
+}
+
 // ---------------------------------------------------------------- contact
 
 export function contactEmail(m: {
@@ -135,7 +142,7 @@ export function contactEmail(m: {
     ) +
     section(
       "الرسالة",
-      `<p dir="auto" style="margin:0;padding:16px;background:#f7f9fb;border-radius:6px;font-family:${FONT};font-size:15px;line-height:1.8;color:${NAVY};white-space:pre-wrap;word-break:break-word">${escapeHtml(m.message)}</p>`,
+      messageBlock(m.message, m.locale),
     ) +
     `<tr><td style="padding:24px 32px">${button(dashboard, "فتح في لوحة التحكم", NAVY)}</td></tr>`;
 
@@ -215,7 +222,7 @@ ${productRows ? `<table role="presentation" width="100%" cellpadding="0" cellspa
         ["لغة الزائر", escapeHtml(LANG_AR[q.locale] ?? q.locale)],
       ])}</table>${
         q.message
-          ? `<p dir="auto" style="margin:12px 0 0 0;padding:16px;background:#f7f9fb;border-radius:6px;font-family:${FONT};font-size:15px;line-height:1.8;color:${NAVY};white-space:pre-wrap;word-break:break-word">${escapeHtml(q.message)}</p>`
+          ? messageBlock(q.message, q.locale, "12px 0 0 0")
           : ""
       }`,
     ) +

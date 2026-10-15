@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { setQuoteStatus } from "@/app/admin/actions";
 import { QUOTE_STATUSES, getQuoteRequest } from "@/lib/admin/data";
-import { formatAdminDate, localeName } from "@/lib/admin/i18n";
+import { formatAdminDate, localeDir, localeName } from "@/lib/admin/i18n";
 import { getAdminLang, getAdminT } from "@/lib/admin/lang";
 import { InboxDelete, MarkRead } from "@/components/admin/InboxItemActions";
 import { InboxStatusBadge, StatusForm } from "@/components/admin/InboxParts";
@@ -115,7 +115,7 @@ export default async function QuotePage({
         </Card>
         {quote.message && (
           <Card title={t.inbox.message}>
-            <p className={s.msgBody} dir="auto">
+            <p className={s.msgBody} dir={localeDir(quote.locale)}>
               {quote.message}
             </p>
           </Card>

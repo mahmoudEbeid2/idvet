@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CONTACT_STATUSES, listContactMessages } from "@/lib/admin/data";
-import { formatAdminDate } from "@/lib/admin/i18n";
+import { formatAdminDate, localeDir } from "@/lib/admin/i18n";
 import { getAdminLang, getAdminT } from "@/lib/admin/lang";
 import { Card, Notice, PageHeader } from "@/components/admin/ui";
 import { InboxFilters, InboxStatusBadge, MailFailedBadge } from "@/components/admin/InboxParts";
@@ -49,7 +49,7 @@ export default async function MessagesPage({
                         <b>
                           <bdi>{m.name}</bdi> <span className={`${s.rowSub} ${s.latin}`}>{m.email}</span>
                         </b>
-                        <span>
+                        <span dir={localeDir(m.locale)}>
                           {m.subject ? <b>{m.subject} · </b> : null}
                           {m.message}
                         </span>

@@ -906,6 +906,11 @@ export function formatAdminDate(date: Date, lang: AdminLang): string {
   }).format(date);
 }
 
+/** Text direction of a site locale: what the visitor wrote in ("en" → ltr, "ar"/"ku" → rtl). */
+export function localeDir(locale: string): "rtl" | "ltr" {
+  return locale === "en" ? "ltr" : "rtl";
+}
+
 /** A site locale ("ku" | "ar" | "en") as its name in the dashboard language. */
 export function localeName(locale: string, t: AdminMessages): string {
   const key = ({ ku: "Ku", ar: "Ar", en: "En" } as const)[locale as AdminLang];
