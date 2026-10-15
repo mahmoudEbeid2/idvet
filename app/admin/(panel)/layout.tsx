@@ -5,5 +5,5 @@ import { AdminShell } from "@/components/admin/AdminShell";
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
   const unread = await getUnreadCounts();
-  return <AdminShell unread={unread.total}>{children}</AdminShell>;
+  return <AdminShell unread={unread}>{children}</AdminShell>;
 }

@@ -161,28 +161,56 @@ export type AdminImage = AdminProduct["images"][number];
 
 // ---------------------------------------------------------------- inbox
 
-export type InboxKind = "message" | "quote";
+export const CONTACT_STATUSES = ["new", "read", "archived"] as const;
+export const QUOTE_STATUSES = ["new", "contacted", "closed"] as const;
+export type ContactStatusValue = (typeof CONTACT_STATUSES)[number];
+export type QuoteStatusValue = (typeof QUOTE_STATUSES)[number];
 
-/** Unread contact messages and quote requests, for the sidebar badge and tabs. */
+const isOneOf = <T extends string>(list: readonly T[], value: unknown): value is T =>
+  typeof value === "string" && (list as readonly string[]).includes(value);
+export const isContactStatus = (v: unknown): v is ContactStatusValue => isOneOf(CONTACT_STATUSES, v);
+export const isQuoteStatus = (v: unknown): v is QuoteStatusValue => isOneOf(QUOTE_STATUSES, v);
+
+/** New contact messages and unopened quote requests, for the sidebar badges. */
 export async function getUnreadCounts() {
   await requireAdmin();
   const [messages, quotes] = await Promise.all([
-    prisma.contactMessage.count({ where: { isRead: false } }),
-    prisma.quoteRequest.count({ where: { isRead: false } }),
+    prisma.contactMessage.count({ where: { status: "new" } }),
+    prisma.quoteRequest.count({ where: { readAt: null } }),
   ]);
-  return { messages, quotes, total: messages + quotes };
+  return { messages, quotes };
 }
 
-const INBOX_PAGE = 200;
+const INBOX_LIMIT = 300;
+const contains = (q: string) => ({ contains: q, mode: "insensitive" as const });
 
-export async function listContactMessages() {
+export type InboxFilter = { q?: string; status?: string };
+
+/** Newest first. Without a status filter, archived messages are left out. */
+export async function listContactMessages(filter: InboxFilter) {
   await requireAdmin();
-  return prisma.contactMessage.findMany({ orderBy: { createdAt: "desc" }, take: INBOX_PAGE });
+  const q = filter.q?.trim().slice(0, 100);
+  const where: Prisma.ContactMessageWhereInput = {
+    ...(isContactStatus(filter.status)
+      ? { status: filter.status }
+      : filter.status === "all"
+        ? {}
+        : { status: { not: "archived" } }),
+    ...(q ? { OR: (["name", "email", "phone", "subject", "message"] as const).map((f) => ({ [f]: contains(q) })) } : {}),
+  };
+  return prisma.contactMessage.findMany({ where, orderBy: { createdAt: "desc" }, take: INBOX_LIMIT });
 }
 
-export async function listQuoteRequests() {
+export async function listQuoteRequests(filter: InboxFilter) {
   await requireAdmin();
-  return prisma.quoteRequest.findMany({ orderBy: { createdAt: "desc" }, take: INBOX_PAGE });
+  const q = filter.q?.trim().slice(0, 100);
+  const where: Prisma.QuoteRequestWhereInput = {
+    ...(isQuoteStatus(filter.status) ? { status: filter.status } : {}),
+    ...(q
+      ? { OR: (["name", "contact", "productName", "company", "city"] as const).map((f) => ({ [f]: contains(q) })) }
+      : {}),
+  };
+  return prisma.quoteRequest.findMany({ where, orderBy: { createdAt: "desc" }, take: INBOX_LIMIT });
 }
 
 export async function getContactMessage(id: string) {

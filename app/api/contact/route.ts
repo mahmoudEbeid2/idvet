@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { sendMail } from "@/lib/mailer";
+import { sendContactMail } from "@/lib/mailer";
+import { contactEmail } from "@/lib/email/templates";
 
 const contactSchema = z.object({
   name: z.string().trim().min(2).max(100),
@@ -25,24 +26,16 @@ export async function POST(request: Request) {
 
   const { name, email, phone, subject, message, locale } = parsed.data;
 
-  // Saved first: the admin inbox has it even when the email can't be sent
-  // (sendMail logs and returns false instead of throwing).
-  const submission = await prisma.contactMessage.create({
+  // Saved first: the message is in the admin even when the email can't be sent.
+  const saved = await prisma.contactMessage.create({
     data: { name, email, phone: phone || null, subject: subject || null, message, locale },
   });
 
-  await sendMail({
-    subject: `Website contact form — ${subject ? `${subject} — ` : ""}${name}`,
-    replyTo: email,
-    rows: [
-      ["Name", name],
-      ["Email", email],
-      ["Phone", phone ?? ""],
-      ["Subject", subject ?? ""],
-      ["Message", message],
-      ["Language", locale],
-    ],
-  });
+  const result = await sendContactMail(contactEmail(saved));
+  await prisma.contactMessage
+    .update({ where: { id: saved.id }, data: result.sent ? { mailSent: true } : { mailError: result.error } })
+    .catch((error) => console.error("[contact] couldn't record mail status:", error));
 
-  return NextResponse.json({ id: submission.id }, { status: 201 });
+  // The visitor's message is stored either way, so a mail failure is still a success for them.
+  return NextResponse.json({ id: saved.id }, { status: 201 });
 }

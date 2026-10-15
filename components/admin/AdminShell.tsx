@@ -7,7 +7,9 @@ import { logout } from "@/app/admin/actions";
 import { AdminLangSwitch, useAdminLang, useAdminT } from "./AdminLang";
 import s from "./admin.module.css";
 
-function Nav({ unread, onNavigate }: { unread: number; onNavigate?: () => void }) {
+type Unread = { messages: number; quotes: number };
+
+function Nav({ unread, onNavigate }: { unread: Unread; onNavigate?: () => void }) {
   const pathname = usePathname();
   const t = useAdminT();
   const lang = useAdminLang();
@@ -15,7 +17,8 @@ function Nav({ unread, onNavigate }: { unread: number; onNavigate?: () => void }
     { href: "/admin", label: t.nav.home },
     { href: "/admin/products", label: t.nav.products },
     { href: "/admin/categories", label: t.nav.categories },
-    { href: "/admin/inbox", label: t.nav.inbox, count: unread },
+    { href: "/admin/messages", label: t.nav.messages, count: unread.messages },
+    { href: "/admin/quotes", label: t.nav.quotes, count: unread.quotes },
   ];
   return (
     <nav className={s.nav}>
@@ -51,7 +54,7 @@ function Logo() {
   );
 }
 
-export function AdminShell({ unread, children }: { unread: number; children: React.ReactNode }) {
+export function AdminShell({ unread, children }: { unread: Unread; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const t = useAdminT();
   return (

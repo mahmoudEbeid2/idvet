@@ -6,39 +6,64 @@ datasource db {
   provider = "postgresql"
 }
 
-/// Contact form submission (site footer/modal). Also emailed (lib/mailer.ts).
+/// Contact form submission (site footer/modal). Saved first, then emailed (lib/mailer.ts).
 model ContactMessage {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   name      String
   email     String
   phone     String?
   subject   String?
   message   String
   locale    String
-  /// Opened in the admin inbox.
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  /// "new" until opened in the admin; "archived" hides it from the default list.
+  status    ContactStatus @default(new)
+  mailSent  Boolean       @default(false)
+  /// Why the notification email failed (null when sent).
+  mailError String?
+  createdAt DateTime      @default(now())
 
+  @@index([status, createdAt])
   @@index([createdAt])
+}
+
+enum ContactStatus {
+  new
+  read
+  archived
 }
 
 /// "Request a quote" from a product page or card. Also emailed (lib/mailer.ts).
 model QuoteRequest {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   productId   String?
-  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  product     Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
   /// The product's name when the request was sent (kept if the product is deleted).
   productName String
   name        String
   /// Phone number or email, as typed.
   contact     String
   quantity    String
+  company     String?
+  city        String?
+  message     String?
   locale      String
-  /// Opened in the admin inbox.
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  /// Follow-up state, set by the team in the admin.
+  status      QuoteStatus @default(new)
+  /// First opened in the admin (null = unread).
+  readAt      DateTime?
+  mailSent    Boolean     @default(false)
+  /// Why the notification email failed (null when sent).
+  mailError   String?
+  createdAt   DateTime    @default(now())
 
   @@index([createdAt])
+  @@index([status, createdAt])
+}
+
+enum QuoteStatus {
+  new
+  contacted
+  closed
 }
 
 // Visitor-facing text is stored once per language (Ku/Ar/En). An empty

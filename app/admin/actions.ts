@@ -11,6 +11,7 @@ import { endSession, requireAdmin, startSession } from "@/lib/admin/session";
 import { adminConfig, safeEqual } from "@/lib/admin/token";
 import { ADMIN_LANG_COOKIE, isAdminLang } from "@/lib/admin/i18n";
 import { getAdminT } from "@/lib/admin/lang";
+import { isContactStatus, isQuoteStatus } from "@/lib/admin/data";
 import {
   PRESET_ICONS,
   SLUG_PATTERN,
@@ -266,25 +267,54 @@ export async function moveCertificate(id: string, direction: -1 | 1): Promise<vo
 
 // ---------------------------------------------------------------- inbox
 
-/** Marks a contact message or quote request as read (called when its page opens). */
-export async function markInboxRead(kind: string, id: string): Promise<void> {
+// Each change refreshes the panel layout too: it holds the sidebar's unread badges.
+
+/** Opening a new contact message marks it read. */
+export async function markMessageRead(id: string): Promise<void> {
   await requireAdmin();
-  const where = { id: String(id), isRead: false };
-  const { count } =
-    kind === "quote"
-      ? await prisma.quoteRequest.updateMany({ where, data: { isRead: true } })
-      : await prisma.contactMessage.updateMany({ where, data: { isRead: true } });
-  // Refresh the sidebar's unread badge (it lives in the panel layout).
+  const { count } = await prisma.contactMessage.updateMany({ where: { id: String(id), status: "new" }, data: { status: "read" } });
   if (count) revalidatePath("/admin", "layout");
 }
 
-export async function deleteInboxItem(kind: string, id: string): Promise<void> {
+/** Opening a quote request marks it read (its follow-up status is separate). */
+export async function markQuoteRead(id: string): Promise<void> {
   await requireAdmin();
-  const where = { id: String(id) };
-  if (kind === "quote") await prisma.quoteRequest.deleteMany({ where });
-  else await prisma.contactMessage.deleteMany({ where });
+  const { count } = await prisma.quoteRequest.updateMany({ where: { id: String(id), readAt: null }, data: { readAt: new Date() } });
+  if (count) revalidatePath("/admin", "layout");
+}
+
+export async function setMessageStatus(form: FormData): Promise<void> {
+  await requireAdmin();
+  const id = text(form, "id", 40);
+  const status = text(form, "status", 20);
+  if (!isContactStatus(status)) return;
+  await prisma.contactMessage.updateMany({ where: { id }, data: { status } });
   revalidatePath("/admin", "layout");
-  redirect(`/admin/inbox?tab=${kind === "quote" ? "quotes" : "messages"}&deleted=1`);
+  redirect(`/admin/messages/${id}?saved=1`);
+}
+
+export async function setQuoteStatus(form: FormData): Promise<void> {
+  await requireAdmin();
+  const id = text(form, "id", 40);
+  const status = text(form, "status", 20);
+  if (!isQuoteStatus(status)) return;
+  await prisma.quoteRequest.updateMany({ where: { id }, data: { status } });
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/quotes/${id}?saved=1`);
+}
+
+export async function deleteMessage(id: string): Promise<void> {
+  await requireAdmin();
+  await prisma.contactMessage.deleteMany({ where: { id: String(id) } });
+  revalidatePath("/admin", "layout");
+  redirect("/admin/messages?deleted=1");
+}
+
+export async function deleteQuote(id: string): Promise<void> {
+  await requireAdmin();
+  await prisma.quoteRequest.deleteMany({ where: { id: String(id) } });
+  revalidatePath("/admin", "layout");
+  redirect("/admin/quotes?deleted=1");
 }
 
 // ---------------------------------------------------------------- helpers

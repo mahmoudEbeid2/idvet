@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { sendMail } from "@/lib/mailer";
+import { sendQuoteMail } from "@/lib/mailer";
+import { quoteEmail } from "@/lib/email/templates";
 import { pick } from "@/lib/catalog/i18n";
-import { absoluteUrl } from "@/lib/seo";
+
+const optional = (max: number) => z.string().trim().max(max).optional().or(z.literal(""));
 
 const quoteSchema = z.object({
   productId: z.string().trim().max(40),
@@ -11,6 +13,9 @@ const quoteSchema = z.object({
   /** Phone number or email. */
   contact: z.string().trim().min(5).max(200),
   quantity: z.string().trim().min(1).max(100),
+  company: optional(150),
+  city: optional(100),
+  message: optional(2000),
   locale: z.enum(["ku", "ar", "en"]),
 });
 
@@ -21,29 +26,50 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid submission", issues: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { productId, name, contact, quantity, locale } = parsed.data;
-  const product = await prisma.product.findFirst({ where: { id: productId, published: true } });
+  const { productId, name, contact, quantity, company, city, message, locale } = parsed.data;
+  const product = await prisma.product.findFirst({
+    where: { id: productId, published: true },
+    include: { category: true, images: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], take: 1 } },
+  });
   if (!product) return NextResponse.json({ error: "Unknown product" }, { status: 404 });
 
-  // The email is read by the IDVET team: English name first, then the visitor's language.
+  // Stored with the English name (kept if the product is deleted later).
   const productName = pick(product, "name", "en") || product.code;
-  const quote = await prisma.quoteRequest.create({
-    data: { productId: product.id, productName, name, contact, quantity, locale },
+  const saved = await prisma.quoteRequest.create({
+    data: {
+      productId: product.id,
+      productName,
+      name,
+      contact,
+      quantity,
+      company: company || null,
+      city: city || null,
+      message: message || null,
+      locale,
+    },
   });
 
-  const isEmail = z.string().email().safeParse(contact).success;
-  await sendMail({
-    subject: `Quote request — ${productName} — ${name}`,
-    replyTo: isEmail ? contact : undefined,
-    rows: [
-      ["Product", [productName, product.code !== productName ? product.code : "", product.brand].filter(Boolean).join(" · ")],
-      ["Product page", absoluteUrl(`/${locale}/products/${product.slug}`)],
-      ["Name / company", name],
-      ["Phone or email", contact],
-      ["Quantity", quantity],
-      ["Language", locale],
-    ],
-  });
+  // The email is read by the IDVET team in Arabic.
+  const result = await sendQuoteMail(
+    quoteEmail({
+      ...saved,
+      product: {
+        name: pick(product, "name", "ar") || product.code,
+        code: product.code,
+        brand: product.brand,
+        category: pick(product.category, "name", "ar"),
+        summary: pick(product, "summary", "ar"),
+        dosageForm: pick(product, "dosageForm", "ar"),
+        packaging: pick(product, "packaging", "ar"),
+        species: pick(product, "species", "ar"),
+        slug: product.slug,
+        image: product.images[0]?.path ?? null,
+      },
+    }),
+  );
+  await prisma.quoteRequest
+    .update({ where: { id: saved.id }, data: result.sent ? { mailSent: true } : { mailError: result.error } })
+    .catch((error) => console.error("[quote] couldn't record mail status:", error));
 
-  return NextResponse.json({ id: quote.id }, { status: 201 });
+  return NextResponse.json({ id: saved.id }, { status: 201 });
 }
