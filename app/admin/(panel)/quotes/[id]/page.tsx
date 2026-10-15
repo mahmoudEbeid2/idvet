@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { z } from "zod";
 import { setQuoteStatus } from "@/app/admin/actions";
-import { QUOTE_STATUSES, getQuoteRequest } from "@/lib/admin/data";
+import { QUOTE_STATUSES, getQuoteRequest, listReplyTemplates } from "@/lib/admin/data";
+import { CUSTOMER_TEXT, customerLang, isEmailAddress, normalizePhone, telHref } from "@/lib/admin/replyKit";
+import { replyFromAddress } from "@/lib/mailer";
 import { formatAdminDate, localeDir, localeName } from "@/lib/admin/i18n";
 import { getAdminLang, getAdminT } from "@/lib/admin/lang";
 import { InboxDelete, MarkRead } from "@/components/admin/InboxItemActions";
 import { InboxStatusBadge, StatusForm } from "@/components/admin/InboxParts";
 import { QuoteProduct } from "@/components/admin/QuoteProduct";
+import { PhoneButtons, ReplyBox } from "@/components/admin/ReplyBox";
+import { ReplyHistory } from "@/components/admin/ReplyHistory";
 import { Card, Notice, PageHeader } from "@/components/admin/ui";
 import s from "@/components/admin/admin.module.css";
 
@@ -23,14 +26,15 @@ export default async function QuotePage({
   searchParams: Promise<{ saved?: string }>;
 }) {
   const [{ id }, { saved }] = await Promise.all([params, searchParams]);
-  const [quote, lang, t] = await Promise.all([getQuoteRequest(id), getAdminLang(), getAdminT()]);
+  const [quote, lang, t, templates] = await Promise.all([getQuoteRequest(id), getAdminLang(), getAdminT(), listReplyTemplates()]);
   if (!quote) notFound();
 
   // The visitor typed either a phone number or an email address.
-  const isEmail = z.string().email().safeParse(quote.contact).success;
-  const contactHref = isEmail
-    ? `mailto:${quote.contact}?subject=${encodeURIComponent(`Re: ${quote.productName}`)}`
-    : `tel:${quote.contact.replace(/[^\d+]/g, "")}`;
+  const email = isEmailAddress(quote.contact) ? quote.contact.trim() : null;
+  const phone = email ? null : normalizePhone(quote.contact);
+  const contactHref = email ? "#reply" : phone ? telHref(phone) : null;
+  const customer = CUSTOMER_TEXT[customerLang(quote.locale)];
+  const product = quote.customerProductName;
 
   const optionalRows: [string, string | null][] = [
     [t.inbox.quantity, quote.quantity],
@@ -46,9 +50,14 @@ export default async function QuotePage({
         description={t.inbox.quoteTitle}
         back={{ href: "/admin/quotes", label: `${t.common.backArrow} ${t.inbox.quotesTitle}` }}
         actions={
-          <a href={contactHref} className={`${s.btn} ${s.primary}`}>
-            {isEmail ? t.inbox.reply : t.inbox.call}
-          </a>
+          <>
+            {phone && <PhoneButtons kind="quote" id={quote.id} phone={phone} greeting={customer.whatsappQuote(quote.name, product)} />}
+            {email && (
+              <a href="#reply" className={`${s.btn} ${s.primary}`}>
+                {t.inbox.reply}
+              </a>
+            )}
+          </>
         }
       />
       <div className={s.stack}>
@@ -66,9 +75,13 @@ export default async function QuotePage({
             </dd>
             <dt>{t.inbox.contact}</dt>
             <dd className={s.latin}>
-              <a href={contactHref} className={s.link} dir="ltr">
-                {quote.contact}
-              </a>
+              {contactHref ? (
+                <a href={contactHref} className={s.link} dir="ltr">
+                  {quote.contact}
+                </a>
+              ) : (
+                <bdi>{quote.contact}</bdi>
+              )}
             </dd>
             {optionalRows.map(([label, value]) =>
               value ? (
@@ -104,6 +117,21 @@ export default async function QuotePage({
             </p>
           </Card>
         )}
+        <Card title={t.reply.title} description={email ? t.reply.quoteStatusNote : undefined} id="reply">
+          <ReplyBox
+            kind="quote"
+            id={quote.id}
+            email={email}
+            from={replyFromAddress()}
+            defaultSubject={customer.quoteSubject(product)}
+            placeholders={{ name: quote.name, product }}
+            templates={templates.map(({ id, lang, title, body }) => ({ id, lang, title, body }))}
+            customerLang={customerLang(quote.locale)}
+          />
+        </Card>
+        <Card title={t.reply.history}>
+          <ReplyHistory replies={quote.replies} lang={lang} t={t} />
+        </Card>
         <Card title={t.inbox.changeStatus}>
           <StatusForm
             id={quote.id}

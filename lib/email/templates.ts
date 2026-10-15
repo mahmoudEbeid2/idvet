@@ -1,6 +1,7 @@
 import { localeDir } from "@/lib/admin/i18n";
 import { escapeHtml, type Mail } from "@/lib/mailer";
 import { SITE_URL as PUBLIC_SITE_URL } from "@/lib/seo";
+import { CUSTOMER_TEXT, textDir, type CustomerLang } from "@/lib/admin/replyKit";
 
 // Notification emails for the IDVET team (Arabic, right-to-left). Built for
 // email clients: table layout, inline styles only, 600px wide, no CSS/JS files,
@@ -55,10 +56,31 @@ ${body}
 </td></tr>`;
 }
 
-/** The outer document: header with logo, the given rows, footer with company and date. */
-function layout({ title, preheader, body, date }: { title: string; preheader: string; body: string; date: Date }) {
+/**
+ * The outer document: header with logo, the given rows, footer with company
+ * and date. Arabic right-to-left unless `lang`/`dir` say otherwise; `footer`
+ * (escaped HTML) replaces the "automatic message" line.
+ */
+function layout({
+  title,
+  preheader,
+  body,
+  date,
+  lang = "ar",
+  dir = "rtl",
+  footer,
+}: {
+  title: string;
+  preheader: string;
+  body: string;
+  date: Date;
+  lang?: string;
+  dir?: "rtl" | "ltr";
+  footer?: string;
+}) {
+  const end = dir === "rtl" ? "left" : "right";
   return `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="${lang}" dir="${dir}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -69,17 +91,20 @@ function layout({ title, preheader, body, date }: { title: string; preheader: st
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(preheader)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f6f8" style="background:#f4f6f8">
 <tr><td align="center" style="padding:24px 12px">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" dir="rtl" style="width:100%;max-width:600px;background:#ffffff;border:1px solid ${LINE};border-radius:8px;border-collapse:separate">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" dir="${dir}" style="width:100%;max-width:600px;background:#ffffff;border:1px solid ${LINE};border-radius:8px;border-collapse:separate">
 <tr><td style="padding:24px 32px;border-bottom:3px solid ${BRAND}">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
 <td valign="middle"><a href="${escapeHtml(siteUrl())}" target="_blank"><img src="${escapeHtml(abs("/assets/email/idvet-logo.png"))}" width="98" height="56" alt="IDVET" style="display:block;border:0;outline:none"></a></td>
-<td valign="middle" align="left" style="font-family:${FONT};font-size:18px;font-weight:bold;color:${NAVY}">${escapeHtml(title)}</td>
+<td valign="middle" align="${end}" style="font-family:${FONT};font-size:18px;font-weight:bold;color:${NAVY}">${escapeHtml(title)}</td>
 </tr></table>
 </td></tr>
 ${body}
 <tr><td style="padding:24px 32px;border-top:1px solid ${LINE};font-family:${FONT};font-size:12px;line-height:1.7;color:${MUTED}">
-IDVET — ${escapeHtml(dateAr(date))}<br>
-هذه رسالة تلقائية من موقع <a href="${escapeHtml(siteUrl())}" target="_blank" style="color:${MUTED}">${escapeHtml(siteUrl().replace(/^https?:\/\//, ""))}</a>.
+${
+  footer ??
+  `IDVET — ${escapeHtml(dateAr(date))}<br>
+هذه رسالة تلقائية من موقع <a href="${escapeHtml(siteUrl())}" target="_blank" style="color:${MUTED}">${escapeHtml(siteUrl().replace(/^https?:\/\//, ""))}</a>.`
+}
 </td></tr>
 </table>
 </td></tr>
@@ -257,5 +282,114 @@ ${productRows ? `<table role="presentation" width="100%" cellpadding="0" cellspa
       ],
       q.createdAt,
     ),
+  };
+}
+
+// ---------------------------------------------------------------- reply to a customer
+
+/**
+ * The team's reply (admin inbox), sent to the customer from info@idvet.co:
+ * the reply in its own direction, then a summary of what the customer sent —
+ * for a quote, the product with its image and link. Labels in the customer's
+ * language; the admin's text is escaped and keeps its line breaks.
+ */
+export function replyEmail(r: {
+  subject: string;
+  body: string;
+  lang: CustomerLang;
+  original:
+    | {
+        kind: "quote";
+        createdAt: Date;
+        quantity?: string | null;
+        company?: string | null;
+        city?: string | null;
+        message?: string | null;
+        product: { name: string; code: string; slug: string | null; image: string | null };
+      }
+    | { kind: "message"; createdAt: Date; subject?: string | null; message: string };
+}): Mail {
+  const t = CUSTOMER_TEXT[r.lang];
+  const dir = textDir(r.body);
+  const align = dir === "rtl" ? "right" : "left";
+  const chromeDir = r.lang === "en" ? "ltr" : "rtl";
+  const o = r.original;
+  const date = new Intl.DateTimeFormat(r.lang === "ku" ? "ckb" : r.lang, {
+    dateStyle: "long",
+    timeZone: "Asia/Baghdad",
+  }).format(o.createdAt);
+
+  const reply = `<tr><td style="padding:24px 32px 8px 32px">
+<div dir="${dir}" style="font-family:${FONT};font-size:15px;line-height:1.9;color:${NAVY};text-align:${align};word-break:break-word">${escapeHtml(r.body).replace(/\n/g, "<br>")}</div>
+</td></tr>`;
+
+  let summary: string;
+  let summaryText: string[];
+  if (o.kind === "quote") {
+    const p = o.product;
+    const url = p.slug ? abs(`/${r.lang}/products/${p.slug}`) : null;
+    const img = p.image
+      ? `<td width="96" valign="top" style="width:96px;padding-${chromeDir === "rtl" ? "left" : "right"}:16px"><img src="${escapeHtml(abs(`/uploads/${p.image}?format=jpg`))}" width="96" height="96" alt="" style="display:block;width:96px;height:96px;object-fit:contain;border:1px solid ${LINE};border-radius:6px;background:#ffffff"></td>`
+      : "";
+    // The Latin trade name on its own LTR line: mixed into RTL text, its
+    // brackets and "%" get reordered by some mail clients.
+    const name = `<p style="margin:0;font-family:${FONT};font-size:16px;font-weight:bold;color:${NAVY}">${escapeHtml(p.name)}</p>${
+      p.code && p.code !== p.name
+        ? `<p dir="ltr" style="margin:2px 0 0 0;font-family:${FONT};font-size:13px;color:${MUTED};text-align:${chromeDir === "rtl" ? "right" : "left"}">${escapeHtml(p.code)}</p>`
+        : ""
+    }`;
+    const link = url
+      ? `<p style="margin:8px 0 0 0"><a href="${escapeHtml(url)}" target="_blank" style="font-family:${FONT};font-size:14px;font-weight:bold;color:${BRAND}">${escapeHtml(t.viewProduct)}</a></p>`
+      : "";
+    summary =
+      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ${LINE};border-radius:8px;border-collapse:separate"><tr><td style="padding:16px">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>${img}<td valign="top">${name}${link}</td></tr></table>
+</td></tr></table>` +
+      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px">${rows([
+        [t.quantity, o.quantity && escapeHtml(o.quantity)],
+        [t.company, o.company && escapeHtml(o.company)],
+        [t.city, o.city && escapeHtml(o.city)],
+        [t.sentOn, escapeHtml(date)],
+      ])}</table>` +
+      (o.message ? messageBlock(o.message, r.lang, "8px 0 0 0") : "");
+    summaryText = [
+      `${t.product}: ${p.name}${p.code && p.code !== p.name ? ` (${p.code})` : ""}`,
+      ...(url ? [url] : []),
+      ...([
+        [t.quantity, o.quantity],
+        [t.company, o.company],
+        [t.city, o.city],
+        [t.sentOn, date],
+      ] as const)
+        .filter(([, v]) => v)
+        .map(([l, v]) => `${l}: ${v}`),
+      ...(o.message ? ["", o.message] : []),
+    ];
+  } else {
+    summary =
+      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${rows([
+        [t.subject, o.subject && escapeHtml(o.subject)],
+        [t.sentOn, escapeHtml(date)],
+      ])}</table>` + messageBlock(o.message, r.lang, "8px 0 0 0");
+    summaryText = [...(o.subject ? [`${t.subject}: ${o.subject}`] : []), `${t.sentOn}: ${date}`, "", o.message];
+  }
+
+  const heading = o.kind === "quote" ? t.yourRequest : t.yourMessage;
+  const footer = `IDVET — <a href="mailto:info@idvet.co" style="color:${MUTED}">info@idvet.co</a> · <a href="${escapeHtml(
+    siteUrl(),
+  )}" target="_blank" style="color:${MUTED}">${escapeHtml(siteUrl().replace(/^https?:\/\//, ""))}</a><br>${escapeHtml(t.footer)}`;
+
+  return {
+    subject: r.subject,
+    html: layout({
+      title: t.heading,
+      preheader: r.body.slice(0, 120),
+      body: reply + section(heading, summary),
+      date: new Date(),
+      lang: r.lang === "ku" ? "ckb" : r.lang,
+      dir: chromeDir,
+      footer,
+    }),
+    text: [r.body, "", "—", "IDVET · info@idvet.co · " + siteUrl(), "", `----- ${heading} -----`, ...summaryText, ""].join("\n"),
   };
 }

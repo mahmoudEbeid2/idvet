@@ -7,6 +7,7 @@ import { uploadUrl } from "@/lib/storage";
 import type { AdminLang } from "./i18n";
 import { getAdminLang } from "./lang";
 import { requireAdmin } from "./session";
+import { customerLang } from "./replyKit";
 
 // Admin reads. Each one checks the session: layouts don't re-run on every
 // client navigation, so pages can't rely on the panel layout's check alone.
@@ -257,7 +258,7 @@ export async function listQuoteRequests(filter: InboxFilter) {
 
 export async function getContactMessage(id: string) {
   await requireAdmin();
-  return prisma.contactMessage.findUnique({ where: { id } });
+  return prisma.contactMessage.findUnique({ where: { id }, include: { replies: { orderBy: { sentAt: "asc" } } } });
 }
 
 export async function getQuoteRequest(id: string) {
@@ -269,12 +270,15 @@ export async function getQuoteRequest(id: string) {
       product: {
         include: { category: true, images: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] } },
       },
+      replies: { orderBy: { sentAt: "asc" } },
     },
   });
   if (!quote) return null;
   const { product, ...rest } = quote;
   return {
     ...rest,
+    /** The product's name in the customer's language (for the reply), falling back like the site. */
+    customerProductName: product ? pick(product, "name", customerLang(quote.locale)) || product.code : quote.productName,
     snapshotImage: quote.productImage ? uploadUrl(quote.productImage) : null,
     /** Null when the product was deleted after the request (the snapshot fields are kept). */
     product: product && quoteProductDetail(product, lang),
@@ -313,3 +317,17 @@ function quoteProductDetail(p: ProductForQuote, lang: AdminLang) {
 }
 
 export type QuoteProductDetail = ReturnType<typeof quoteProductDetail>;
+
+// ---------------------------------------------------------------- reply templates
+
+export async function listReplyTemplates() {
+  await requireAdmin();
+  return prisma.replyTemplate.findMany({ orderBy: [{ lang: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }] });
+}
+
+export async function getReplyTemplate(id: string) {
+  await requireAdmin();
+  return prisma.replyTemplate.findUnique({ where: { id } });
+}
+
+export type ReplyTemplateRow = Awaited<ReturnType<typeof listReplyTemplates>>[number];

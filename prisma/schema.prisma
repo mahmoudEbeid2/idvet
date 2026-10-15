@@ -20,6 +20,7 @@ model ContactMessage {
   mailSent  Boolean       @default(false)
   /// Why the notification email failed (null when sent).
   mailError String?
+  replies   Reply[]
   createdAt DateTime      @default(now())
 
   @@index([status, createdAt])
@@ -58,10 +59,56 @@ model QuoteRequest {
   mailSent     Boolean     @default(false)
   /// Why the notification email failed (null when sent).
   mailError    String?
+  replies      Reply[]
   createdAt    DateTime    @default(now())
 
   @@index([createdAt])
   @@index([status, createdAt])
+}
+
+/// The team's answer to a quote request or contact message, newest last on
+/// the item's page: an email sent from info@idvet.co, or a logged WhatsApp
+/// chat opened from the admin. Exactly one of quoteId / messageId is set.
+model Reply {
+  id        String          @id @default(cuid())
+  quoteId   String?
+  quote     QuoteRequest?   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  messageId String?
+  message   ContactMessage? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  channel   ReplyChannel    @default(email)
+  /// Email address or WhatsApp number it went to.
+  recipient String
+  subject   String          @default("")
+  body      String
+  /// The admin who sent it (ADMIN_EMAIL).
+  sentBy    String
+  sentAt    DateTime        @default(now())
+  mailSent  Boolean         @default(false)
+  /// Why the email failed (null when sent, and for WhatsApp).
+  mailError String?
+
+  @@index([quoteId, sentAt])
+  @@index([messageId, sentAt])
+}
+
+enum ReplyChannel {
+  email
+  whatsapp
+}
+
+/// Reusable reply text, picked in the reply box. {name} and {product} are
+/// filled in with the customer's name and the requested product.
+model ReplyTemplate {
+  id        String   @id @default(cuid())
+  /// "ar", "ku" or "en".
+  lang      String
+  title     String
+  body      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([lang, sortOrder])
 }
 
 enum QuoteStatus {

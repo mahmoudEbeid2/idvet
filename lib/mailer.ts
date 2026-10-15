@@ -132,5 +132,34 @@ async function send(kind: MailAccount, mail: Mail): Promise<MailResult> {
 export const sendContactMail = (mail: Mail) => send("contact", mail);
 export const sendQuoteMail = (mail: Mail) => send("quote", mail);
 
+/** The address replies go out from (shown in the reply box): the contact account. */
+export const replyFromAddress = () => process.env.CONTACT_SMTP_USER?.trim() || "info@idvet.co";
+
+/**
+ * The team's reply to a customer (admin inbox). Always from the contact
+ * account — info@idvet.co, never notification@ — with Reply-To that same
+ * address, so the customer's answer lands in the shared inbox.
+ */
+export async function sendCustomerReply(mail: Omit<Mail, "replyTo"> & { to: string }): Promise<MailResult> {
+  const acc = account("contact");
+  const transport = await getTransport("contact");
+  if (!acc || !transport) return { sent: false, error: "contact mailer (info@) not configured or SMTP login failed" };
+  try {
+    await transport.sendMail({
+      from: { name: "IDVET", address: acc.user },
+      to: mail.to,
+      replyTo: acc.user,
+      subject: mail.subject.replace(/[\r\n]+/g, " ").slice(0, 200),
+      text: mail.text,
+      html: mail.html,
+    });
+    return { sent: true };
+  } catch (error) {
+    console.error("[mailer] reply: sending failed:", (error as Error).message);
+    transports.delete("contact");
+    return { sent: false, error: String((error as Error).message ?? error).slice(0, 500) };
+  }
+}
+
 export const escapeHtml = (value: string) =>
   value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);

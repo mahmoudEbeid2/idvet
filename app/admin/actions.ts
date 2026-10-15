@@ -6,12 +6,16 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { deleteUpload, deleteUploadFolder, uploadPathFromUrl } from "@/lib/storage";
-import { clearLoginFailures, clientIp, loginBlockedFor, recordLoginFailure } from "@/lib/admin/rateLimit";
+import { clearLoginFailures, clientIp, loginBlockedFor, recordLoginFailure, takeReplySlot } from "@/lib/admin/rateLimit";
 import { endSession, requireAdmin, startSession } from "@/lib/admin/session";
 import { adminConfig, safeEqual } from "@/lib/admin/token";
 import { ADMIN_LANG_COOKIE, isAdminLang } from "@/lib/admin/i18n";
 import { getAdminT } from "@/lib/admin/lang";
 import { isContactStatus, isQuoteStatus } from "@/lib/admin/data";
+import { pick } from "@/lib/catalog/i18n";
+import { replyEmail } from "@/lib/email/templates";
+import { sendCustomerReply } from "@/lib/mailer";
+import { CUSTOMER_TEXT, customerLang, isEmailAddress, normalizePhone } from "@/lib/admin/replyKit";
 import {
   PRESET_ICONS,
   SLUG_PATTERN,
@@ -319,6 +323,189 @@ export async function deleteQuote(id: string): Promise<void> {
   }
   revalidatePath("/admin", "layout");
   redirect("/admin/quotes?deleted=1");
+}
+
+// ---------------------------------------------------------------- replies
+
+export interface ReplyState {
+  ok?: boolean;
+  /** Where the reply went (shown in the success notice). */
+  to?: string;
+  /** The saved reply, after a successful send. */
+  replyId?: string;
+  error?: string;
+  /** Extra detail after `error` (the SMTP error), shown as Latin text. */
+  detail?: string;
+  fields?: { subject: string; body: string };
+}
+
+const adminEmail = () => adminConfig()?.email ?? "admin";
+
+/**
+ * Emails the reply to the customer from info@idvet.co (lib/mailer.ts), records
+ * it in the item's history whether or not it went out, and on success moves a
+ * new quote to "contacted" / a new message to "read" (a closed quote or an
+ * archived message keeps its status).
+ */
+export async function sendReply(_prev: ReplyState, form: FormData): Promise<ReplyState> {
+  await requireAdmin();
+  const t = await getAdminT();
+  const kind = text(form, "kind", 10);
+  const id = text(form, "id", 40);
+  const subject = text(form, "subject", 200);
+  const body = text(form, "body", 10_000);
+  const fields = { subject, body };
+  if (!subject) return { error: t.reply.errSubject, fields };
+  if (!body) return { error: t.reply.errBody, fields };
+
+  let to: string | null = null;
+  let mail: ReturnType<typeof replyEmail>;
+  let path: string;
+  if (kind === "quote") {
+    const quote = await prisma.quoteRequest.findUnique({
+      where: { id },
+      include: { product: { include: { images: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], take: 1 } } } },
+    });
+    if (!quote) return { error: t.reply.errGone, fields };
+    to = isEmailAddress(quote.contact) ? quote.contact.trim() : null;
+    const lang = customerLang(quote.locale);
+    const p = quote.product;
+    mail = replyEmail({
+      subject,
+      body,
+      lang,
+      original: {
+        kind: "quote",
+        createdAt: quote.createdAt,
+        quantity: quote.quantity,
+        company: quote.company,
+        city: quote.city,
+        message: quote.message,
+        product: {
+          name: p ? pick(p, "name", lang) || p.code : quote.productName,
+          code: p?.code ?? "",
+          slug: p?.published ? p.slug : null,
+          image: p?.images[0]?.path ?? quote.productImage,
+        },
+      },
+    });
+    path = `/admin/quotes/${id}`;
+  } else if (kind === "message") {
+    const message = await prisma.contactMessage.findUnique({ where: { id } });
+    if (!message) return { error: t.reply.errGone, fields };
+    to = isEmailAddress(message.email) ? message.email.trim() : null;
+    mail = replyEmail({
+      subject,
+      body,
+      lang: customerLang(message.locale),
+      original: { kind: "message", createdAt: message.createdAt, subject: message.subject, message: message.message },
+    });
+    path = `/admin/messages/${id}`;
+  } else {
+    return { error: t.reply.errGone, fields };
+  }
+  if (!to) return { error: t.reply.noEmail, fields };
+
+  const wait = takeReplySlot();
+  if (wait) return { error: t.reply.errRateLimited(wait), fields };
+
+  const result = await sendCustomerReply({ ...mail, to });
+  const parent = kind === "quote" ? { quoteId: id } : { messageId: id };
+  const saved = await prisma.reply.create({
+    data: {
+      ...parent,
+      channel: "email",
+      recipient: to,
+      subject,
+      body,
+      sentBy: adminEmail(),
+      mailSent: result.sent,
+      mailError: result.sent ? null : result.error,
+    },
+  });
+  if (result.sent) {
+    if (kind === "quote") {
+      await prisma.quoteRequest.updateMany({
+        where: { id, status: { not: "closed" } },
+        data: { status: "contacted" },
+      });
+      await prisma.quoteRequest.updateMany({ where: { id, readAt: null }, data: { readAt: new Date() } });
+    } else {
+      await prisma.contactMessage.updateMany({ where: { id, status: "new" }, data: { status: "read" } });
+    }
+  }
+  revalidatePath(path);
+  revalidatePath("/admin", "layout");
+  return result.sent ? { ok: true, to, replyId: saved.id } : { error: t.reply.errSend, detail: result.error, fields };
+}
+
+/**
+ * Logs a WhatsApp chat opened from the item's page (the link itself opens on
+ * the admin's device; nothing is sent from here). Repeated clicks within a
+ * minute are logged once.
+ */
+export async function logWhatsApp(kind: string, id: string): Promise<void> {
+  await requireAdmin();
+  id = String(id).slice(0, 40);
+  let phone: string | null = null;
+  let note = "";
+  if (kind === "quote") {
+    const quote = await prisma.quoteRequest.findUnique({ where: { id }, include: { product: true } });
+    if (!quote) return;
+    phone = normalizePhone(quote.contact);
+    const lang = customerLang(quote.locale);
+    const product = quote.product ? pick(quote.product, "name", lang) || quote.product.code : quote.productName;
+    note = CUSTOMER_TEXT[lang].whatsappQuote(quote.name, product);
+  } else if (kind === "message") {
+    const message = await prisma.contactMessage.findUnique({ where: { id } });
+    if (!message) return;
+    phone = normalizePhone(message.phone);
+    note = CUSTOMER_TEXT[customerLang(message.locale)].whatsappMessage(message.name);
+  }
+  if (!phone) return;
+  const parent = kind === "quote" ? { quoteId: id } : { messageId: id };
+  const recent = await prisma.reply.findFirst({
+    where: { ...parent, channel: "whatsapp", sentAt: { gt: new Date(Date.now() - 60_000) } },
+    select: { id: true },
+  });
+  if (recent) return;
+  await prisma.reply.create({ data: { ...parent, channel: "whatsapp", recipient: phone, body: note, sentBy: adminEmail() } });
+  revalidatePath(kind === "quote" ? `/admin/quotes/${id}` : `/admin/messages/${id}`);
+}
+
+// ---------------------------------------------------------------- reply templates
+
+const TEMPLATE_LANGS = ["ar", "ku", "en"];
+
+export async function saveReplyTemplate(_prev: FormState, form: FormData): Promise<FormState> {
+  await requireAdmin();
+  const t = await getAdminT();
+  const id = text(form, "id", 40);
+  const data = {
+    lang: text(form, "lang", 4),
+    title: text(form, "title", 120),
+    body: text(form, "body", 5000),
+    sortOrder: int(form, "sortOrder"),
+  };
+  const fields = fieldsOf(form);
+  if (!TEMPLATE_LANGS.includes(data.lang)) return { error: t.templates.errLang, fields };
+  if (!data.title) return { error: t.templates.errTitle, fields };
+  if (!data.body) return { error: t.templates.errBody, fields };
+  if (id) {
+    const { count } = await prisma.replyTemplate.updateMany({ where: { id }, data });
+    if (!count) return { error: t.reply.errGone, fields };
+  } else {
+    await prisma.replyTemplate.create({ data });
+  }
+  revalidatePath("/admin/reply-templates");
+  redirect("/admin/reply-templates?saved=1");
+}
+
+export async function deleteReplyTemplate(id: string): Promise<void> {
+  await requireAdmin();
+  await prisma.replyTemplate.deleteMany({ where: { id: String(id) } });
+  revalidatePath("/admin/reply-templates");
+  redirect("/admin/reply-templates?deleted=1");
 }
 
 // ---------------------------------------------------------------- helpers

@@ -44,3 +44,21 @@ export function clientIp(headers: Headers): string {
     "unknown"
   );
 }
+
+// Reply emails (admin inbox): at most REPLY_BURST per 10 minutes and
+// REPLY_DAILY per day, so a stuck button or a stolen session can't turn
+// info@idvet.co into a spam source.
+const REPLY_BURST = 15;
+const REPLY_DAILY = 150;
+const replyLog: number[] = [];
+
+/** Minutes until another reply may be sent, or 0 (and the send is counted). */
+export function takeReplySlot(now = Date.now()): number {
+  const day = now - 24 * 60 * 60 * 1000;
+  while (replyLog.length && replyLog[0] <= day) replyLog.shift();
+  const recent = replyLog.filter((t) => t > now - 10 * 60 * 1000);
+  if (recent.length >= REPLY_BURST) return Math.ceil((recent[0] + 10 * 60 * 1000 - now) / 60000);
+  if (replyLog.length >= REPLY_DAILY) return Math.ceil((replyLog[0] + 24 * 60 * 60 * 1000 - now) / 60000);
+  replyLog.push(now);
+  return 0;
+}

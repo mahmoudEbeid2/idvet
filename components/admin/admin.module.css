@@ -1455,3 +1455,40 @@ span.qpImg {
     max-width: 260px;
   }
 }
+
+/* ---------- Replies (components/admin/ReplyBox.tsx, ReplyHistory.tsx) ---------- */
+.whatsapp {
+  background: #1f9d55;
+  color: #fff;
+}
+.whatsapp:hover {
+  background: #188046;
+}
+.replies {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.reply {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  min-width: 0;
+}
+.replyHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 14px;
+}
+.replySubject {
+  font-weight: 600;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}

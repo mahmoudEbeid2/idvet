@@ -19,6 +19,7 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
     { href: "/admin/categories", label: t.nav.categories },
     { href: "/admin/messages", label: t.nav.messages, count: unread.messages },
     { href: "/admin/quotes", label: t.nav.quotes, count: unread.quotes },
+    { href: "/admin/reply-templates", label: t.nav.replyTemplates },
   ];
   return (
     <nav className={s.nav}>

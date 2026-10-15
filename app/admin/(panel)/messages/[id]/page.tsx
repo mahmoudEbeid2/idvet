@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { setMessageStatus } from "@/app/admin/actions";
-import { CONTACT_STATUSES, getContactMessage } from "@/lib/admin/data";
+import { CONTACT_STATUSES, getContactMessage, listReplyTemplates } from "@/lib/admin/data";
+import { CUSTOMER_TEXT, customerLang, isEmailAddress, normalizePhone, telHref } from "@/lib/admin/replyKit";
+import { replyFromAddress } from "@/lib/mailer";
 import { formatAdminDate, localeDir, localeName } from "@/lib/admin/i18n";
 import { getAdminLang, getAdminT } from "@/lib/admin/lang";
 import { InboxDelete, MarkRead } from "@/components/admin/InboxItemActions";
 import { InboxStatusBadge, StatusForm } from "@/components/admin/InboxParts";
+import { PhoneButtons, ReplyBox } from "@/components/admin/ReplyBox";
+import { ReplyHistory } from "@/components/admin/ReplyHistory";
 import { Card, Notice, PageHeader } from "@/components/admin/ui";
 import s from "@/components/admin/admin.module.css";
 
@@ -21,11 +25,19 @@ export default async function MessagePage({
   searchParams: Promise<{ saved?: string }>;
 }) {
   const [{ id }, { saved }] = await Promise.all([params, searchParams]);
-  const [message, lang, t] = await Promise.all([getContactMessage(id), getAdminLang(), getAdminT()]);
+  const [message, lang, t, templates] = await Promise.all([
+    getContactMessage(id),
+    getAdminLang(),
+    getAdminT(),
+    listReplyTemplates(),
+  ]);
   if (!message) notFound();
   // Opening it marks it read (MarkRead); show it as such right away.
   const status = message.status === "new" ? "read" : message.status;
-  const tel = message.phone ? `tel:${message.phone.replace(/[^\d+]/g, "")}` : null;
+  const phone = normalizePhone(message.phone);
+  const tel = phone ? telHref(phone) : null;
+  const email = isEmailAddress(message.email) ? message.email.trim() : null;
+  const customer = CUSTOMER_TEXT[customerLang(message.locale)];
 
   return (
     <>
@@ -35,17 +47,12 @@ export default async function MessagePage({
         back={{ href: "/admin/messages", label: `${t.common.backArrow} ${t.inbox.messagesTitle}` }}
         actions={
           <>
-            {tel && (
-              <a href={tel} className={`${s.btn} ${s.secondary}`}>
-                {t.inbox.call}
+            {phone && <PhoneButtons kind="message" id={message.id} phone={phone} greeting={customer.whatsappMessage(message.name)} />}
+            {email && (
+              <a href="#reply" className={`${s.btn} ${s.primary}`}>
+                {t.inbox.reply}
               </a>
             )}
-            <a
-              href={`mailto:${message.email}?subject=${encodeURIComponent(`Re: ${message.subject || "IDVET"}`)}`}
-              className={`${s.btn} ${s.primary}`}
-            >
-              {t.inbox.reply}
-            </a>
           </>
         }
       />
@@ -64,9 +71,13 @@ export default async function MessagePage({
             </dd>
             <dt>{t.inbox.email}</dt>
             <dd className={s.latin}>
-              <a href={`mailto:${message.email}`} className={s.link}>
-                {message.email}
-              </a>
+              {email ? (
+                <a href="#reply" className={s.link}>
+                  {message.email}
+                </a>
+              ) : (
+                <bdi>{message.email}</bdi>
+              )}
             </dd>
             {tel && (
               <>
@@ -96,6 +107,21 @@ export default async function MessagePage({
           <p className={s.msgBody} dir={localeDir(message.locale)}>
             {message.message}
           </p>
+        </Card>
+        <Card title={t.reply.title} description={email ? t.reply.messageStatusNote : undefined} id="reply">
+          <ReplyBox
+            kind="message"
+            id={message.id}
+            email={email}
+            from={replyFromAddress()}
+            defaultSubject={customer.messageSubject(message.subject ?? "")}
+            placeholders={{ name: message.name, product: message.subject ?? "" }}
+            templates={templates.map(({ id, lang, title, body }) => ({ id, lang, title, body }))}
+            customerLang={customerLang(message.locale)}
+          />
+        </Card>
+        <Card title={t.reply.history}>
+          <ReplyHistory replies={message.replies} lang={lang} t={t} />
         </Card>
         <Card title={t.inbox.changeStatus}>
           <StatusForm
