@@ -30,7 +30,7 @@ export function ProductPage({
   const brandHref = product.brandSlug ? `${base}?brand=${encodeURIComponent(product.brandSlug)}` : "";
   const brand = knownBrand(product.brand);
   const code = product.code && product.code !== product.name ? product.code : "";
-  const quote = { id: product.id, name: product.name, code };
+  const quote = { id: product.id, name: product.name, code, image: product.images[0]?.src };
   const whatsappHref = `https://wa.me/${site.contact.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
     t.whatsappMessage.replace("{name}", code ? `${product.name} (${code})` : product.name),
   )}`;

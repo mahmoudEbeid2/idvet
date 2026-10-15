@@ -198,6 +198,12 @@ export interface SiteContent {
     quoteSuccess: string;
     quoteError: string;
     quoteCancel: string;
+    /** Shown above quoteSuccess once the request is sent. */
+    quoteSuccessTitle: string;
+    /** Inline validation messages under the quote form's fields. */
+    quoteErrRequired: string;
+    quoteErrName: string;
+    quoteErrContact: string;
   };
   gallery: {
     title: string;

@@ -88,7 +88,12 @@ export function ProductCard({ product, site }: { product: ProductCardView; site:
         {product.summary && <p className={s.pCardDesc}>{product.summary}</p>}
         <div className={s.pCardFoot}>
           <QuoteButton
-            product={{ id: product.id, name: product.name, code: product.code !== product.name ? product.code : "" }}
+            product={{
+              id: product.id,
+              name: product.name,
+              code: product.code !== product.name ? product.code : "",
+              image: product.image?.src,
+            }}
             locale={site.locale}
             labels={quoteLabels(t)}
             className={s.pCardQuote}

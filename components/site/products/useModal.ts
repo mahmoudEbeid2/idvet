@@ -3,10 +3,11 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Shared modal behaviour: focus the close button on open, close on Escape,
- * lock page scroll, and give focus back to whatever opened the modal.
+ * Shared modal behaviour: focus `focusRef` (usually the close button) on
+ * open, close on Escape, lock page scroll, and give focus back to whatever
+ * opened the modal.
  */
-export function useModal(closeRef: React.RefObject<HTMLElement | null>, onClose: () => void) {
+export function useModal(focusRef: React.RefObject<HTMLElement | null>, onClose: () => void) {
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -16,7 +17,7 @@ export function useModal(closeRef: React.RefObject<HTMLElement | null>, onClose:
     const opener = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
+    focusRef.current?.focus();
 
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onCloseRef.current();
@@ -27,5 +28,5 @@ export function useModal(closeRef: React.RefObject<HTMLElement | null>, onClose:
       document.body.style.overflow = overflow;
       opener?.focus?.();
     };
-  }, [closeRef]);
+  }, [focusRef]);
 }

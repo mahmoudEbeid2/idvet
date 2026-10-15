@@ -17,6 +17,10 @@ const KEYS = [
   "quoteSuccess",
   "quoteError",
   "quoteCancel",
+  "quoteSuccessTitle",
+  "quoteErrRequired",
+  "quoteErrName",
+  "quoteErrContact",
   "close",
 ] as const;
 
