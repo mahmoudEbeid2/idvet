@@ -170,6 +170,10 @@ export interface SiteContent {
     quoteContact: string;
     quoteQuantity: string;
     quoteQuantityPlaceholder: string;
+    quoteCompany: string;
+    quoteCity: string;
+    /** Marks a field that can be left empty. */
+    quoteOptional: string;
     quoteSend: string;
     quoteSending: string;
     quoteSuccess: string;
@@ -223,6 +227,7 @@ export interface SiteContent {
     name: string;
     email: string;
     phone: string;
+    subject: string;
     message: string;
     submit: string;
     submitting: string;

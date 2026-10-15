@@ -33,6 +33,7 @@ export default async function QuotePage({
     : `tel:${quote.contact.replace(/[^\d+]/g, "")}`;
 
   const optionalRows: [string, string | null][] = [
+    [t.inbox.quantity, quote.quantity],
     [t.inbox.company, quote.company],
     [t.inbox.city, quote.city],
   ];
@@ -97,10 +98,6 @@ export default async function QuotePage({
                 </div>
               ) : null,
             )}
-            <dt>{t.inbox.quantity}</dt>
-            <dd>
-              <bdi>{quote.quantity}</bdi>
-            </dd>
             <dt>{t.inbox.status}</dt>
             <dd>
               <InboxStatusBadge status={quote.status} label={t.inbox.quoteStatus[quote.status]} />

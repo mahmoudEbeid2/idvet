@@ -12,7 +12,7 @@ const quoteSchema = z.object({
   name: z.string().trim().min(2).max(100),
   /** Phone number or email. */
   contact: z.string().trim().min(5).max(200),
-  quantity: z.string().trim().min(1).max(100),
+  quantity: optional(100),
   company: optional(150),
   city: optional(100),
   message: optional(2000),
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       productName,
       name,
       contact,
-      quantity,
+      quantity: quantity || null,
       company: company || null,
       city: city || null,
       message: message || null,

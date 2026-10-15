@@ -42,7 +42,7 @@ model QuoteRequest {
   name        String
   /// Phone number or email, as typed.
   contact     String
-  quantity    String
+  quantity    String?
   company     String?
   city        String?
   message     String?

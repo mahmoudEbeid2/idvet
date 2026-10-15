@@ -46,7 +46,8 @@ export default async function QuotesPage({
                           <bdi>{r.name}</bdi> <span className={s.rowSub}>· <bdi>{r.productName}</bdi></span>
                         </b>
                         <span>
-                          <bdi>{r.contact}</bdi> · {t.inbox.quantity}: <bdi>{r.quantity}</bdi>
+                          <bdi>{r.contact}</bdi>
+                          {r.quantity ? <> · {t.inbox.quantity}: <bdi>{r.quantity}</bdi></> : null}
                           {r.company ? <> · <bdi>{r.company}</bdi></> : null}
                         </span>
                       </span>

@@ -12,8 +12,9 @@ import s from "./catalog.module.css";
 type QuoteProduct = { id: string; name: string; code?: string };
 
 /**
- * "Request a quote" for one product: opens a small form (name, phone or email,
- * quantity) that posts to /api/quote, which stores it and emails info@idvet.co.
+ * "Request a quote" for one product: opens a small form (name, phone or email;
+ * optional quantity, company, city) that posts to /api/quote, which stores it
+ * and emails notification@idvet.co.
  */
 export function QuoteButton({
   product,
@@ -70,6 +71,8 @@ function QuoteModal({
           name: form.get("name"),
           contact: form.get("contact"),
           quantity: form.get("quantity"),
+          company: form.get("company"),
+          city: form.get("city"),
           locale,
         }),
       });
@@ -128,9 +131,19 @@ function QuoteModal({
               <input name="contact" required minLength={5} maxLength={200} dir="ltr" />
             </label>
             <label>
-              <span>{labels.quoteQuantity}</span>
-              <input name="quantity" required maxLength={100} placeholder={labels.quoteQuantityPlaceholder} />
+              <Optional label={labels.quoteQuantity} hint={labels.quoteOptional} />
+              <input name="quantity" maxLength={100} placeholder={labels.quoteQuantityPlaceholder} />
             </label>
+            <div className={s.qmPair}>
+              <label>
+                <Optional label={labels.quoteCompany} hint={labels.quoteOptional} />
+                <input name="company" maxLength={150} autoComplete="organization" />
+              </label>
+              <label>
+                <Optional label={labels.quoteCity} hint={labels.quoteOptional} />
+                <input name="city" maxLength={100} autoComplete="address-level2" />
+              </label>
+            </div>
             {status === "error" && (
               <p className={s.qmError} role="alert">
                 {labels.quoteError}
@@ -149,5 +162,13 @@ function QuoteModal({
       </div>
     </div>,
     document.body,
+  );
+}
+
+function Optional({ label, hint }: { label: string; hint: string }) {
+  return (
+    <span>
+      {label} <span className={s.qmOptional}>({hint})</span>
+    </span>
   );
 }

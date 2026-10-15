@@ -1656,6 +1656,20 @@ a.secMeta {
   font-weight: 400;
   color: var(--ink);
 }
+.qmOptional {
+  font-weight: 400;
+  color: var(--muted);
+}
+.qmPair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 420px) {
+  .qmPair {
+    grid-template-columns: 1fr;
+  }
+}
 .qmForm input:focus {
   outline: none;
   border-color: var(--brand-500);

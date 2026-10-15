@@ -160,7 +160,7 @@ export function quoteEmail(q: {
   id: string;
   name: string;
   contact: string;
-  quantity: string;
+  quantity?: string | null;
   company?: string | null;
   city?: string | null;
   message?: string | null;
@@ -218,7 +218,7 @@ ${productRows ? `<table role="presentation" width="100%" cellpadding="0" cellspa
         ["البريد", email && `<a href="mailto:${escapeHtml(email)}" style="color:${BRAND}" dir="ltr">${escapeHtml(email)}</a>`],
         ["الشركة", q.company && escapeHtml(q.company)],
         ["المدينة", q.city && escapeHtml(q.city)],
-        ["الكمية", `<b>${escapeHtml(q.quantity)}</b>`],
+        ["الكمية", q.quantity && `<b>${escapeHtml(q.quantity)}</b>`],
         ["لغة الزائر", escapeHtml(LANG_AR[q.locale] ?? q.locale)],
       ])}</table>${
         q.message
@@ -231,7 +231,7 @@ ${productRows ? `<table role="presentation" width="100%" cellpadding="0" cellspa
   return {
     subject: `طلب عرض سعر: ${p.name} — ${q.name}`,
     replyTo: email ?? undefined,
-    html: layout({ title, preheader: `${q.name} — ${p.name} — ${q.quantity}`, body, date: q.createdAt }),
+    html: layout({ title, preheader: [q.name, p.name, q.quantity].filter(Boolean).join(" — "), body, date: q.createdAt }),
     text: plain(
       title,
       [

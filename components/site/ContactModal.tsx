@@ -42,6 +42,7 @@ export function ContactModal({
           name: formData.get("name"),
           email: formData.get("email"),
           phone: formData.get("phone"),
+          subject: formData.get("subject"),
           message: formData.get("message"),
           locale,
         }),
@@ -88,6 +89,7 @@ export function ContactModal({
               name="name"
               required
               minLength={2}
+              maxLength={100}
               placeholder={form.name}
               className="rounded-lg border border-[#d9d9d9] px-4 py-3 text-sm outline-none focus:border-[#006eb3]"
             />
@@ -105,10 +107,17 @@ export function ContactModal({
               className="rounded-lg border border-[#d9d9d9] px-4 py-3 text-sm outline-none focus:border-[#006eb3]"
               dir="ltr"
             />
+            <input
+              name="subject"
+              maxLength={200}
+              placeholder={form.subject}
+              className="rounded-lg border border-[#d9d9d9] px-4 py-3 text-sm outline-none focus:border-[#006eb3]"
+            />
             <textarea
               name="message"
               required
               minLength={10}
+              maxLength={2000}
               rows={4}
               placeholder={form.message}
               className="resize-none rounded-lg border border-[#d9d9d9] px-4 py-3 text-sm outline-none focus:border-[#006eb3]"
