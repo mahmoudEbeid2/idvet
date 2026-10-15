@@ -7,7 +7,7 @@ import { logout } from "@/app/admin/actions";
 import { AdminLangSwitch, useAdminLang, useAdminT } from "./AdminLang";
 import s from "./admin.module.css";
 
-function Nav({ onNavigate }: { onNavigate?: () => void }) {
+function Nav({ unread, onNavigate }: { unread: number; onNavigate?: () => void }) {
   const pathname = usePathname();
   const t = useAdminT();
   const lang = useAdminLang();
@@ -15,6 +15,7 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
     { href: "/admin", label: t.nav.home },
     { href: "/admin/products", label: t.nav.products },
     { href: "/admin/categories", label: t.nav.categories },
+    { href: "/admin/inbox", label: t.nav.inbox, count: unread },
   ];
   return (
     <nav className={s.nav}>
@@ -23,6 +24,11 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
         return (
           <Link key={link.href} href={link.href} aria-current={active ? "page" : undefined} onClick={onNavigate}>
             {link.label}
+            {link.count ? (
+              <span className={s.navCount} aria-label={t.inbox.unreadCount(link.count)}>
+                {link.count > 99 ? "99+" : link.count}
+              </span>
+            ) : null}
           </Link>
         );
       })}
@@ -45,7 +51,7 @@ function Logo() {
   );
 }
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({ unread, children }: { unread: number; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const t = useAdminT();
   return (
@@ -62,7 +68,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className={s.sideLang}>
           <AdminLangSwitch />
         </div>
-        <Nav onNavigate={() => setOpen(false)} />
+        <Nav unread={unread} onNavigate={() => setOpen(false)} />
       </div>
       <div className={s.shell}>
         <aside className={s.side}>
@@ -73,7 +79,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <div className={s.sideLang}>
             <AdminLangSwitch />
           </div>
-          <Nav />
+          <Nav unread={unread} />
         </aside>
         <main className={s.main}>
           <div className={s.container}>{children}</div>

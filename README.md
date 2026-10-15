@@ -97,7 +97,7 @@ ever come from the container environment.
   contact modal
 - `lib/content/` — typed per-locale copy (`ku.ts`, `ar.ts`) consumed by every section component
 - `app/api/contact/route.ts` — validates (Zod) and persists contact form submissions
-- `prisma/schema.prisma` — `ContactSubmission`, `Category`, `Product`, `ProductImage`, `Certificate`
+- `prisma/schema.prisma` — `ContactMessage`, `QuoteRequest`, `Category`, `Product`, `ProductImage`, `Certificate`
 - `public/assets/` — images/icons exported from Figma
 
 ## Design fidelity notes

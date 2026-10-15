@@ -6,14 +6,20 @@ datasource db {
   provider = "postgresql"
 }
 
-model ContactSubmission {
+/// Contact form submission (site footer/modal). Also emailed (lib/mailer.ts).
+model ContactMessage {
   id        String   @id @default(cuid())
   name      String
   email     String
   phone     String?
+  subject   String?
   message   String
   locale    String
+  /// Opened in the admin inbox.
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 /// "Request a quote" from a product page or card. Also emailed (lib/mailer.ts).
@@ -28,6 +34,8 @@ model QuoteRequest {
   contact     String
   quantity    String
   locale      String
+  /// Opened in the admin inbox.
+  isRead      Boolean  @default(false)
   createdAt   DateTime @default(now())
 
   @@index([createdAt])

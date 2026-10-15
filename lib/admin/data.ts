@@ -158,3 +158,56 @@ export async function getAdminProduct(id: string) {
 export type AdminProduct = NonNullable<Awaited<ReturnType<typeof getAdminProduct>>>;
 export type AdminCertificate = AdminProduct["certificates"][number];
 export type AdminImage = AdminProduct["images"][number];
+
+// ---------------------------------------------------------------- inbox
+
+export type InboxKind = "message" | "quote";
+
+/** Unread contact messages and quote requests, for the sidebar badge and tabs. */
+export async function getUnreadCounts() {
+  await requireAdmin();
+  const [messages, quotes] = await Promise.all([
+    prisma.contactMessage.count({ where: { isRead: false } }),
+    prisma.quoteRequest.count({ where: { isRead: false } }),
+  ]);
+  return { messages, quotes, total: messages + quotes };
+}
+
+const INBOX_PAGE = 200;
+
+export async function listContactMessages() {
+  await requireAdmin();
+  return prisma.contactMessage.findMany({ orderBy: { createdAt: "desc" }, take: INBOX_PAGE });
+}
+
+export async function listQuoteRequests() {
+  await requireAdmin();
+  return prisma.quoteRequest.findMany({ orderBy: { createdAt: "desc" }, take: INBOX_PAGE });
+}
+
+export async function getContactMessage(id: string) {
+  await requireAdmin();
+  return prisma.contactMessage.findUnique({ where: { id } });
+}
+
+export async function getQuoteRequest(id: string) {
+  await requireAdmin();
+  const lang = await getAdminLang();
+  const quote = await prisma.quoteRequest.findUnique({
+    where: { id },
+    include: { product: { select: { id: true, slug: true, code: true, published: true, nameKu: true, nameAr: true, nameEn: true } } },
+  });
+  if (!quote) return null;
+  const { product, ...rest } = quote;
+  return {
+    ...rest,
+    /** Null when the product was deleted after the request (productName is kept). */
+    product: product && {
+      id: product.id,
+      name: pick(product, "name", lang) || product.code,
+      published: product.published,
+      /** Public page, in the language the visitor used. */
+      href: `/${quote.locale}/products/${product.slug}`,
+    },
+  };
+}

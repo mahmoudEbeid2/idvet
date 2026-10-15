@@ -2,6 +2,7 @@
 
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { deleteUpload, deleteUploadFolder, uploadPathFromUrl } from "@/lib/storage";
@@ -261,6 +262,29 @@ export async function moveCertificate(id: string, direction: -1 | 1): Promise<vo
   await reorder(siblings.map((s) => s.id), certificate.id, direction, (rowId, sortOrder) =>
     prisma.certificate.update({ where: { id: rowId }, data: { sortOrder } }),
   );
+}
+
+// ---------------------------------------------------------------- inbox
+
+/** Marks a contact message or quote request as read (called when its page opens). */
+export async function markInboxRead(kind: string, id: string): Promise<void> {
+  await requireAdmin();
+  const where = { id: String(id), isRead: false };
+  const { count } =
+    kind === "quote"
+      ? await prisma.quoteRequest.updateMany({ where, data: { isRead: true } })
+      : await prisma.contactMessage.updateMany({ where, data: { isRead: true } });
+  // Refresh the sidebar's unread badge (it lives in the panel layout).
+  if (count) revalidatePath("/admin", "layout");
+}
+
+export async function deleteInboxItem(kind: string, id: string): Promise<void> {
+  await requireAdmin();
+  const where = { id: String(id) };
+  if (kind === "quote") await prisma.quoteRequest.deleteMany({ where });
+  else await prisma.contactMessage.deleteMany({ where });
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/inbox?tab=${kind === "quote" ? "quotes" : "messages"}&deleted=1`);
 }
 
 // ---------------------------------------------------------------- helpers
