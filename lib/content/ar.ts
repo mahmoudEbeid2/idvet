@@ -5,10 +5,12 @@ export const ar: Omit<SiteContent, "languages"> = {
   htmlLang: "ar",
   nav: {
     contact: "تواصل معنا",
-    brands: "علاماتنا",
+    brands: "العلامات التجارية",
     services: "خدماتنا",
-    about: "عن الشركة",
+    about: "من نحن",
     products: "منتجاتنا",
+    menu: "القائمة",
+    language: "اللغة",
   },
   hero: {
     eyebrow: "شريككم في صحة الحيوان - العراق",
@@ -286,7 +288,7 @@ export const ar: Omit<SiteContent, "languages"> = {
     },
   },
   brandsPage: {
-    metaTitle: "علاماتنا — IDVET",
+    metaTitle: "العلامات التجارية — IDVET",
     hero: {
       heading: "علامات عالمية موثوقة، بخبرة محلية تصل إلى السوق العراقي",
       body: "في IDVET نعمل كحلقة وصل بين المصنّعين الدوليين المتخصصين في صحة الحيوان وبين الأطباء البيطريين والموزعين والمزارع في العراق، من خلال اختيار علامات موثوقة، توزيع منظم، ودعم فني مستمر.",

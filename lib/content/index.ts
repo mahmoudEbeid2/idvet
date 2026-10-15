@@ -16,6 +16,7 @@ const baseContent: Record<Locale, Omit<SiteContent, "languages">> = { ku, ar, en
 const languages: LanguageOption[] = locales.map((locale) => ({
   locale,
   label: nativeNames[locale],
+  short: locale.toUpperCase(),
   href: `/${locale}`,
 }));
 

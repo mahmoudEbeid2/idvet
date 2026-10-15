@@ -4,11 +4,13 @@ export const ku: Omit<SiteContent, "languages"> = {
   locale: "ku",
   htmlLang: "ckb",
   nav: {
-    contact: "پەیوەندی",
+    contact: "پەیوەندیمان پێوە بکە",
     brands: "براندەکان",
-    services: "خزمەتەکان",
+    services: "خزمەتگوزارییەکان",
     about: "دەربارەی ئێمە",
     products: "بەرهەمەکان",
+    menu: "مێنیو",
+    language: "زمان",
   },
   hero: {
     eyebrow: "هاوبەشی ئێوە لە تەندروستی ئاژەڵان – عێراق",

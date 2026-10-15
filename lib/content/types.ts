@@ -3,6 +3,8 @@ export type Locale = "ku" | "ar" | "en";
 export interface LanguageOption {
   locale: Locale;
   label: string;
+  /** Short label on the language button, e.g. "AR". */
+  short: string;
   href: string;
 }
 
@@ -69,6 +71,9 @@ export interface SiteContent {
     services: string;
     about: string;
     products: string;
+    /** Accessible names of the mobile menu button and the language menu. */
+    menu: string;
+    language: string;
   };
   languages: LanguageOption[];
   hero: {

@@ -4,11 +4,13 @@ export const en: Omit<SiteContent, "languages"> = {
   locale: "en",
   htmlLang: "en",
   nav: {
-    contact: "Contact",
+    contact: "Contact Us",
     brands: "Brands",
     services: "Services",
-    about: "About",
+    about: "About Us",
     products: "Products",
+    menu: "Menu",
+    language: "Language",
   },
   hero: {
     eyebrow: "Your partner in animal health — Iraq",

@@ -6,28 +6,86 @@ import { scrollToSection, scrollToTop } from "@/lib/scrollToSection";
 import { useActiveSection } from "@/lib/useActiveSection";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
-const NAV_ITEMS = [
-  { id: "contact", left: 496 },
-  { id: "products", left: 609 },
-  { id: "brands", left: 722 },
-  { id: "services", left: 835 },
-  { id: "about", left: 948.5 },
-] as const;
-
-const NAV_IDS = NAV_ITEMS.map((item) => item.id);
-
 /** Which page the header is on: home, the catalog, the About, Contact or Brands page, or anything else (404, error). */
 export type HeaderPage = "home" | "products" | "about" | "contact" | "brands" | "other";
 
-/** Nav items that link to their own page rather than a home section. */
-export const PAGE_NAV_IDS: readonly string[] = ["products", "about", "contact", "brands"];
+/** The nav links in order (start → end); Contact follows as a button. */
+const NAV_IDS = ["products", "brands", "services", "about"] as const;
+type NavId = (typeof NAV_IDS)[number];
+
+/** Home page sections, tracked to mark "services" while it is in view. */
+const HOME_SECTIONS = ["about", "services", "brands", "contact"];
+
+export interface NavLink {
+  id: NavId;
+  label: string;
+  href: string;
+  active: boolean;
+  /** Services is a home page section: scrolled to rather than followed. */
+  onClick?: (e: React.MouseEvent) => void;
+}
 
 /**
- * The desktop header, drawn on the 1440px canvas — the only desktop header in
- * the app. The home page renders it inside Canvas; every other page renders it
- * through SiteHeader. Off home the logo links home, section links go to
- * /{locale}#section, and `languagePath` is appended to the language
- * switcher's /{locale} targets so switching keeps the page.
+ * The header's links, shared by the desktop Header and the MobileHeader.
+ * Products, Brands and About are pages; Services is the home page's section
+ * (see lib/scrollToSection.ts for why it is scrolled to by hand).
+ */
+export function useHeaderNav(site: SiteContent, page: HeaderPage, onNavigate?: () => void) {
+  const home = `/${site.locale}`;
+  const isHome = page === "home";
+  const tracked = useActiveSection(HOME_SECTIONS);
+
+  const links: NavLink[] = NAV_IDS.map((id) =>
+    id === "services"
+      ? {
+          id,
+          label: site.nav.services,
+          href: isHome ? "#services" : `${home}#services`,
+          active: isHome && tracked === "services",
+          onClick: (e) => {
+            e.preventDefault();
+            onNavigate?.();
+            scrollToSection("services", { fallbackHref: home });
+          },
+        }
+      : { id, label: site.nav[id], href: `${home}/${id}`, active: page === id },
+  );
+
+  /** On home the logo scrolls back to the top instead of reloading. */
+  function onLogoClick(e: React.MouseEvent) {
+    onNavigate?.();
+    if (!isHome) return;
+    e.preventDefault();
+    scrollToTop();
+  }
+
+  return {
+    home,
+    links,
+    contact: { label: site.nav.contact, href: `${home}/contact`, active: page === "contact" },
+    onLogoClick,
+  };
+}
+
+/** Same page in each language: `languagePath` is appended to /{locale}. */
+export function languageOptions(site: SiteContent, languagePath: string) {
+  return site.languages.map((option) => ({ ...option, href: `${option.href}${languagePath}` }));
+}
+
+export const navLinkClass = (active: boolean) =>
+  `underline-offset-[10px] transition-colors hover:text-[#0676bd] ${
+    active ? "font-bold text-[#0676bd] underline decoration-2" : "text-[#33475b] hover:underline hover:decoration-[#0676bd]/40"
+  }`;
+
+export const contactButtonClass = (active: boolean) =>
+  `inline-flex h-11 items-center justify-center whitespace-nowrap rounded-full bg-[#0676bd] px-6 text-[15px] font-bold text-white shadow-sm transition-colors hover:bg-[#0568a8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0676bd] ${
+    active ? "ring-2 ring-[#0676bd]/35 ring-offset-2" : ""
+  }`;
+
+/**
+ * The desktop header (from lg) on every public page: logo, the nav links,
+ * the Contact button and the language menu, in the page's direction.
+ * Below lg the MobileHeader takes over.
  */
 export function Header({
   site,
@@ -38,99 +96,47 @@ export function Header({
   page?: HeaderPage;
   languagePath?: string;
 }) {
-  const { nav } = site;
-  const home = `/${site.locale}`;
-  const isHome = page === "home";
-  // The bold item: the About/Contact/Brands page's own item there; elsewhere
-  // "about", as on home before scrolling (off home no section is ever in
-  // view, so it stays).
-  const tracked = useActiveSection(NAV_IDS, "about");
-  const active = page === "about" || page === "contact" || page === "brands" ? page : tracked;
-  const languages = site.languages.map((option) => ({ ...option, href: `${option.href}${languagePath}` }));
-  // The canvas is mirrored horizontally for English (see Canvas.tsx) so the
-  // whole page reads left-to-right; text/logo units counter-mirror
-  // themselves so their content stays upright while their position mirrors.
-  const mirror = site.locale === "en" ? "-scale-x-100" : "";
+  const { home, links, contact, onLogoClick } = useHeaderNav(site, page);
 
-  // Opening the page directly on a hash (e.g. /#brands) should land on that
-  // section — native fragment navigation doesn't work here (see
-  // lib/scrollToSection.ts), so this does it manually on mount.
+  // Opening home directly on a hash (e.g. /ar#services) should land on that
+  // section; MobileSite does the same below lg.
   useEffect(() => {
-    if (!isHome) return;
+    if (page !== "home") return;
     const hash = window.location.hash.replace("#", "");
-    if (hash) {
-      requestAnimationFrame(() => scrollToSection(hash));
-    }
-  }, [isHome]);
-
-  function handleNavClick(e: React.MouseEvent, id: string) {
-    e.preventDefault();
-    scrollToSection(id, { fallbackHref: home });
-  }
-
-  const labels: Record<(typeof NAV_ITEMS)[number]["id"], string> = {
-    contact: nav.contact,
-    products: nav.products,
-    brands: nav.brands,
-    services: nav.services,
-    about: nav.about,
-  };
-
-  // eslint-disable-next-line @next/next/no-img-element
-  const logo = <img src="/assets/idvet-logo.svg" alt="IDVET" className="block size-full" />;
+    if (hash) requestAnimationFrame(() => scrollToSection(hash));
+  }, [page]);
 
   return (
-    <>
-      <div className="absolute left-0 top-0 h-[150px] w-[1440px] bg-white" />
-
-      {NAV_ITEMS.map(({ id, left }) =>
-        PAGE_NAV_IDS.includes(id) ? (
-          <a
-            key={id}
-            href={`${home}/${id}`}
-            aria-current={page === id ? "page" : undefined}
-            className={`absolute top-[65px] -translate-x-1/2 whitespace-nowrap text-[20px] text-[#0676bd] hover:underline ${mirror} ${
-              active === id ? "font-bold" : "font-normal"
-            }`}
-            style={{ left }}
-          >
-            {labels[id]}
-          </a>
-        ) : (
-          <a
-            key={id}
-            href={isHome ? `#${id}` : `${home}#${id}`}
-            onClick={(e) => handleNavClick(e, id)}
-            className={`absolute top-[65px] -translate-x-1/2 whitespace-nowrap text-[20px] text-[#0676bd] hover:underline ${mirror} ${
-              active === id ? "font-bold" : "font-normal"
-            }`}
-            style={{ left }}
-          >
-            {labels[id]}
-          </a>
-        ),
-      )}
-
-      <LanguageSwitcher
-        current={site.locale}
-        options={languages}
-        className={`absolute left-[190px] top-[57px] h-[44px] w-[165px] cursor-pointer appearance-none rounded-[25px] border border-solid border-[#0676bd] bg-white px-4 text-center font-roboto text-[13px] font-bold text-[#0676bd] transition-colors hover:bg-[#0676bd]/5 focus:outline-none ${mirror}`}
-      />
-
-      {!isHome ? (
-        <a href={home} className={`absolute left-[1090px] top-[34px] h-[93px] w-[163px] transition-opacity hover:opacity-90 ${mirror}`}>
-          {logo}
+    // Font-size/line-height reset: pages may set their own (the catalog uses 15px/1.7).
+    <header className="relative z-30 hidden bg-white text-base leading-normal lg:block">
+      <div className="mx-auto flex h-[112px] max-w-[1097px] items-center justify-between gap-8 px-4 xl:h-[150px]">
+        <a href={home} onClick={onLogoClick} className="shrink-0 transition-opacity hover:opacity-90">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/assets/idvet-logo.svg" alt="IDVET" width={163} height={93} className="block h-[72px] w-auto xl:h-[93px]" />
         </a>
-      ) : (
-        <button
-          type="button"
-          onClick={() => scrollToTop()}
-          aria-label="Scroll to top"
-          className={`absolute left-[1090px] top-[34px] h-[93px] w-[163px] cursor-pointer bg-transparent p-0 transition-opacity hover:opacity-90 ${mirror}`}
-        >
-          {logo}
-        </button>
-      )}
-    </>
+        <nav aria-label={site.nav.menu} className="flex items-center gap-8 xl:gap-12">
+          <ul className="flex items-center gap-7 text-[17px] xl:gap-10 xl:text-[19px]">
+            {links.map((link) => (
+              <li key={link.id}>
+                <a
+                  href={link.href}
+                  onClick={link.onClick}
+                  aria-current={link.active ? (link.id === "services" ? "true" : "page") : undefined}
+                  className={`whitespace-nowrap ${navLinkClass(link.active)}`}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <div className="flex items-center gap-4">
+            <a href={contact.href} aria-current={contact.active ? "page" : undefined} className={contactButtonClass(contact.active)}>
+              {contact.label}
+            </a>
+            <LanguageSwitcher current={site.locale} options={languageOptions(site, languagePath)} label={site.nav.language} />
+          </div>
+        </nav>
+      </div>
+    </header>
   );
 }

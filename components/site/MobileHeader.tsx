@@ -1,18 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { SiteContent } from "@/lib/content";
-import { scrollToSection, scrollToTop } from "@/lib/scrollToSection";
-import { useActiveSection } from "@/lib/useActiveSection";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { PAGE_NAV_IDS, type HeaderPage } from "./Header";
-
-const MOBILE_NAV_IDS = ["about", "services", "brands", "contact"] as const;
+import { contactButtonClass, languageOptions, navLinkClass, useHeaderNav, type HeaderPage } from "./Header";
 
 /**
  * The sticky phone/tablet header (below lg) — the only one in the app, used by
- * the home page (MobileSite) and every other page (SiteHeader). Same `page`
- * and `languagePath` behaviour as the desktop Header.
+ * the home page (MobileSite) and every other page (SiteHeader). The menu holds
+ * the desktop Header's links in the same order, the language menu, and the
+ * Contact button across the bottom.
  */
 export function MobileHeader({
   site,
@@ -24,100 +21,69 @@ export function MobileHeader({
   languagePath?: string;
 }) {
   const [navOpen, setNavOpen] = useState(false);
-  const isHome = page === "home";
-  // Same bold item as the desktop Header.
-  const tracked = useActiveSection(MOBILE_NAV_IDS, "about");
-  const active = page === "about" || page === "contact" || page === "brands" ? page : tracked;
-  const home = `/${site.locale}`;
-  const languages = site.languages.map((option) => ({ ...option, href: `${option.href}${languagePath}` }));
+  const { home, links, contact, onLogoClick } = useHeaderNav(site, page, () => setNavOpen(false));
 
-  function handleNavClick(id: string) {
-    setNavOpen(false);
-    scrollToSection(id, { fallbackHref: home });
-  }
-
-  const mobileLabels: Record<(typeof MOBILE_NAV_IDS)[number], string> = {
-    about: site.nav.about,
-    services: site.nav.services,
-    brands: site.nav.brands,
-    contact: site.nav.contact,
-  };
-
-  // eslint-disable-next-line @next/next/no-img-element
-  const logo = <img src="/assets/idvet-logo.svg" alt="IDVET" className="h-12 w-auto" />;
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setNavOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [navOpen]);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-black/5 bg-white text-base leading-normal shadow-xs lg:hidden">
+    <header className="sticky top-0 z-30 border-b border-black/5 bg-white text-base leading-normal shadow-xs lg:hidden">
       <div className="flex items-center justify-between px-5 pt-5 pb-4">
-        {!isHome ? (
-          <a href={home} className="p-0">
-            {logo}
-          </a>
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setNavOpen(false);
-              scrollToTop();
-            }}
-            aria-label="Scroll to top"
-            className="cursor-pointer bg-transparent p-0"
-          >
-            {logo}
-          </button>
-        )}
+        <a href={home} onClick={onLogoClick} className="p-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/assets/idvet-logo.svg" alt="IDVET" className="h-12 w-auto" />
+        </a>
         <button
           type="button"
           onClick={() => setNavOpen((v) => !v)}
-          aria-label="menu"
+          aria-label={site.nav.menu}
           aria-expanded={navOpen}
-          className="flex h-10 w-10 flex-col items-center justify-center gap-1.5"
+          aria-controls="mobile-nav"
+          className="relative flex size-10 items-center justify-center"
         >
-          <span className="block h-0.5 w-6 bg-[#0676bd]" />
-          <span className="block h-0.5 w-6 bg-[#0676bd]" />
-          <span className="block h-0.5 w-6 bg-[#0676bd]" />
+          {/* Three bars that fold into an X while the menu is open. */}
+          <span
+            className={`absolute h-0.5 w-6 bg-[#0676bd] transition-transform ${navOpen ? "rotate-45" : "-translate-y-2"}`}
+          />
+          <span className={`absolute h-0.5 w-6 bg-[#0676bd] transition-opacity ${navOpen ? "opacity-0" : ""}`} />
+          <span
+            className={`absolute h-0.5 w-6 bg-[#0676bd] transition-transform ${navOpen ? "-rotate-45" : "translate-y-2"}`}
+          />
         </button>
       </div>
       {navOpen && (
-        <nav className="flex flex-col items-center gap-3 border-t border-black/5 px-4 py-4 text-center text-[#0676bd]">
-          {MOBILE_NAV_IDS.map((id) =>
-            PAGE_NAV_IDS.includes(id) ? (
-              <a
-                key={id}
-                href={`${home}/${id}`}
-                aria-current={page === id ? "page" : undefined}
-                className={active === id ? "font-bold" : "font-normal"}
-                onClick={() => setNavOpen(false)}
-              >
-                {mobileLabels[id]}
-              </a>
-            ) : (
-              <a
-                key={id}
-                href={isHome ? `#${id}` : `${home}#${id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick(id);
-                }}
-                className={active === id ? "font-bold" : "font-normal"}
-              >
-                {mobileLabels[id]}
-              </a>
-            ),
-          )}
+        <nav id="mobile-nav" aria-label={site.nav.menu} className="border-t border-black/5 px-5 pt-2 pb-5">
+          <ul className="flex flex-col text-center text-[17px]">
+            {links.map((link) => (
+              <li key={link.id}>
+                <a
+                  href={link.href}
+                  onClick={(e) => (link.onClick ? link.onClick(e) : setNavOpen(false))}
+                  aria-current={link.active ? (link.id === "services" ? "true" : "page") : undefined}
+                  className={`block py-3 ${navLinkClass(link.active)}`}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-2 flex justify-center">
+            <LanguageSwitcher current={site.locale} options={languageOptions(site, languagePath)} label={site.nav.language} />
+          </div>
           <a
-            href={`${home}/products`}
-            aria-current={page === "products" ? "page" : undefined}
-            className="font-normal"
+            href={contact.href}
+            aria-current={contact.active ? "page" : undefined}
             onClick={() => setNavOpen(false)}
+            className={`mt-4 flex w-full ${contactButtonClass(contact.active)}`}
           >
-            {site.nav.products}
+            {contact.label}
           </a>
-          <LanguageSwitcher
-            current={site.locale}
-            options={languages}
-            className="mt-1 w-fit cursor-pointer appearance-none rounded-full border border-[#0676bd] bg-white px-4 py-2 text-center font-roboto text-sm font-bold text-[#0676bd] focus:outline-none"
-          />
         </nav>
       )}
     </header>
