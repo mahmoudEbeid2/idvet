@@ -56,7 +56,7 @@ export const en: Omit<SiteContent, "languages"> = {
     title: "Brands",
     introHeading: "Exclusive agent for three leading brands from Turkey, Saudi Arabia, and Jordan",
     introBody:
-      "idvet is the exclusive agent in Iraq for HiPro, Jumuh, and Vet Care, guaranteeing product quality, availability, and fast delivery to every province.",
+      "idvet is the exclusive agent in Iraq for HiPro, Jumuh, and Pharmavet, guaranteeing product quality, availability, and fast delivery to every province.",
     cards: [
       {
         name: "HiPro",

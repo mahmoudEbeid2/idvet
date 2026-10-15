@@ -54,7 +54,7 @@ export const ar: Omit<SiteContent, "languages"> = {
     title: "العلامات التجارية",
     introHeading: "وكيل حصري لعلامتين تركيتين رائدتين",
     introBody:
-      "idvet هي الوكيل الحصري في العراق لكلٍّ من HiPro وPharmavet، مع ضمان جودة المنتج وتوفّره وسرعة وصوله إلى جميع المحافظات.",
+      "idvet هي الوكيل الحصري في العراق لكلٍّ من HiPro وJumuh وPharmavet، مع ضمان جودة المنتج وتوفّره وسرعة وصوله إلى جميع المحافظات.",
     cards: [
       {
         name: "HiPro",
