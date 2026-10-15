@@ -30,14 +30,18 @@ function button(href: string, label: string, color = BRAND) {
 </td></tr></table>`;
 }
 
-/** Label/value rows; values are already-escaped HTML. Empty values are skipped. */
+/**
+ * Label/value rows; values are already-escaped HTML. Empty values are skipped.
+ * Each value is direction-isolated (dir="auto"), so Latin text like "10 boxes"
+ * isn't reordered by the right-to-left layout.
+ */
 function rows(items: [string, string | null | undefined][]) {
   return items
     .filter((item): item is [string, string] => Boolean(item[1]))
     .map(
       ([label, value]) => `<tr>
 <td valign="top" style="padding:8px 0;width:130px;font-family:${FONT};font-size:14px;color:${MUTED}">${escapeHtml(label)}</td>
-<td valign="top" style="padding:8px 0;font-family:${FONT};font-size:15px;color:${NAVY};word-break:break-word">${value}</td>
+<td valign="top" style="padding:8px 0;font-family:${FONT};font-size:15px;color:${NAVY};word-break:break-word"><span dir="auto">${value}</span></td>
 </tr>`,
     )
     .join("");
