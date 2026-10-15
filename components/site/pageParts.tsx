@@ -1,7 +1,7 @@
 import type { SiteContent } from "@/lib/content/types";
 import { ContactTriggerButton } from "./ContactTriggerButton";
 
-// Shared by the responsive inner pages (About, Contact): from lg they match
+// Shared by the responsive inner pages (About, Contact, Brands): from lg they match
 // the 1440px designs (content 1065px wide, like every home section), below
 // 720px their text, images, icons and buttons are centered.
 
@@ -18,12 +18,20 @@ export function Paragraphs({ paragraphs, className }: { paragraphs: string[]; cl
   );
 }
 
-/** The hero's two buttons: the brands on the home page, and the contact form. */
-export function HeroButtons({ site, className }: { site: SiteContent; className: string }) {
+/** The hero's two buttons: the brands (the Brands page unless `brandsHref` says otherwise), and the contact form. */
+export function HeroButtons({
+  site,
+  className,
+  brandsHref = `/${site.locale}/brands`,
+}: {
+  site: SiteContent;
+  className: string;
+  brandsHref?: string;
+}) {
   return (
     <div className={`flex flex-wrap gap-[15px] max-[719px]:justify-center ${className}`}>
       <a
-        href={`/${site.locale}#brands`}
+        href={brandsHref}
         className="inline-flex h-[44px] min-w-[165px] items-center justify-center gap-2 bg-[#0676bd] px-3 text-[13px] font-bold transition-colors hover:bg-[#0568a8]"
       >
         <span>{site.hero.ctaPrimary}</span>

@@ -27,7 +27,7 @@ export function MobileHeader({
   const isHome = page === "home";
   // Same bold item as the desktop Header.
   const tracked = useActiveSection(MOBILE_NAV_IDS, "about");
-  const active = page === "about" || page === "contact" ? page : tracked;
+  const active = page === "about" || page === "contact" || page === "brands" ? page : tracked;
   const home = `/${site.locale}`;
   const languages = site.languages.map((option) => ({ ...option, href: `${option.href}${languagePath}` }));
 

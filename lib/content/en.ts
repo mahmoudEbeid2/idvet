@@ -211,6 +211,87 @@ export const en: Omit<SiteContent, "languages"> = {
   footer: {
     copyright: "All rights reserved © IDVET",
   },
+  brandsPage: {
+    metaTitle: "Our brands — IDVET",
+    hero: {
+      heading: "Trusted global brands, with local expertise that reaches the Iraqi market",
+      body: "At IDVET we connect international manufacturers specialized in animal health with veterinarians, distributors and farms in Iraq, through carefully chosen trusted brands, organized distribution and ongoing technical support.",
+    },
+    intro: {
+      title: "Our brand partners",
+      paragraphs: [
+        "We build our brand portfolio on partnerships with manufacturers that have clear expertise in animal health and veterinary nutrition, focusing on product quality, continuity of supply and solutions that fit the market's needs.",
+        "Through our local role, we turn this global expertise into solutions that are available and supported inside Iraq.",
+      ],
+    },
+    brands: [
+      {
+        id: "hipro",
+        name: "HiPro",
+        title: "HiPro — Turkey",
+        subtitle: "Specialists in animal nutrition and health",
+        paragraphs: [
+          "HiPro offers a range of nutritional and health-supporting solutions for animals, including supplements, vitamins, minerals, amino acids, and metabolic and immune support products.",
+          "The brand's strength lies in developing practical formulations that serve the animal's performance, production and overall health at different stages of rearing and production.",
+          "IDVET supports HiPro's presence in Iraq through import, distribution, technical communication and customer follow-up.",
+        ],
+        tags: ["Supplements", "Feed additives", "Premix", "Concentrates"],
+        linkText: "Visit HiPro ↗︎",
+        href: "https://www.hipro-feed.com/",
+      },
+      {
+        id: "vetcare",
+        name: "VetCare",
+        title: "Vet Care — Jordan",
+        subtitle: "Veterinary solutions for animal health and production",
+        paragraphs: [
+          "Vet Care works in veterinary products and animal-health solutions, with a portfolio covering prevention, health support and better production performance.",
+          "The brand stands out for its focus on practical, everyday use on farms and in the veterinary sector.",
+          "Through IDVET, Vet Care products reach the Iraqi market within a system that covers distribution, technical support and an understanding of local customers' needs.",
+        ],
+        tags: ["Animal health", "Care", "Innovation", "Performance"],
+        linkText: "Visit VetCare ↗︎",
+        href: "https://vetcare-jo.com/",
+      },
+      {
+        id: "jamuh",
+        name: "AFAQCO",
+        title: "AFAQCO — Saudi Arabia",
+        subtitle: "Veterinary medicines and supplements",
+        paragraphs: [
+          "AFAQCO provides veterinary medicines and supplements that support animal health and livestock production.",
+          "Its products address a range of health and nutritional needs in animals, helping veterinarians and farmers run their care and production programs more efficiently.",
+          "IDVET supports the distribution of AFAQCO products in Iraq, along with commercial and technical communication and continuous follow-up with the market.",
+        ],
+        tags: ["Medicines", "Feed additives", "Supplements", "Production support"],
+        linkText: "Visit AFAQCO ↗︎",
+        href: "https://afaqco.net/en/",
+      },
+    ],
+    support: {
+      title: "How do we support our brands in Iraq?",
+      heading: "From the factory to the market… and after the sale",
+      lead: "IDVET's role does not end with importing the products.",
+      listIntro: "We work with our partners to build a practical, lasting presence in the Iraqi market through:",
+      items: [
+        { title: "Import and supply", body: "Coordinating the arrival of products in Iraq and organizing the market's needs." },
+        { title: "Local distribution", body: "Making products available to customers and target markets through a reliable distribution network." },
+        { title: "Technical communication", body: "Sharing technical product information and helping customers understand the available uses and solutions." },
+        { title: "Market follow-up", body: "Listening to feedback from veterinarians, farmers and distributors, and understanding changing challenges and needs." },
+      ],
+    },
+    trust: {
+      title: "A portfolio built on trust",
+      paragraphs: [
+        "For IDVET, a good brand is not just a name we distribute; it is a partner with whom we share the responsibility of delivering real value to the market.",
+        "That is why we build long-term relationships with manufacturers and customers, based on quality, clarity, continuity and technical support.",
+      ],
+    },
+    imageAlts: {
+      hero: "A veterinary logistics hub around a glowing globe, with cows, sheep, trucks and cargo ships",
+      portfolio: "A folder icon holding documents",
+    },
+  },
   aboutPage: {
     metaTitle: "About us — IDVET",
     hero: {

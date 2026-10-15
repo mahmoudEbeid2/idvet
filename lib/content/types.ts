@@ -31,6 +31,20 @@ export interface BrandCard {
   href: string;
 }
 
+/** A brand's section on the Brands page. */
+export interface BrandProfile {
+  id: "hipro" | "vetcare" | "jamuh";
+  /** Brand name, used as the logo's alt text. */
+  name: string;
+  /** "{brand} — {country}". */
+  title: string;
+  subtitle: string;
+  paragraphs: string[];
+  tags: string[];
+  linkText: string;
+  href: string;
+}
+
 export interface AboutBlock {
   title: string;
   paragraphs: string[];
@@ -215,6 +229,24 @@ export interface SiteContent {
     intro: { title: string; body: string };
     details: { title: string; phoneLabel: string; emailLabel: string; addressLabel: string };
     imageAlts: { hero: string; hand: string };
+  };
+  /** The /{locale}/brands page. The hero eyebrow and buttons reuse `hero`. */
+  brandsPage: {
+    metaTitle: string;
+    hero: { heading: string; body: string };
+    intro: AboutBlock;
+    /** One section each, in page order; logos and images come from BrandsPage by `id`. */
+    brands: BrandProfile[];
+    support: {
+      title: string;
+      heading: string;
+      lead: string;
+      /** The underlined line introducing the four items. */
+      listIntro: string;
+      items: { title: string; body: string }[];
+    };
+    trust: AboutBlock;
+    imageAlts: { hero: string; portfolio: string };
   };
   /** Alt text for the home page's content images (decorative ones use ""). */
   imageAlts: {
