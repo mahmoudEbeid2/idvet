@@ -97,32 +97,34 @@ export interface SiteContent {
     statCategories: PluralForms;
     statProducts: PluralForms;
     statBrands: PluralForms;
-    categoriesHeading: string;
-    allProductsHeading: string;
-    /** "{q}" is replaced with the search text. */
-    searchResultsHeading: string;
+    /** "{brand}" is replaced with the brand name (title of /products?brand=…). */
+    brandPageTitle: string;
+    filtersHeading: string;
+    /** Opens the filter drawer on phones. */
+    filtersButton: string;
+    brandFilter: string;
+    categoryFilter: string;
+    /** Label of the button that closes the filter drawer. */
+    showResults: string;
+    clearAll: string;
+    /** "{name}" is the filter value; aria-label of a chip's remove button. */
+    removeFilter: string;
+    activeFilters: string;
     noResults: string;
-    clearSearch: string;
+    noResultsBody: string;
     emptyCatalog: string;
-    viewProducts: string;
     productCount: PluralForms;
-    // Cards
-    certificateCount: PluralForms;
-    noCertificates: string;
-    details: string;
-    imageCount: string;
-    noImage: string;
-    // Category page
-    breadcrumbHome: string;
-    breadcrumbLabel: string;
-    /** "{count}" = productCount text, "{name}" = category name. */
-    inCategory: string;
     sortLabel: string;
-    sortNewest: string;
+    sortRelevance: string;
     sortName: string;
     sortBrand: string;
     sortApply: string;
-    emptyCategory: string;
+    // Cards
+    details: string;
+    imageCount: string;
+    noImage: string;
+    breadcrumbHome: string;
+    breadcrumbLabel: string;
     // Product page
     galleryLabel: string;
     previousImage: string;
@@ -130,9 +132,10 @@ export interface SiteContent {
     enlargeImage: string;
     close: string;
     brandLabel: string;
+    categoryLabel: string;
     dosageForm: string;
-    packaging: string;
     species: string;
+    tagsLabel: string;
     requestQuote: string;
     whatsapp: string;
     /** "{name}" is replaced with the product name. */
@@ -143,11 +146,35 @@ export interface SiteContent {
     view: string;
     openInNewTab: string;
     download: string;
+    compositionHeading: string;
+    ingredientColumn: string;
+    amountColumn: string;
+    indicationsHeading: string;
+    packSizesHeading: string;
     aboutHeading: string;
     usageHeading: string;
+    asideTitle: string;
+    asideBody: string;
     relatedHeading: string;
     /** "{name}" is replaced with the category name. */
     allInCategory: string;
+    /** "{brand}" is replaced with the brand name. */
+    moreFromBrand: string;
+    allFromBrand: string;
+    // Quote request modal
+    quoteTitle: string;
+    quoteIntro: string;
+    /** "{name}" is replaced with the product name. */
+    quoteFor: string;
+    quoteName: string;
+    quoteContact: string;
+    quoteQuantity: string;
+    quoteQuantityPlaceholder: string;
+    quoteSend: string;
+    quoteSending: string;
+    quoteSuccess: string;
+    quoteError: string;
+    quoteCancel: string;
   };
   gallery: {
     title: string;

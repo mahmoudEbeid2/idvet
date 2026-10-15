@@ -16,6 +16,23 @@ model ContactSubmission {
   createdAt DateTime @default(now())
 }
 
+/// "Request a quote" from a product page or card. Also emailed (lib/mailer.ts).
+model QuoteRequest {
+  id          String   @id @default(cuid())
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  /// The product's name when the request was sent (kept if the product is deleted).
+  productName String
+  name        String
+  /// Phone number or email, as typed.
+  contact     String
+  quantity    String
+  locale      String
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 // Visitor-facing text is stored once per language (Ku/Ar/En). An empty
 // translation falls back to ar → ku → en at read time (lib/catalog/i18n.ts).
 
@@ -41,42 +58,62 @@ model Category {
 }
 
 model Product {
-  id           String         @id @default(cuid())
-  slug         String         @unique
-  categoryId   String
-  category     Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  brand        String         @default("")
+  id               String         @id @default(cuid())
+  slug             String         @unique
+  categoryId       String
+  category         Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  brand            String         @default("")
   /// Trade name as printed on the pack, e.g. "AMOXI-VET 50%".
-  code         String         @default("")
-  nameKu       String         @default("")
-  nameAr       String         @default("")
-  nameEn       String         @default("")
-  summaryKu    String         @default("")
-  summaryAr    String         @default("")
-  summaryEn    String         @default("")
-  dosageFormKu String         @default("")
-  dosageFormAr String         @default("")
-  dosageFormEn String         @default("")
-  packagingKu  String         @default("")
-  packagingAr  String         @default("")
-  packagingEn  String         @default("")
-  speciesKu    String         @default("")
-  speciesAr    String         @default("")
-  speciesEn    String         @default("")
+  code             String         @default("")
+  nameKu           String         @default("")
+  nameAr           String         @default("")
+  nameEn           String         @default("")
+  summaryKu        String         @default("")
+  summaryAr        String         @default("")
+  summaryEn        String         @default("")
+  dosageFormKu     String         @default("")
+  dosageFormAr     String         @default("")
+  dosageFormEn     String         @default("")
+  packagingKu      String         @default("")
+  packagingAr      String         @default("")
+  packagingEn      String         @default("")
+  speciesKu        String         @default("")
+  speciesAr        String         @default("")
+  speciesEn        String         @default("")
   /// Paragraphs separated by a blank line.
-  aboutKu      String         @default("")
-  aboutAr      String         @default("")
-  aboutEn      String         @default("")
+  aboutKu          String         @default("")
+  aboutAr          String         @default("")
+  aboutEn          String         @default("")
   /// One usage step per line.
-  usageKu      String         @default("")
-  usageAr      String         @default("")
-  usageEn      String         @default("")
-  published    Boolean        @default(false)
-  sortOrder    Int            @default(0)
-  images       ProductImage[]
-  certificates Certificate[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  usageKu          String         @default("")
+  usageAr          String         @default("")
+  usageEn          String         @default("")
+  /// Active ingredients, one per line (searched together with the name).
+  compositionKu    String         @default("")
+  compositionAr    String         @default("")
+  compositionEn    String         @default("")
+  /// What the product is used for, one indication per line.
+  indicationsKu    String         @default("")
+  indicationsAr    String         @default("")
+  indicationsEn    String         @default("")
+  /// Short labels separated by commas or new lines, e.g. "Injectable, Cattle".
+  tagsKu           String         @default("")
+  tagsAr           String         @default("")
+  tagsEn           String         @default("")
+  /// Optional overrides for <title> and the meta description.
+  seoTitleKu       String         @default("")
+  seoTitleAr       String         @default("")
+  seoTitleEn       String         @default("")
+  seoDescriptionKu String         @default("")
+  seoDescriptionAr String         @default("")
+  seoDescriptionEn String         @default("")
+  published        Boolean        @default(false)
+  sortOrder        Int            @default(0)
+  images           ProductImage[]
+  certificates     Certificate[]
+  quotes           QuoteRequest[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   @@index([categoryId, published, sortOrder])
   @@index([published, sortOrder])

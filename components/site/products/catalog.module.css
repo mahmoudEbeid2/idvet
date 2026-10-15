@@ -286,83 +286,6 @@ a.secMeta {
   }
 }
 
-/* ---------- Category cards ---------- */
-.cats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
-}
-@media (max-width: 1000px) {
-  .cats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (max-width: 520px) {
-  .cats {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-.catCard {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  text-align: start;
-  background: var(--tint);
-  border: 2px solid transparent;
-  border-radius: var(--radius);
-  padding: 22px;
-  transition: border-color 0.2s, transform 0.2s;
-}
-.catCard:hover {
-  border-color: color-mix(in srgb, var(--brand-600) 45%, transparent);
-  transform: translateY(-3px);
-}
-.catCardIcon {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: #fff;
-  display: grid;
-  place-items: center;
-}
-.catCardIcon img {
-  width: 34px;
-  height: 34px;
-  object-fit: contain;
-}
-.catCard h3 {
-  font-size: 18px;
-  color: var(--brand-600);
-  font-weight: 700;
-}
-.catCard p {
-  font-size: 13.5px;
-  color: var(--body);
-  line-height: 1.65;
-}
-.catCardGo {
-  margin-top: auto;
-  padding-top: 6px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--brand-600);
-}
-.catCardGo .n {
-  color: var(--muted);
-  font-weight: 500;
-}
-.arrow {
-  display: inline-flex;
-  transition: transform 0.2s;
-}
-.catCard:hover .arrow {
-  transform: translateX(-4px);
-}
-
 /* ---------- Product cards ---------- */
 .grid {
   display: grid;
@@ -460,10 +383,6 @@ a.secMeta {
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
-.pCardBrand {
-  font-size: 12.5px;
-  color: var(--body);
-}
 .pCardFoot {
   margin-top: auto;
   padding-top: 12px;
@@ -473,28 +392,6 @@ a.secMeta {
   gap: 8px;
   border-top: 1px dashed var(--line-2);
   font-size: 12.5px;
-}
-.pCardBrand {
-  margin-bottom: 8px;
-}
-.pdfBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--body);
-}
-.pdfBadgeMuted {
-  color: var(--muted);
-}
-.pdfTag {
-  font-family: var(--latin);
-  font-size: 10px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--pdf);
-  padding: 1px 5px;
-  border-radius: 3px;
-  letter-spacing: 0.04em;
 }
 .more {
   color: var(--brand-600);
@@ -517,36 +414,106 @@ a.secMeta {
     grid-template-columns: minmax(0, 1fr);
   }
 }
-/* Clears the sticky mobile header (below lg); the desktop header doesn't stick. */
-.side {
-  position: sticky;
-  top: 100px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* ---------- Catalog filters (components/site/products/CatalogFilters.tsx) ----------
+   A sticky sidebar from 900px; below that a drawer opened by .fToggle. */
+.results,
+.fCol {
   min-width: 0;
 }
-.side h2 {
-  margin: 0 0 8px;
+.fToggle,
+.fClose,
+.fFoot,
+.fBackdrop {
+  display: none;
+}
+/* Clears the sticky mobile header (below lg); the desktop header doesn't stick. */
+.filters {
+  position: sticky;
+  top: 100px;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+.fHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.fHead h2 {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.fClear {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand-600);
+  white-space: nowrap;
+}
+.fClear:hover {
+  text-decoration: underline;
+}
+.fForm {
+  display: grid;
+  gap: 22px;
+  transition: opacity 0.2s;
+}
+.filters[aria-busy="true"] .fForm {
+  opacity: 0.65;
+}
+.fGroup {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.fGroup legend {
+  padding: 0;
+  margin-bottom: 8px;
   font-size: 13px;
   color: var(--muted);
   font-weight: 600;
   letter-spacing: 0.02em;
 }
-.side a {
+.fOption {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 7px 10px;
   border-radius: 12px;
-  text-align: start;
-  border: 2px solid transparent;
   font-size: 14.5px;
   color: var(--brand-600);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.fOption:hover {
+  background: var(--surface-2);
+}
+.fOption:has(input:checked) {
+  background: color-mix(in srgb, var(--brand-500) 8%, #fff);
+  font-weight: 700;
+}
+.fOption:has(input:focus-visible) {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 1px;
+}
+.fOption[data-empty] {
+  opacity: 0.55;
+}
+.fOption input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--brand-500);
+  cursor: pointer;
 }
 .sideIcon {
-  width: 38px;
-  height: 38px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--tint);
   display: grid;
@@ -554,56 +521,125 @@ a.secMeta {
   flex: none;
 }
 .sideIcon img {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
 }
-.side .n {
+.fOption .n {
   margin-inline-start: auto;
   font-family: var(--latin);
   font-size: 12.5px;
+  font-weight: 500;
   color: var(--muted);
 }
-.side a:hover {
-  background: var(--surface-2);
-}
-.side a[aria-current] {
-  background: var(--tint);
-  border-color: var(--brand-600);
-  font-weight: 700;
-}
 @media (max-width: 900px) {
-  .side {
-    position: static;
-    flex-direction: row;
-    overflow-x: auto;
-    padding-bottom: 6px;
+  .fToggle {
+    display: inline-flex;
+    align-items: center;
     gap: 8px;
-    scrollbar-width: thin;
-  }
-  .side h2 {
-    display: none;
-  }
-  .side a {
-    flex: none;
+    height: 42px;
+    padding-inline: 16px;
     border: 1px solid var(--line-2);
+    background: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .fBadge {
+    min-width: 20px;
+    height: 20px;
+    padding-inline: 6px;
     border-radius: 999px;
-    padding-block: 6px;
-    padding-inline: 8px 14px;
-    white-space: nowrap;
+    background: var(--brand-500);
+    color: #fff;
+    font-family: var(--latin);
+    font-size: 12px;
+    display: grid;
+    place-items: center;
   }
-  .side a[aria-current] {
-    border-width: 1px;
+  .filters {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    inset-inline-start: 0;
+    z-index: 60;
+    width: min(360px, 88vw);
+    padding: 16px 18px 0;
+    background: #fff;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-shadow: 0 0 40px rgba(6, 16, 29, 0.25);
+    /* RTL: the start edge is the right one */
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform 0.25s ease-out, visibility 0.25s;
   }
-  .sideIcon {
-    width: 30px;
-    height: 30px;
+  .filters[data-open] {
+    transform: none;
+    visibility: visible;
+    /* Visible at once when opening (focus() ignores hidden elements); hidden only after the slide-out. */
+    transition: transform 0.25s ease-out;
   }
-  .sideIcon img {
-    width: 18px;
-    height: 18px;
+  .fClose {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .fFoot {
+    display: block;
+    position: sticky;
+    bottom: 0;
+    padding: 14px 0 calc(16px + env(safe-area-inset-bottom, 0px));
+    background: #fff;
+    border-top: 1px solid var(--line);
+  }
+  .fFoot .btn {
+    width: 100%;
+  }
+  .fBackdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 59;
+    background: rgba(6, 16, 29, 0.5);
+    animation: fade 0.2s ease-out;
   }
 }
+
+/* Active filter chips above the results */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: -6px 0 20px;
+}
+.fChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--brand-700);
+  border-radius: 999px;
+  padding-block: 3px;
+  padding-inline: 12px 8px;
+  background: color-mix(in srgb, var(--brand-500) 6%, #fff);
+  color: var(--brand-600);
+  font-size: 13px;
+  font-weight: 600;
+}
+.fChip svg {
+  width: 14px;
+  height: 14px;
+}
+.fChip:hover {
+  background: color-mix(in srgb, var(--brand-500) 14%, #fff);
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -1014,44 +1050,169 @@ a.secMeta {
   color: var(--muted);
 }
 
-.long {
+/* ---------- Product details below the fold: specs + sticky quote card ---------- */
+.pdBody {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 40px;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 48px;
+  align-items: start;
   padding-block: 48px;
   border-top: 1px solid var(--line);
 }
-@media (max-width: 860px) {
-  .long {
+@media (max-width: 960px) {
+  .pdBody {
     grid-template-columns: minmax(0, 1fr);
-    gap: 28px;
+    gap: 32px;
+    padding-block: 36px;
   }
 }
-.long h2 {
+.pdMain {
+  display: grid;
+  gap: 36px;
+  min-width: 0;
+}
+.pdMain h2 {
   font-size: 20px;
   color: var(--brand-600);
   margin-bottom: 12px;
 }
-.long p {
+.pdMain p {
   color: var(--body);
   line-height: 1.9;
-  max-width: 62ch;
+  max-width: 70ch;
 }
-.long p + p {
+.pdMain p + p {
   margin-top: 12px;
 }
-.long ol {
+.pdMain ol,
+.bullets {
   margin: 0;
   padding-inline-start: 20px;
   color: var(--body);
   display: grid;
   gap: 6px;
+}
+.pdMain ol {
   list-style: decimal;
 }
-.long ol li::marker {
+.bullets {
+  list-style: disc;
+}
+.pdMain ol li::marker {
   color: var(--brand-600);
   font-family: var(--latin);
   font-weight: 700;
+}
+.bullets li::marker {
+  color: var(--brand-600);
+}
+.specTable {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  font-size: 14.5px;
+}
+.specTable th,
+.specTable td {
+  text-align: start;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.specTable tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.specTable thead th {
+  background: var(--surface-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.specTable tbody th {
+  font-weight: 600;
+  color: var(--ink);
+}
+.specTable td {
+  color: var(--body);
+}
+.packs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.packs li {
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.quoteCard {
+  position: sticky;
+  top: 100px;
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 14px 30px -24px rgba(11, 31, 54, 0.45);
+}
+@media (max-width: 960px) {
+  .quoteCard {
+    position: static;
+  }
+}
+.quoteCardHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.quoteCardHead b {
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--brand-600);
+  overflow-wrap: anywhere;
+}
+.quoteCardThumb {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--tint);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.quoteCardThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8%;
+}
+.quoteCardTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.quoteCardBody {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--body);
+}
+.quoteCardCtas {
+  display: grid;
+  gap: 10px;
+}
+.quoteCardCtas .btn {
+  width: 100%;
 }
 
 /* ---------- Modals (lightbox + PDF viewer) ---------- */
@@ -1276,14 +1437,12 @@ a.secMeta {
 :global([dir="ltr"]) .flip {
   transform: scaleX(-1);
 }
-:global([dir="ltr"]) .catCard:hover .arrow {
-  transform: translateX(4px);
-}
 
 /* The desktop header (lg+) scrolls away with the page, so sticky columns can sit near the top. */
 @media (min-width: 1024px) {
-  .side,
-  .gal {
+  .filters,
+  .gal,
+  .quoteCard {
     top: 24px;
   }
 }
@@ -1318,4 +1477,215 @@ a.secMeta {
   justify-content: center;
   gap: 12px;
   margin-top: 10px;
+}
+
+/* ---------- Product card additions ---------- */
+/* The name's link covers the whole card; the quote button sits above it. */
+.pCard {
+  position: relative;
+}
+.pCardLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.pCardLink:focus-visible {
+  outline: none;
+}
+.pCard:has(.pCardLink:focus-visible) {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+.brandBadge {
+  position: absolute;
+  top: 10px;
+  inset-inline-start: 10px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(11, 31, 54, 0.12);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.pCardDesc {
+  font-size: 13px;
+  color: var(--body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pCardQuote {
+  position: relative;
+  z-index: 2;
+  border: 1px solid var(--brand-500);
+  color: var(--brand-500);
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.pCardQuote:hover {
+  background: var(--brand-500);
+  color: #fff;
+}
+.sortForm label {
+  font-size: 13px;
+  color: var(--muted);
+}
+.emptyTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.empty .btn {
+  margin-top: 8px;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Product page extras */
+.specLink {
+  color: var(--brand-600);
+}
+.specLink:hover {
+  text-decoration: underline;
+}
+.tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tags li {
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--tint);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+/* ---------- Quote request modal (QuoteButton.tsx), portalled like the lightbox ---------- */
+.qmOverlay {
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+  background: rgba(6, 16, 29, 0.6);
+  color: var(--ink);
+}
+.qm {
+  width: 100%;
+  max-width: 460px;
+  margin: auto;
+  padding: 24px;
+  display: grid;
+  gap: 14px;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  text-align: start;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.qm :where(h2, p) {
+  margin: 0;
+}
+.qmHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.qmHead h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--brand-600);
+}
+.qmClose {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.qmClose:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.qmFor {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+}
+.qmIntro {
+  font-size: 13.5px;
+  color: var(--body);
+}
+.qmForm {
+  display: grid;
+  gap: 12px;
+}
+.qmForm label {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--body);
+}
+.qmForm input {
+  height: 46px;
+  padding-inline: 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink);
+}
+.qmForm input:focus {
+  outline: none;
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-500) 18%, transparent);
+}
+.qmError {
+  font-size: 13.5px;
+  color: var(--pdf);
+}
+.qmDone {
+  padding: 16px 0 6px;
+  text-align: center;
+  color: var(--body);
+}
+.qmActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+.qmActions .btn {
+  flex: 1;
+}
+
+/* LTR: the filter drawer slides in from the left */
+@media (max-width: 900px) {
+  :global([dir="ltr"]) .filters {
+    transform: translateX(-100%);
+  }
+  :global([dir="ltr"]) .filters[data-open] {
+    transform: none;
+  }
 }

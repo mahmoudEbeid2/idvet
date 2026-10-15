@@ -43,7 +43,7 @@ export default async function EditProductPage({ params, searchParams }: Props) {
             <>
               <span className={`${s.badge} ${s.bGreen}`}>{t.common.published}</span>
               <a
-                href={`/${lang}/products/${category.slug}/${product.slug}`}
+                href={`/${lang}/products/${product.slug}`}
                 target="_blank"
                 rel="noopener"
                 className={`${s.btn} ${s.secondary}`}

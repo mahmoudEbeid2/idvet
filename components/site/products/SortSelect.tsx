@@ -1,39 +1,46 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import type { SortKey } from "@/lib/catalog/data";
+import { useRouter } from "next/navigation";
+import { type CatalogFilters, type SortKey, filtersQuery } from "@/lib/catalog/filters";
 import s from "./catalog.module.css";
 
 /**
  * A GET form, so sorting works without JavaScript (the Apply button is only
  * shown then). With JS, changing the select navigates straight away and the
- * server renders the sorted list; the choice stays in ?sort=.
+ * server renders the sorted list; the choice stays in ?sort= next to the filters.
  */
 export function SortSelect({
-  value,
+  base,
+  filters,
   labels,
 }: {
-  value: SortKey;
-  labels: { sortLabel: string; sortNewest: string; sortName: string; sortBrand: string; sortApply: string };
+  /** /{locale}/products */
+  base: string;
+  filters: CatalogFilters;
+  labels: { sortLabel: string; sortRelevance: string; sortName: string; sortBrand: string; sortApply: string };
 }) {
   const router = useRouter();
-  const pathname = usePathname();
 
   return (
-    <form method="get" className={s.sortForm}>
-      <label htmlFor="sort" className={s.srOnly}>
-        {labels.sortLabel}
-      </label>
+    <form method="get" action={base} className={s.sortForm}>
+      {filters.q && <input type="hidden" name="q" value={filters.q} />}
+      {filters.brands.map((brand) => (
+        <input key={`b-${brand}`} type="hidden" name="brand" value={brand} />
+      ))}
+      {filters.categories.map((category) => (
+        <input key={`c-${category}`} type="hidden" name="category" value={category} />
+      ))}
+      <label htmlFor="sort">{labels.sortLabel}</label>
       <select
         id="sort"
         name="sort"
-        defaultValue={value}
+        defaultValue={filters.sort}
         onChange={(e) => {
-          const sort = e.currentTarget.value;
-          router.push(sort === "newest" ? pathname : `${pathname}?sort=${sort}`, { scroll: false });
+          const sort = e.currentTarget.value as SortKey;
+          router.push(`${base}${filtersQuery({ ...filters, sort })}`, { scroll: false });
         }}
       >
-        <option value="newest">{labels.sortNewest}</option>
+        <option value="relevance">{labels.sortRelevance}</option>
         <option value="name">{labels.sortName}</option>
         <option value="brand">{labels.sortBrand}</option>
       </select>

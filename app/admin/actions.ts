@@ -157,10 +157,15 @@ export async function saveProduct(_prev: FormState, form: FormData): Promise<For
     ...translated(form, "name", 150),
     ...translated(form, "summary", 1000),
     ...translated(form, "dosageForm", 150),
-    ...translated(form, "packaging", 200),
+    ...translated(form, "packaging", 500),
     ...translated(form, "species", 200),
+    ...translated(form, "composition", 3000),
+    ...translated(form, "indications", 3000),
+    ...translated(form, "tags", 500),
     ...translated(form, "about", 8000),
     ...translated(form, "usage", 4000),
+    ...translated(form, "seoTitle", 120),
+    ...translated(form, "seoDescription", 320),
   };
 
   if (!categoryId || !(await prisma.category.findUnique({ where: { id: categoryId }, select: { id: true } }))) {

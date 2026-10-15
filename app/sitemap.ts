@@ -7,22 +7,28 @@ import { absoluteUrl, languageAlternates } from "@/lib/seo";
 // (hreflang + x-default) — Google's recommended sitemap form for multilingual
 // sites. Rendered per request (the catalog lives in the database).
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { categories, products } = await getSitemapCatalog("ar");
+  const { categories, brands, products } = await getSitemapCatalog("ar");
   const newest = (dates: Date[]) => (dates.length ? new Date(Math.max(...dates.map(Number))) : undefined);
-  const catalogUpdated = newest([...categories, ...products].map((x) => x.updatedAt));
+  const catalogUpdated = newest(products.map((p) => p.updatedAt));
 
   const pages: { path: string; lastModified?: Date; priority: number; images?: string[] }[] = [
     { path: "", lastModified: catalogUpdated, priority: 1 },
     { path: "/products", lastModified: catalogUpdated, priority: 0.9 },
     { path: "/about", priority: 0.8 },
     { path: "/contact", priority: 0.8 },
+    // One-category and one-brand views of the catalog are indexable landing pages.
     ...categories.map((c) => ({
-      path: `/products/${c.slug}`,
-      lastModified: newest([c.updatedAt, ...products.filter((p) => p.categorySlug === c.slug).map((p) => p.updatedAt)]),
+      path: `/products?category=${encodeURIComponent(c.slug)}`,
+      lastModified: c.updatedAt,
       priority: 0.8,
     })),
+    ...brands.map((b) => ({
+      path: `/products?brand=${encodeURIComponent(b.slug)}`,
+      lastModified: b.updatedAt,
+      priority: 0.7,
+    })),
     ...products.map((p) => ({
-      path: `/products/${p.categorySlug}/${p.slug}`,
+      path: `/products/${p.slug}`,
       lastModified: p.updatedAt,
       priority: 0.7,
       images: p.images.map(absoluteUrl),

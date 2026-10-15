@@ -12,6 +12,7 @@ export const PRESET_ICONS = [
   "/assets/products/icon-supplement.svg",
   "/assets/products/icon-feed.svg",
   "/assets/products/icon-poultry.svg",
+  "/assets/products/icon-disinfectant.svg",
 ] as const;
 
 export const COLOR_SWATCHES = ["#e8f3fb", "#fdf1e3", "#eaf7ee", "#fdecec", "#f1ecfb", "#fff8d9", "#e6f5f5", "#f1f2f4"];

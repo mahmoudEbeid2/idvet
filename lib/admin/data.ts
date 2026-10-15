@@ -9,7 +9,10 @@ import { requireAdmin } from "./session";
 // client navigation, so pages can't rely on the panel layout's check alone.
 // Names are picked in the dashboard language, falling back like the site does.
 
-const PRODUCT_TEXT = ["name", "summary", "dosageForm", "packaging", "species", "about", "usage"] as const;
+const PRODUCT_TEXT = [
+  "name", "summary", "dosageForm", "packaging", "species",
+  "composition", "indications", "tags", "about", "usage", "seoTitle", "seoDescription",
+] as const;
 
 export async function getDashboard() {
   await requireAdmin();

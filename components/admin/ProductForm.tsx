@@ -11,8 +11,11 @@ import { useFormAction } from "./useFormAction";
 import { Card, Field } from "./ui";
 import s from "./admin.module.css";
 
-const TEXT_FIELDS = ["name", "summary", "dosageForm", "packaging", "species", "about", "usage"];
-
+const TEXT_FIELDS = [
+  "name", "summary", "dosageForm", "packaging", "species",
+  "composition", "indications", "tags", "about", "usage",
+];
+const SEO_FIELDS = ["seoTitle", "seoDescription"];
 
 export function ProductForm({
   product,
@@ -92,15 +95,26 @@ export function ProductForm({
                 <Field label={f.summary} htmlFor={`summary${lang}`} hint={f.summaryHint}>
                   {input("summary", lang, 3)}
                 </Field>
-                <div className={s.grid3}>
+                <div className={s.grid2}>
                   <Field label={f.dosageForm} htmlFor={`dosageForm${lang}`}>
                     {input("dosageForm", lang)}
                   </Field>
-                  <Field label={f.packaging} htmlFor={`packaging${lang}`}>
-                    {input("packaging", lang)}
-                  </Field>
                   <Field label={f.species} htmlFor={`species${lang}`}>
                     {input("species", lang)}
+                  </Field>
+                </div>
+                <Field label={f.composition} htmlFor={`composition${lang}`} hint={f.compositionHint}>
+                  {input("composition", lang, 4)}
+                </Field>
+                <Field label={f.indications} htmlFor={`indications${lang}`} hint={f.indicationsHint}>
+                  {input("indications", lang, 4)}
+                </Field>
+                <div className={s.grid2}>
+                  <Field label={f.packaging} htmlFor={`packaging${lang}`} hint={f.packagingHint}>
+                    {input("packaging", lang, 3)}
+                  </Field>
+                  <Field label={f.tags} htmlFor={`tags${lang}`} hint={f.tagsHint}>
+                    {input("tags", lang, 3)}
                   </Field>
                 </div>
                 <Field label={f.about} htmlFor={`about${lang}`} hint={f.aboutHint}>
@@ -108,6 +122,23 @@ export function ProductForm({
                 </Field>
                 <Field label={f.usage} htmlFor={`usage${lang}`} hint={f.usageHint}>
                   {input("usage", lang, 5)}
+                </Field>
+              </>
+            )}
+          </LangTabs>
+        </div>
+      </Card>
+
+      <Card title={f.seo} description={f.seoDescription}>
+        <div className={`${s.stack} ${s.stackTight}`}>
+          <LangTabs initialFilled={filledLangs(product as Record<string, string> | undefined, SEO_FIELDS)}>
+            {(lang) => (
+              <>
+                <Field label={f.seoTitle} htmlFor={`seoTitle${lang}`} hint={f.seoTitleHint}>
+                  {input("seoTitle", lang)}
+                </Field>
+                <Field label={f.seoMetaDescription} htmlFor={`seoDescription${lang}`} hint={f.seoMetaDescriptionHint}>
+                  {input("seoDescription", lang, 3)}
                 </Field>
               </>
             )}

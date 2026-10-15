@@ -16,7 +16,7 @@ export async function GET() {
     "",
     `> ${en.hero.paragraph}`,
     "",
-    `IDVET is the exclusive Iraqi agent for HiPro (Turkey), Vet Care (Jordan) and Jamuh (Saudi Arabia). Services: ${en.services.items
+    `IDVET is the exclusive Iraqi agent for HiPro (Turkey), Vet Care (Jordan) and Jumuh (Saudi Arabia). Services: ${en.services.items
       .map((item) => item.heading.split("\n").pop())
       .join(", ")}.`,
     "",
@@ -31,22 +31,22 @@ export async function GET() {
     line("Home (Kurdish)", "/ku"),
     line("About us", "/en/about", "who IDVET is, its story, mission and vision"),
     line("Contact us", "/en/contact", "phone, email and office addresses"),
-    line("Product catalog", "/en/products", "all published products, searchable with ?q="),
+    line("Product catalog", "/en/products", "all published products; search with ?q=, filter with ?brand= and ?category="),
     "",
     "## Product categories",
     "",
-    ...categories.map((c) => line(c.name, `/en/products/${c.slug}`)),
+    ...categories.map((c) => line(c.name, `/en/products?category=${c.slug}`)),
     "",
     "## Products",
     "",
-    ...products.map((p) => line(p.name, `/en/products/${p.categorySlug}/${p.slug}`)),
+    ...products.map((p) => line(p.name, `/en/products/${p.slug}`)),
     "",
     "## Optional",
     "",
     line("Sitemap", "/sitemap.xml", "every page in every language"),
     line("Brand: HiPro", "https://www.hipro-feed.com/"),
     line("Brand: Vet Care", "https://vetcare-jo.com/"),
-    line("Brand: Jamuh", "https://jamuh.sa/"),
+    line("Brand: Jumuh", "https://jamuh.sa/"),
     "",
   ].join("\n");
 

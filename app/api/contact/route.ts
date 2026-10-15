@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { sendMail } from "@/lib/mailer";
 
 const contactSchema = z.object({
   name: z.string().trim().min(2).max(100),
@@ -25,6 +26,18 @@ export async function POST(request: Request) {
 
   const submission = await prisma.contactSubmission.create({
     data: { name, email, phone: phone || null, message, locale },
+  });
+
+  await sendMail({
+    subject: `Website contact form — ${name}`,
+    replyTo: email,
+    rows: [
+      ["Name", name],
+      ["Email", email],
+      ["Phone", phone ?? ""],
+      ["Message", message],
+      ["Language", locale],
+    ],
   });
 
   return NextResponse.json({ id: submission.id }, { status: 201 });

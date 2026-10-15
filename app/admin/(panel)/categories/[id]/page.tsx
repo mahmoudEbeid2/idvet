@@ -36,7 +36,7 @@ export default async function EditCategoryPage({
             <Link href={`/admin/products?category=${category.id}`} className={`${s.btn} ${s.secondary}`}>
               {t.category.productsOf(count)}
             </Link>
-            <a href={`/${lang}/products/${category.slug}`} target="_blank" rel="noopener" className={`${s.btn} ${s.secondary}`}>
+            <a href={`/${lang}/products?category=${category.slug}`} target="_blank" rel="noopener" className={`${s.btn} ${s.secondary}`}>
               {t.common.viewOnSite}
             </a>
           </>

@@ -44,3 +44,30 @@ export function safeDecode(value: string): string {
     return value;
   }
 }
+
+/**
+ * Short items such as tags or pack sizes: one per line, or separated by
+ * commas. A Latin comma only splits when a space follows, so "1,000 ml" stays whole.
+ */
+export function items(text: string): string[] {
+  return [
+    ...new Set(
+      text
+        .split(/\n|،|[,;]\s+/)
+        .map((item) => item.trim().replace(/^[-•*]\s*/, "").replace(/[,;]$/, ""))
+        .filter(Boolean),
+    ),
+  ];
+}
+
+/**
+ * Composition lines → table rows. "Amoxicillin trihydrate: 500 mg" (also
+ * " - ", " – ", " — ", "=" or a tab) splits into ingredient and amount; a
+ * line without a separator is an ingredient with no amount.
+ */
+export function compositionRows(text: string): { ingredient: string; amount: string }[] {
+  return steps(text).map((line) => {
+    const match = line.match(/^(.+?)(?:\s*[:：=\t]\s*|\s+[-–—]\s+)(.+)$/);
+    return match ? { ingredient: match[1].trim(), amount: match[2].trim() } : { ingredient: line, amount: "" };
+  });
+}
