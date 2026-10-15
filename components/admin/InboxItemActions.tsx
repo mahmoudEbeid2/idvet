@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { deleteMessage, deleteQuote, markMessageRead, markQuoteRead } from "@/app/admin/actions";
+import { useLive } from "./AdminLive";
 import { ConfirmDeleteButton } from "./ConfirmDeleteButton";
 
 type Kind = "message" | "quote";
@@ -11,9 +12,11 @@ type Kind = "message" | "quote";
  * Server Action, so the sidebar's unread badge (in the layout) refreshes too.
  */
 export function MarkRead({ kind, id, unread }: { kind: Kind; id: string; unread: boolean }) {
+  const { markOpened } = useLive();
   useEffect(() => {
+    markOpened(id); // Drops the live "just arrived" highlight in the list.
     if (unread) void (kind === "quote" ? markQuoteRead(id) : markMessageRead(id));
-  }, [kind, id, unread]);
+  }, [kind, id, unread, markOpened]);
   return null;
 }
 

@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { sendQuoteMail } from "@/lib/mailer";
 import { quoteEmail } from "@/lib/email/templates";
 import { pick } from "@/lib/catalog/i18n";
+import { notifyInbox } from "@/lib/admin/inboxEvents";
+import { copyUpload } from "@/lib/storage";
 
 const optional = (max: number) => z.string().trim().max(max).optional().or(z.literal(""));
 
@@ -33,12 +35,16 @@ export async function POST(request: Request) {
   });
   if (!product) return NextResponse.json({ error: "Unknown product" }, { status: 404 });
 
-  // Stored with the English name (kept if the product is deleted later).
+  // Snapshot kept if the product is deleted later: English name, slug, and a
+  // copy of the first image (the product's own files go with it).
   const productName = pick(product, "name", "en") || product.code;
+  const productImage = product.images[0] ? await copyUpload(product.images[0].path, "quotes") : null;
   const saved = await prisma.quoteRequest.create({
     data: {
       productId: product.id,
       productName,
+      productSlug: product.slug,
+      productImage,
       name,
       contact,
       quantity: quantity || null,
@@ -48,6 +54,7 @@ export async function POST(request: Request) {
       locale,
     },
   });
+  notifyInbox();
 
   // The email is read by the IDVET team in Arabic.
   const result = await sendQuoteMail(

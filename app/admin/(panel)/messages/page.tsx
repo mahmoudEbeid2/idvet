@@ -5,6 +5,7 @@ import { formatAdminDate, localeDir } from "@/lib/admin/i18n";
 import { getAdminLang, getAdminT } from "@/lib/admin/lang";
 import { Card, Notice, PageHeader } from "@/components/admin/ui";
 import { InboxFilters, InboxStatusBadge, MailFailedBadge } from "@/components/admin/InboxParts";
+import { FreshRow } from "@/components/admin/AdminLive";
 import s from "@/components/admin/admin.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -42,7 +43,7 @@ export default async function MessagesPage({
               {messages.map((m) => {
                 const unread = m.status === "new";
                 return (
-                  <li key={m.id}>
+                  <FreshRow key={m.id} id={m.id}>
                     <Link href={`/admin/messages/${m.id}`} className={`${s.row} ${unread ? s.unread : ""}`}>
                       <span className={unread ? s.unreadDot : s.readDot} aria-hidden="true" />
                       <span className={s.rowText}>
@@ -62,7 +63,7 @@ export default async function MessagesPage({
                         {formatAdminDate(m.createdAt, lang)}
                       </time>
                     </Link>
-                  </li>
+                  </FreshRow>
                 );
               })}
             </ul>

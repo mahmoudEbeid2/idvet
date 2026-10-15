@@ -5,12 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/admin/actions";
 import { AdminLangSwitch, useAdminLang, useAdminT } from "./AdminLang";
+import { LiveControls, useLive } from "./AdminLive";
 import s from "./admin.module.css";
 
-type Unread = { messages: number; quotes: number };
-
-function Nav({ unread, onNavigate }: { unread: Unread; onNavigate?: () => void }) {
+function Nav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const { counts: unread } = useLive();
   const t = useAdminT();
   const lang = useAdminLang();
   const links = [
@@ -54,24 +54,28 @@ function Logo() {
   );
 }
 
-export function AdminShell({ unread, children }: { unread: Unread; children: React.ReactNode }) {
+export function AdminShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const t = useAdminT();
   return (
     <>
       <div className={s.mobileTop}>
         <Logo />
-        <button type="button" aria-label={t.nav.menu} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-            <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
-        </button>
+        <span className={s.mobileActions}>
+          <LiveControls compact />
+          <button type="button" aria-label={t.nav.menu} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </button>
+        </span>
       </div>
       <div className={s.mobileNav} hidden={!open}>
         <div className={s.sideLang}>
           <AdminLangSwitch />
         </div>
-        <Nav unread={unread} onNavigate={() => setOpen(false)} />
+        <LiveControls />
+        <Nav onNavigate={() => setOpen(false)} />
       </div>
       <div className={s.shell}>
         <aside className={s.side}>
@@ -82,7 +86,8 @@ export function AdminShell({ unread, children }: { unread: Unread; children: Rea
           <div className={s.sideLang}>
             <AdminLangSwitch />
           </div>
-          <Nav unread={unread} />
+          <LiveControls />
+          <Nav />
         </aside>
         <main className={s.main}>
           <div className={s.container}>{children}</div>

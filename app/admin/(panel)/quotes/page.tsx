@@ -5,6 +5,7 @@ import { formatAdminDate } from "@/lib/admin/i18n";
 import { getAdminLang, getAdminT } from "@/lib/admin/lang";
 import { Card, Notice, PageHeader } from "@/components/admin/ui";
 import { InboxFilters, InboxStatusBadge, MailFailedBadge } from "@/components/admin/InboxParts";
+import { FreshRow } from "@/components/admin/AdminLive";
 import s from "@/components/admin/admin.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -38,18 +39,36 @@ export default async function QuotesPage({
               {quotes.map((r) => {
                 const unread = !r.readAt;
                 return (
-                  <li key={r.id}>
+                  <FreshRow key={r.id} id={r.id}>
                     <Link href={`/admin/quotes/${r.id}`} className={`${s.row} ${unread ? s.unread : ""}`}>
                       <span className={unread ? s.unreadDot : s.readDot} aria-hidden="true" />
+                      <span className={`${s.thumb} ${s.thumbSm}`}>
+                        {r.product.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={r.product.image} alt="" loading="lazy" />
+                        ) : (
+                          t.common.noImage
+                        )}
+                      </span>
                       <span className={s.rowText}>
                         <b>
-                          <bdi>{r.name}</bdi> <span className={s.rowSub}>· <bdi>{r.productName}</bdi></span>
+                          <bdi>{r.name}</bdi>
                         </b>
                         <span>
                           <bdi>{r.contact}</bdi>
                           {r.quantity ? <> · {t.inbox.quantity}: <bdi>{r.quantity}</bdi></> : null}
                           {r.company ? <> · <bdi>{r.company}</bdi></> : null}
                         </span>
+                      </span>
+                      <span className={`${s.rowText} ${s.rowProduct}`}>
+                        <b>
+                          <bdi>{r.product.name}</bdi>
+                        </b>
+                        {r.product.brand && (
+                          <span className={s.latin}>
+                            <bdi>{r.product.brand}</bdi>
+                          </span>
+                        )}
                       </span>
                       <span className={s.badges}>
                         {!r.mailSent && <MailFailedBadge t={t} />}
@@ -60,7 +79,7 @@ export default async function QuotesPage({
                         {formatAdminDate(r.createdAt, lang)}
                       </time>
                     </Link>
-                  </li>
+                  </FreshRow>
                 );
               })}
             </ul>

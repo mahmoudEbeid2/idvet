@@ -1,5 +1,5 @@
 import path from "node:path";
-import { mkdir, rm, unlink, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, rm, unlink, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 
 // Uploaded files live outside public/ (so they survive rebuilds and a Docker
@@ -39,6 +39,25 @@ export async function saveUpload(folder: string, extension: string, data: Buffer
   await mkdir(path.dirname(/*turbopackIgnore: true*/ full), { recursive: true });
   await writeFile(/*turbopackIgnore: true*/ full, data);
   return relative;
+}
+
+/**
+ * Copies a stored file under `folder` with a fresh random name (same extension)
+ * and returns the copy's relative path, or null when the source can't be copied.
+ */
+export async function copyUpload(relative: string, folder: string): Promise<string | null> {
+  const source = resolveUpload(relative);
+  const target = `${folder}/${randomUUID()}${path.extname(relative).toLowerCase()}`;
+  const full = resolveUpload(target);
+  if (!source || !full) return null;
+  try {
+    await mkdir(path.dirname(/*turbopackIgnore: true*/ full), { recursive: true });
+    await copyFile(/*turbopackIgnore: true*/ source, /*turbopackIgnore: true*/ full);
+    return target;
+  } catch (error) {
+    console.error("[storage] couldn't copy", relative, error);
+    return null;
+  }
 }
 
 /** Deletes a stored file; a file that is already gone is not an error. */

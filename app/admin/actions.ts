@@ -312,7 +312,11 @@ export async function deleteMessage(id: string): Promise<void> {
 
 export async function deleteQuote(id: string): Promise<void> {
   await requireAdmin();
-  await prisma.quoteRequest.deleteMany({ where: { id: String(id) } });
+  const quote = await prisma.quoteRequest.findUnique({ where: { id: String(id) }, select: { id: true, productImage: true } });
+  if (quote) {
+    await prisma.quoteRequest.delete({ where: { id: quote.id } });
+    await deleteUpload(quote.productImage);
+  }
   revalidatePath("/admin", "layout");
   redirect("/admin/quotes?deleted=1");
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendContactMail } from "@/lib/mailer";
 import { contactEmail } from "@/lib/email/templates";
+import { notifyInbox } from "@/lib/admin/inboxEvents";
 
 const contactSchema = z.object({
   name: z.string().trim().min(2).max(100),
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
   const saved = await prisma.contactMessage.create({
     data: { name, email, phone: phone || null, subject: subject || null, message, locale },
   });
+  notifyInbox();
 
   const result = await sendContactMail(contactEmail(saved));
   await prisma.contactMessage

@@ -34,27 +34,31 @@ enum ContactStatus {
 
 /// "Request a quote" from a product page or card. Also emailed (lib/mailer.ts).
 model QuoteRequest {
-  id          String      @id @default(cuid())
-  productId   String?
-  product     Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
-  /// The product's name when the request was sent (kept if the product is deleted).
-  productName String
-  name        String
+  id           String      @id @default(cuid())
+  productId    String?
+  product      Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
+  /// Snapshot of the product when the request was sent, kept if the product is
+  /// deleted later: its English name, its slug, and a copy of its first image
+  /// (relative to UPLOAD_DIR, under quotes/; null for requests sent before snapshots).
+  productName  String
+  productSlug  String?
+  productImage String?
+  name         String
   /// Phone number or email, as typed.
-  contact     String
-  quantity    String?
-  company     String?
-  city        String?
-  message     String?
-  locale      String
+  contact      String
+  quantity     String?
+  company      String?
+  city         String?
+  message      String?
+  locale       String
   /// Follow-up state, set by the team in the admin.
-  status      QuoteStatus @default(new)
+  status       QuoteStatus @default(new)
   /// First opened in the admin (null = unread).
-  readAt      DateTime?
-  mailSent    Boolean     @default(false)
+  readAt       DateTime?
+  mailSent     Boolean     @default(false)
   /// Why the notification email failed (null when sent).
-  mailError   String?
-  createdAt   DateTime    @default(now())
+  mailError    String?
+  createdAt    DateTime    @default(now())
 
   @@index([createdAt])
   @@index([status, createdAt])

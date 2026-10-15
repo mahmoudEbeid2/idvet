@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { setQuoteStatus } from "@/app/admin/actions";
@@ -8,7 +7,8 @@ import { formatAdminDate, localeDir, localeName } from "@/lib/admin/i18n";
 import { getAdminLang, getAdminT } from "@/lib/admin/lang";
 import { InboxDelete, MarkRead } from "@/components/admin/InboxItemActions";
 import { InboxStatusBadge, StatusForm } from "@/components/admin/InboxParts";
-import { Card, Notice, PageHeader, StatusBadge } from "@/components/admin/ui";
+import { QuoteProduct } from "@/components/admin/QuoteProduct";
+import { Card, Notice, PageHeader } from "@/components/admin/ui";
 import s from "@/components/admin/admin.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -42,7 +42,7 @@ export default async function QuotePage({
     <>
       <MarkRead kind="quote" id={quote.id} unread={!quote.readAt} />
       <PageHeader
-        title={<bdi>{quote.productName}</bdi>}
+        title={<bdi>{quote.product?.name ?? quote.productName}</bdi>}
         description={t.inbox.quoteTitle}
         back={{ href: "/admin/quotes", label: `${t.common.backArrow} ${t.inbox.quotesTitle}` }}
         actions={
@@ -60,24 +60,6 @@ export default async function QuotePage({
         )}
         <Card>
           <dl className={s.dl}>
-            <dt>{t.inbox.product}</dt>
-            <dd>
-              {quote.product ? (
-                <span className={s.badges}>
-                  <a href={quote.product.href} target="_blank" rel="noopener" className={s.link}>
-                    <bdi>{quote.product.name}</bdi> ↗
-                  </a>
-                  <StatusBadge published={quote.product.published} t={t} />
-                  <Link href={`/admin/products/${quote.product.id}`} className={`${s.link} ${s.linkMuted}`}>
-                    {t.inbox.editProduct}
-                  </Link>
-                </span>
-              ) : (
-                <>
-                  <bdi>{quote.productName}</bdi> <span className={`${s.badge} ${s.bGray}`}>{t.inbox.productDeleted}</span>
-                </>
-              )}
-            </dd>
             <dt>{t.inbox.name}</dt>
             <dd>
               <bdi>{quote.name}</bdi>
@@ -110,6 +92,11 @@ export default async function QuotePage({
             </dd>
           </dl>
         </Card>
+        <QuoteProduct
+          product={quote.product}
+          snapshot={{ name: quote.productName, slug: quote.productSlug, image: quote.snapshotImage }}
+          t={t}
+        />
         {quote.message && (
           <Card title={t.inbox.message}>
             <p className={s.msgBody} dir={localeDir(quote.locale)}>

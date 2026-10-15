@@ -1,7 +1,10 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { knownBrand } from "@/lib/catalog/brands";
+import { compositionRows, items, steps } from "@/lib/catalog/format";
 import { missingLocales, pick } from "@/lib/catalog/i18n";
 import { uploadUrl } from "@/lib/storage";
+import type { AdminLang } from "./i18n";
 import { getAdminLang } from "./lang";
 import { requireAdmin } from "./session";
 
@@ -174,11 +177,41 @@ export const isQuoteStatus = (v: unknown): v is QuoteStatusValue => isOneOf(QUOT
 /** New contact messages and unopened quote requests, for the sidebar badges. */
 export async function getUnreadCounts() {
   await requireAdmin();
+  return countUnread();
+}
+
+/** getUnreadCounts without the session check, for route handlers that checked it already. */
+export async function countUnread() {
   const [messages, quotes] = await Promise.all([
     prisma.contactMessage.count({ where: { status: "new" } }),
     prisma.quoteRequest.count({ where: { readAt: null } }),
   ]);
   return { messages, quotes };
+}
+
+export type UnreadCounts = Awaited<ReturnType<typeof countUnread>>;
+
+const firstImage = { orderBy: [{ sortOrder: "asc" as const }, { createdAt: "asc" as const }], take: 1 };
+
+/** Product fields for a quote's one-line summary (list rows, live notifications). */
+export const quoteProductSummary = {
+  select: { code: true, brand: true, nameKu: true, nameAr: true, nameEn: true, images: firstImage },
+} satisfies Prisma.QuoteRequest$productArgs;
+
+type QuoteWithSummary = Prisma.QuoteRequestGetPayload<{ include: { product: typeof quoteProductSummary } }>;
+
+/**
+ * Name, brand and thumbnail of a quote's product: the live product while it
+ * exists, else the snapshot saved with the request.
+ */
+export function quoteProductLine(quote: QuoteWithSummary, lang: AdminLang) {
+  const { product } = quote;
+  const image = product?.images[0]?.path ?? quote.productImage;
+  return {
+    name: (product && (pick(product, "name", lang) || product.code)) || quote.productName,
+    brand: product?.brand.trim() ?? "",
+    image: image ? uploadUrl(image) : null,
+  };
 }
 
 const INBOX_LIMIT = 300;
@@ -210,7 +243,16 @@ export async function listQuoteRequests(filter: InboxFilter) {
       ? { OR: (["name", "contact", "productName", "company", "city"] as const).map((f) => ({ [f]: contains(q) })) }
       : {}),
   };
-  return prisma.quoteRequest.findMany({ where, orderBy: { createdAt: "desc" }, take: INBOX_LIMIT });
+  const [rows, lang] = await Promise.all([
+    prisma.quoteRequest.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: INBOX_LIMIT,
+      include: { product: quoteProductSummary },
+    }),
+    getAdminLang(),
+  ]);
+  return rows.map((row) => ({ ...row, product: quoteProductLine(row, lang) }));
 }
 
 export async function getContactMessage(id: string) {
@@ -223,19 +265,51 @@ export async function getQuoteRequest(id: string) {
   const lang = await getAdminLang();
   const quote = await prisma.quoteRequest.findUnique({
     where: { id },
-    include: { product: { select: { id: true, slug: true, code: true, published: true, nameKu: true, nameAr: true, nameEn: true } } },
+    include: {
+      product: {
+        include: { category: true, images: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] } },
+      },
+    },
   });
   if (!quote) return null;
   const { product, ...rest } = quote;
   return {
     ...rest,
-    /** Null when the product was deleted after the request (productName is kept). */
-    product: product && {
-      id: product.id,
-      name: pick(product, "name", lang) || product.code,
-      published: product.published,
-      /** Public page, in the language the visitor used. */
-      href: `/${quote.locale}/products/${product.slug}`,
-    },
+    snapshotImage: quote.productImage ? uploadUrl(quote.productImage) : null,
+    /** Null when the product was deleted after the request (the snapshot fields are kept). */
+    product: product && quoteProductDetail(product, lang),
   };
 }
+
+type ProductForQuote = Prisma.ProductGetPayload<{ include: { category: true; images: true } }>;
+
+/** The product as the public page shows it, in the dashboard language. */
+function quoteProductDetail(p: ProductForQuote, lang: AdminLang) {
+  const known = knownBrand(p.brand);
+  const name = pick(p, "name", lang) || p.code;
+  return {
+    id: p.id,
+    slug: p.slug,
+    name,
+    /** The name in the other languages, when filled in and different. */
+    otherNames: (["Ku", "Ar", "En"] as const)
+      .map((l) => ({ lang: l, name: p[`name${l}`].trim() }))
+      .filter((n) => n.name && n.name !== name),
+    code: p.code && p.code !== name ? p.code : "",
+    brand: known?.name ?? p.brand.trim(),
+    brandCountry: known?.country[lang] ?? "",
+    category: pick(p.category, "name", lang),
+    color: p.category.color,
+    published: p.published,
+    summary: pick(p, "summary", lang),
+    dosageForm: pick(p, "dosageForm", lang),
+    species: pick(p, "species", lang),
+    composition: compositionRows(pick(p, "composition", lang)),
+    indications: steps(pick(p, "indications", lang)),
+    packSizes: items(pick(p, "packaging", lang)),
+    tags: items(pick(p, "tags", lang)),
+    images: p.images.map((i) => uploadUrl(i.path)),
+  };
+}
+
+export type QuoteProductDetail = ReturnType<typeof quoteProductDetail>;
