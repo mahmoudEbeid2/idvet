@@ -3,53 +3,33 @@
 import { useEffect } from "react";
 import type { SiteContent } from "@/lib/content";
 import { scrollToSection, scrollToTop } from "@/lib/scrollToSection";
-import { useActiveSection } from "@/lib/useActiveSection";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
-/** Which page the header is on: home, the catalog, the About, Contact or Brands page, or anything else (404, error). */
-export type HeaderPage = "home" | "products" | "about" | "contact" | "brands" | "other";
+/** Which page the header is on: home, the catalog, the About, Contact, Brands or Services page, or anything else (404, error). */
+export type HeaderPage = "home" | "products" | "about" | "contact" | "brands" | "services" | "other";
 
 /** The nav links in order (start → end); Contact follows as a button. */
 const NAV_IDS = ["products", "brands", "services", "about"] as const;
 type NavId = (typeof NAV_IDS)[number];
-
-/** Home page sections, tracked to mark "services" while it is in view. */
-const HOME_SECTIONS = ["about", "services", "brands", "contact"];
 
 export interface NavLink {
   id: NavId;
   label: string;
   href: string;
   active: boolean;
-  /** Services is a home page section: scrolled to rather than followed. */
-  onClick?: (e: React.MouseEvent) => void;
 }
 
-/**
- * The header's links, shared by the desktop Header and the MobileHeader.
- * Products, Brands and About are pages; Services is the home page's section
- * (see lib/scrollToSection.ts for why it is scrolled to by hand).
- */
+/** The header's links (all pages), shared by the desktop Header and the MobileHeader. */
 export function useHeaderNav(site: SiteContent, page: HeaderPage, onNavigate?: () => void) {
   const home = `/${site.locale}`;
   const isHome = page === "home";
-  const tracked = useActiveSection(HOME_SECTIONS);
 
-  const links: NavLink[] = NAV_IDS.map((id) =>
-    id === "services"
-      ? {
-          id,
-          label: site.nav.services,
-          href: isHome ? "#services" : `${home}#services`,
-          active: isHome && tracked === "services",
-          onClick: (e) => {
-            e.preventDefault();
-            onNavigate?.();
-            scrollToSection("services", { fallbackHref: home });
-          },
-        }
-      : { id, label: site.nav[id], href: `${home}/${id}`, active: page === id },
-  );
+  const links: NavLink[] = NAV_IDS.map((id) => ({
+    id,
+    label: site.nav[id],
+    href: `${home}/${id}`,
+    active: page === id,
+  }));
 
   /** On home the logo scrolls back to the top instead of reloading. */
   function onLogoClick(e: React.MouseEvent) {
@@ -120,8 +100,7 @@ export function Header({
               <li key={link.id}>
                 <a
                   href={link.href}
-                  onClick={link.onClick}
-                  aria-current={link.active ? (link.id === "services" ? "true" : "page") : undefined}
+                  aria-current={link.active ? "page" : undefined}
                   className={`whitespace-nowrap ${navLinkClass(link.active)}`}
                 >
                   {link.label}

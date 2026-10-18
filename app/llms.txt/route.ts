@@ -32,6 +32,7 @@ export async function GET() {
     line("About us", "/en/about", "who IDVET is, its story, mission and vision"),
     line("Contact us", "/en/contact", "phone, email and office addresses"),
     line("Our brands", "/en/brands", "the brands IDVET distributes in Iraq and how it supports them"),
+    line("Our services", "/en/services", "import, distribution, delivery, technical consulting, after-sales follow-up and market support"),
     line("Product catalog", "/en/products", "all published products; search with ?q=, filter with ?brand= and ?category="),
     "",
     "## Product categories",

@@ -64,8 +64,8 @@ export function MobileHeader({
               <li key={link.id}>
                 <a
                   href={link.href}
-                  onClick={(e) => (link.onClick ? link.onClick(e) : setNavOpen(false))}
-                  aria-current={link.active ? (link.id === "services" ? "true" : "page") : undefined}
+                  onClick={() => setNavOpen(false)}
+                  aria-current={link.active ? "page" : undefined}
                   className={`block py-3 ${navLinkClass(link.active)}`}
                 >
                   {link.label}

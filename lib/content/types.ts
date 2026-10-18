@@ -47,6 +47,17 @@ export interface BrandProfile {
   href: string;
 }
 
+export interface ServiceDetail {
+  id: "import" | "distribution" | "delivery" | "consulting" | "afterSales" | "marketSupport";
+  title: string;
+  /** The bold line opening the body. */
+  lead: string;
+  paragraphs: string[];
+  audience: string;
+  value: string;
+  imageAlt: string;
+}
+
 export interface AboutBlock {
   title: string;
   paragraphs: string[];
@@ -258,6 +269,17 @@ export interface SiteContent {
     };
     trust: AboutBlock;
     imageAlts: { hero: string; portfolio: string };
+  };
+  /** The /{locale}/services page. The hero eyebrow and buttons reuse `hero`. */
+  servicesPage: {
+    metaTitle: string;
+    hero: { heading: string; body: string };
+    title: string;
+    /** Bold labels before each service's beneficiaries and practical value. */
+    labels: { audience: string; value: string };
+    /** One band each, in page order; images come from ServicesPage by `id`. */
+    items: ServiceDetail[];
+    imageAlts: { hero: string };
   };
   /** Alt text for the home page's content images (decorative ones use ""). */
   imageAlts: {

@@ -1,7 +1,8 @@
+import Image from "next/image";
 import type { SiteContent } from "@/lib/content/types";
 import { ContactTriggerButton } from "./ContactTriggerButton";
 
-// Shared by the responsive inner pages (About, Contact, Brands): from lg they match
+// Shared by the responsive inner pages (About, Contact, Brands, Services): from lg they match
 // the 1440px designs (content 1065px wide, like every home section), below
 // 720px their text, images, icons and buttons are centered.
 
@@ -14,6 +15,21 @@ export function Paragraphs({ paragraphs, className }: { paragraphs: string[]; cl
       {paragraphs.map((p, i) => (
         <p key={i}>{p}</p>
       ))}
+    </div>
+  );
+}
+
+/**
+ * The large IDVET wordmark closing the Brands and Services pages, cut off by
+ * the contact band below it (1513px wide on the 1440px design, its bottom
+ * 55px hidden). Capped at 1440px like the footer canvas (FigmaCanvas) below it.
+ */
+export function IdvetWatermark({ className = "" }: { className?: string }) {
+  return (
+    <div aria-hidden className={`relative mx-auto aspect-[1440/328] max-w-[1440px] overflow-hidden ${className}`} dir="ltr">
+      <div className="absolute top-0 left-[-2.6%] aspect-[1817/460] w-[105.07%]">
+        <Image src="/assets/brands/idvet-watermark.png" alt="" fill sizes="105vw" className="object-cover" />
+      </div>
     </div>
   );
 }

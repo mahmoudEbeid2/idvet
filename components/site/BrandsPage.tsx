@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { BrandProfile, SiteContent } from "@/lib/content/types";
-import { container, HeroButtons, Paragraphs } from "./pageParts";
+import { container, HeroButtons, IdvetWatermark, Paragraphs } from "./pageParts";
 
 // The Brands page body (Figma "Desktop - 5"), between SiteHeader and
 // SiteFooter — same responsive approach as AboutPage (see pageParts), except
@@ -147,14 +147,7 @@ export function BrandsPage({ site }: { site: SiteContent }) {
         </div>
       </section>
 
-      {/* The large IDVET wordmark, cut off by the contact band below it
-          (1513px wide on the 1440px design, its bottom 55px hidden). Capped
-          at 1440px like the footer canvas (FigmaCanvas) below it. */}
-      <div aria-hidden className="relative mx-auto mt-5 aspect-[1440/328] max-w-[1440px] overflow-hidden" dir="ltr">
-        <div className="absolute top-0 left-[-2.6%] aspect-[1817/460] w-[105.07%]">
-          <Image src="/assets/brands/idvet-watermark.png" alt="" fill sizes="105vw" className="object-cover" />
-        </div>
-      </div>
+      <IdvetWatermark className="mt-5" />
     </>
   );
 }

@@ -17,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/about", priority: 0.8 },
     { path: "/contact", priority: 0.8 },
     { path: "/brands", priority: 0.8 },
+    { path: "/services", priority: 0.8 },
     // One-category and one-brand views of the catalog are indexable landing pages.
     ...categories.map((c) => ({
       path: `/products?category=${encodeURIComponent(c.slug)}`,
